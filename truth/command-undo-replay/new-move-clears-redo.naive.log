@@ -1,0 +1,32 @@
+# src 697b99bddf9c
+# command-undo-replay new-move-clears-redo naive=1
+0.30 in right
+0.30 ev → (1,1) → (2,1) · moves 에 → 추가
+0.50 st x=2 y=1 ex=2 ey=1 moves=1 redo=0 replaying=0
+0.60 in right
+0.60 ev → (2,1) → (3,1) · moves 에 → 추가
+0.90 in up
+0.90 ev ↑ (3,1) → (3,2) · moves 에 ↑ 추가
+1.00 st x=3 y=2 ex=3 ey=2 moves=3 redo=0 replaying=0
+1.20 in up
+1.20 ev ↑ (3,2) → (3,3) · moves 에 ↑ 추가
+1.50 st x=3 y=3 ex=3 ey=3 moves=4 redo=0 replaying=0
+1.60 in undo
+1.60 ev 되돌리기: ↑ 의 반대로 한 칸 (3,3) → (3,2)
+2.00 st x=3 y=2 ex=3 ey=2 moves=3 redo=1 replaying=0
+2.00 in undo
+2.00 ev 되돌리기: ↑ 의 반대로 한 칸 (3,2) → (3,1)
+2.40 in redo
+2.40 ev 다시 하기 ↑ (3,1) → (3,2)
+2.50 st x=3 y=2 ex=3 ey=2 moves=3 redo=1 replaying=0
+2.80 in undo
+2.80 ev 되돌리기: ↑ 의 반대로 한 칸 (3,2) → (3,1)
+3.00 st x=3 y=1 ex=3 ey=1 moves=2 redo=2 replaying=0
+3.20 in left
+3.20 ev ← (3,1) → (2,1) · moves 에 ← 추가
+3.20 ev redo 목록 비움 (2개)
+3.50 st x=2 y=1 ex=2 ey=1 moves=3 redo=0 replaying=0
+3.60 in redo
+3.60 ev 다시 할 방향이 없다
+4.00 st x=2 y=1 ex=2 ey=1 moves=3 redo=0 replaying=0
+end st x=2 y=1 ex=2 ey=1 moves=3 redo=0 replaying=0
