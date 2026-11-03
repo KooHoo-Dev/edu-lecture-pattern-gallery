@@ -1,0 +1,21 @@
+# src f80728ebab44
+# state-player-actions hit-during-attack naive=1
+0.30 in attack
+0.30 ev isAttacking = true
+0.45 in hit
+0.45 ev isHurt = true
+0.45 ev !맞았는데 공격이 이어진다 (isHurt && isAttacking)
+0.50 st jump=0 attack=1 hurt=1 x=4.00 y=0.00
+0.60 in jump
+0.60 ev isJumping = true
+0.60 ev !공격 자세로 점프한다 (isAttacking && isJumping)
+0.60 ev !경직 중에 점프한다 (isHurt && isJumping)
+0.73 ev isAttacking = false
+0.90 in attack
+1.00 st jump=1 attack=0 hurt=1 x=4.00 y=1.53
+1.03 ev isHurt = false
+1.37 ev isJumping = false
+1.50 st jump=0 attack=0 hurt=0 x=4.00 y=0.00
+2.00 st jump=0 attack=0 hurt=0 x=4.00 y=0.00
+2.50 st jump=0 attack=0 hurt=0 x=4.00 y=0.00
+end st jump=0 attack=0 hurt=0 x=4.00 y=0.00

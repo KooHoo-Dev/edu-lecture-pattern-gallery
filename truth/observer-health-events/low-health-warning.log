@@ -1,0 +1,32 @@
+# src 5008690daf88
+# observer-health-events low-health-warning naive=0
+0.00 ev HealthBar 채움 1.00
+0.30 in damage
+0.30 ev Health 100 → 65 (Changed)
+0.30 ev HealthBar 채움 0.65
+0.30 ev HitSound 재생 (1번째)
+0.30 ev Achievement 누적 피해 35
+0.50 st hp=65 bar=0.65 sounds=1 total=35 unlocked=0 over=0
+0.90 in damage
+0.90 ev Health 65 → 30 (Changed)
+0.90 ev HealthBar 채움 0.30
+0.90 ev HealthBar 경고 색
+0.90 ev HitSound 재생 (2번째)
+0.90 ev Achievement 누적 피해 70
+0.90 ev Achievement 해금: 버텨 낸 탐사대장
+1.00 st hp=30 bar=0.30 sounds=2 total=70 unlocked=1 over=0
+1.50 st hp=30 bar=0.30 sounds=2 total=70 unlocked=1 over=0
+1.60 in heal
+1.60 ev Health 30 → 60 (Changed)
+1.60 ev HealthBar 채움 0.60
+1.60 ev HealthBar 보통 색
+2.00 st hp=60 bar=0.60 sounds=2 total=70 unlocked=1 over=0
+2.20 in damage
+2.20 ev Health 60 → 25 (Changed)
+2.20 ev HealthBar 채움 0.25
+2.20 ev HealthBar 경고 색
+2.20 ev HitSound 재생 (3번째)
+2.20 ev Achievement 누적 피해 105
+2.50 st hp=25 bar=0.25 sounds=3 total=105 unlocked=1 over=0
+3.00 st hp=25 bar=0.25 sounds=3 total=105 unlocked=1 over=0
+end st hp=25 bar=0.25 sounds=3 total=105 unlocked=1 over=0

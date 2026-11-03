@@ -1,0 +1,27 @@
+<!-- 시나리오 하네스: 표본의 순수 C# 코어(Core/)와 나쁜 예(Naive/)를 Unity 없이 돌려 사건 기록을 만든다.
+     node tools/truth.mjs 가 부른다. Unity 와 같은 C# 9 로 컴파일한다 (API 차이는 gallery unity-compile 이 잡는다).
+     -p:Only=<id> 면 그 표본만 넣는다 (다른 표본의 미완성 코드에 영향받지 않게). -->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <NoWarn>CS0169;CS0649</NoWarn>
+    <AssemblyName>PatternHarness</AssemblyName>
+    <RootNamespace>PatternGallery.Truth</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Runner/*.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Only)' == ''">
+    <Compile Include="../unity/*/Core/**/*.cs;../unity/*/Naive/**/*.cs;*/Target.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(Only)' != ''">
+    <Compile Include="../unity/$(Only)/Core/**/*.cs;../unity/$(Only)/Naive/**/*.cs;$(Only)/Target.cs" />
+  </ItemGroup>
+</Project>

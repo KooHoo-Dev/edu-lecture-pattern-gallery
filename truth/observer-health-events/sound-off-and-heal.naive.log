@@ -1,0 +1,30 @@
+# src 5008690daf88
+# observer-health-events sound-off-and-heal naive=1
+0.30 in damage
+0.30 ev Current 100 → 80
+0.30 ev HealthBar 채움 0.80
+0.30 ev HitSound 재생 (1번째)
+0.30 ev Achievement 누적 피해 20
+0.50 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+0.80 in sound
+0.80 ev HitSound 파괴 (Destroy)
+1.00 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+1.20 in damage
+1.20 ev Current 80 → 60
+1.20 ev !MissingReferenceException: 파괴된 HitSound 의 AudioSource 를 건드렸다 → 아래 줄(업적, 게임 오버)이 실행되지 않았다
+1.20 ev HealthBar 채움 0.60
+1.50 st hp=60 bar=0.60 sounds=1 total=20 unlocked=0 over=0
+1.80 in heal
+1.80 ev Current 60 → 75
+1.80 ev HealthBar 채움 0.75
+2.00 st hp=75 bar=0.75 sounds=1 total=20 unlocked=0 over=0
+2.40 in sound
+2.40 ev 새 HitSound 생성 (플레이어의 sound 칸은 아직 옛 것)
+2.50 st hp=75 bar=0.75 sounds=1 total=20 unlocked=0 over=0
+2.80 in damage
+2.80 ev Current 75 → 55
+2.80 ev !MissingReferenceException: 파괴된 HitSound 의 AudioSource 를 건드렸다 → 아래 줄(업적, 게임 오버)이 실행되지 않았다
+2.80 ev HealthBar 채움 0.55
+3.00 st hp=55 bar=0.55 sounds=1 total=20 unlocked=0 over=0
+3.50 st hp=55 bar=0.55 sounds=1 total=20 unlocked=0 over=0
+end st hp=55 bar=0.55 sounds=1 total=20 unlocked=0 over=0

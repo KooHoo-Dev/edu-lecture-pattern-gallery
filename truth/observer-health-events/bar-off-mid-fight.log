@@ -1,0 +1,49 @@
+# src 5008690daf88
+# observer-health-events bar-off-mid-fight naive=0
+0.00 ev HealthBar 채움 1.00
+0.40 in damage
+0.40 ev Health 100 → 80 (Changed)
+0.40 ev HealthBar 채움 0.80
+0.40 ev HitSound 재생 (1번째)
+0.40 ev Achievement 누적 피해 20
+0.50 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+1.00 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+1.20 in damage
+1.20 ev Health 80 → 60 (Changed)
+1.20 ev HealthBar 채움 0.60
+1.20 ev HitSound 재생 (2번째)
+1.20 ev Achievement 누적 피해 40
+1.50 st hp=60 bar=0.60 sounds=2 total=40 unlocked=0 over=0
+2.00 st hp=60 bar=0.60 sounds=2 total=40 unlocked=0 over=0
+2.00 in bar
+2.00 ev HealthBar 파괴 → OnDisable 에서 구독 해제
+2.50 st hp=60 bar=off sounds=2 total=40 unlocked=0 over=0
+2.60 in damage
+2.60 ev Health 60 → 40 (Changed)
+2.60 ev HitSound 재생 (3번째)
+2.60 ev Achievement 누적 피해 60
+2.60 ev Achievement 해금: 버텨 낸 탐사대장
+3.00 st hp=40 bar=off sounds=3 total=60 unlocked=1 over=0
+3.40 in bar
+3.40 ev 새 HealthBar → OnEnable 에서 구독 (지금 값으로 맞춘다)
+3.40 ev HealthBar 채움 0.40
+3.50 st hp=40 bar=0.40 sounds=3 total=60 unlocked=1 over=0
+4.00 st hp=40 bar=0.40 sounds=3 total=60 unlocked=1 over=0
+4.20 in damage
+4.20 ev Health 40 → 20 (Changed)
+4.20 ev HitSound 재생 (4번째)
+4.20 ev Achievement 누적 피해 80
+4.20 ev HealthBar 채움 0.20
+4.20 ev HealthBar 경고 색
+4.50 st hp=20 bar=0.20 sounds=4 total=80 unlocked=1 over=0
+5.00 st hp=20 bar=0.20 sounds=4 total=80 unlocked=1 over=0
+5.00 in damage
+5.00 ev Health 20 → 0 (Changed)
+5.00 ev HitSound 재생 (5번째)
+5.00 ev Achievement 누적 피해 100
+5.00 ev HealthBar 채움 0.00
+5.00 ev Health 0 (Died)
+5.00 ev GameOver 표시
+5.50 st hp=0 bar=0.00 sounds=5 total=100 unlocked=1 over=1
+6.00 st hp=0 bar=0.00 sounds=5 total=100 unlocked=1 over=1
+end st hp=0 bar=0.00 sounds=5 total=100 unlocked=1 over=1

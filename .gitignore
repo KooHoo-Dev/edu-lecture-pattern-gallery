@@ -1,0 +1,8 @@
+node_modules/
+dist/
+_shots/
+_review/
+*.tgz
+skill/*.zip
+truth/bin/
+truth/obj/

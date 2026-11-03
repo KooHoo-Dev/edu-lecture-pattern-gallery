@@ -1,0 +1,33 @@
+# src 5008690daf88
+# observer-health-events sound-off-and-heal naive=0
+0.00 ev HealthBar 채움 1.00
+0.30 in damage
+0.30 ev Health 100 → 80 (Changed)
+0.30 ev HealthBar 채움 0.80
+0.30 ev HitSound 재생 (1번째)
+0.30 ev Achievement 누적 피해 20
+0.50 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+0.80 in sound
+0.80 ev HitSound 파괴 → OnDisable 에서 구독 해제
+1.00 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+1.20 in damage
+1.20 ev Health 80 → 60 (Changed)
+1.20 ev HealthBar 채움 0.60
+1.20 ev Achievement 누적 피해 40
+1.50 st hp=60 bar=0.60 sounds=1 total=40 unlocked=0 over=0
+1.80 in heal
+1.80 ev Health 60 → 75 (Changed)
+1.80 ev HealthBar 채움 0.75
+2.00 st hp=75 bar=0.75 sounds=1 total=40 unlocked=0 over=0
+2.40 in sound
+2.40 ev 새 HitSound → OnEnable 에서 구독
+2.50 st hp=75 bar=0.75 sounds=1 total=40 unlocked=0 over=0
+2.80 in damage
+2.80 ev Health 75 → 55 (Changed)
+2.80 ev HealthBar 채움 0.55
+2.80 ev Achievement 누적 피해 60
+2.80 ev Achievement 해금: 버텨 낸 탐사대장
+2.80 ev HitSound 재생 (2번째)
+3.00 st hp=55 bar=0.55 sounds=2 total=60 unlocked=1 over=0
+3.50 st hp=55 bar=0.55 sounds=2 total=60 unlocked=1 over=0
+end st hp=55 bar=0.55 sounds=2 total=60 unlocked=1 over=0

@@ -1,0 +1,17 @@
+# src f80728ebab44
+# state-player-actions hit-during-attack naive=0
+0.30 in attack
+0.30 ev Idle → Attack
+0.45 in hit
+0.45 ev Attack → HitStun
+0.50 st state=HitStun x=4.00 y=0.00 hitbox=0
+0.60 in jump
+0.60 ev HitStun 무시 (jump)
+0.90 in attack
+0.90 ev HitStun 무시 (attack)
+1.00 st state=HitStun x=4.00 y=0.00 hitbox=0
+1.03 ev HitStun → Idle
+1.50 st state=Idle x=4.00 y=0.00 hitbox=0
+2.00 st state=Idle x=4.00 y=0.00 hitbox=0
+2.50 st state=Idle x=4.00 y=0.00 hitbox=0
+end st state=Idle x=4.00 y=0.00 hitbox=0

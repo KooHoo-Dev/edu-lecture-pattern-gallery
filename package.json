@@ -1,0 +1,45 @@
+{
+  "name": "pattern-gallery",
+  "version": "0.1.0",
+  "private": true,
+  "description": "게임 프로그래밍 패턴 갤러리: 유니티 개발자 양성과정 수업용",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "check": "node tools/gallery.mjs check",
+    "live": "node tools/gallery.mjs live",
+    "thumbs": "node tools/gallery.mjs thumbs",
+    "skill": "node tools/gallery.mjs skill",
+    "size": "node tools/gallery.mjs size",
+    "unity-compile": "node tools/gallery.mjs unity-compile",
+    "truth": "node tools/truth.mjs",
+    "kit:sync": "node tools/kit-sync.mjs"
+  },
+  "gallery": {
+    "unityFolders": "unity/{id}",
+    "domainCheck": "tools/check-domain.mjs",
+    "thumbTime": 2.5,
+    "thumbQuery": "auto=1",
+    "checkQuery": "auto=1",
+    "perSpecimenGzip": 30720
+  },
+  "dependencies": {
+    "@koohoo/gallery-kit": "git+https://github.com/KooHoo-Dev/edu-lecture-gallery-kit.git#v0.1.1",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.0.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "vite": "8.3.4"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}

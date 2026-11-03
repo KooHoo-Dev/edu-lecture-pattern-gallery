@@ -1,0 +1,41 @@
+# src 5008690daf88
+# observer-health-events bar-off-mid-fight naive=1
+0.40 in damage
+0.40 ev Current 100 → 80
+0.40 ev HealthBar 채움 0.80
+0.40 ev HitSound 재생 (1번째)
+0.40 ev Achievement 누적 피해 20
+0.50 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+1.00 st hp=80 bar=0.80 sounds=1 total=20 unlocked=0 over=0
+1.20 in damage
+1.20 ev Current 80 → 60
+1.20 ev HealthBar 채움 0.60
+1.20 ev HitSound 재생 (2번째)
+1.20 ev Achievement 누적 피해 40
+1.50 st hp=60 bar=0.60 sounds=2 total=40 unlocked=0 over=0
+2.00 st hp=60 bar=0.60 sounds=2 total=40 unlocked=0 over=0
+2.00 in bar
+2.00 ev HealthBar 파괴 (Destroy)
+2.50 st hp=60 bar=off sounds=2 total=40 unlocked=0 over=0
+2.60 in damage
+2.60 ev Current 60 → 40
+2.60 ev !MissingReferenceException: 파괴된 HealthBar 의 Image 를 건드렸다 → 아래 줄(피격음, 업적, 게임 오버)이 실행되지 않았다
+3.00 st hp=40 bar=off sounds=2 total=40 unlocked=0 over=0
+3.40 in bar
+3.40 ev 새 HealthBar 생성 (플레이어의 bar 칸은 아직 파괴된 옛 바)
+3.40 ev !새 체력 바가 100% 로 보인다 (아무도 값을 넣지 않는다)
+3.40 ev HealthBar 채움 1.00
+3.50 st hp=40 bar=1.00 sounds=2 total=40 unlocked=0 over=0
+4.00 st hp=40 bar=1.00 sounds=2 total=40 unlocked=0 over=0
+4.20 in damage
+4.20 ev Current 40 → 20
+4.20 ev !MissingReferenceException: 파괴된 HealthBar 의 Image 를 건드렸다 → 아래 줄(피격음, 업적, 게임 오버)이 실행되지 않았다
+4.50 st hp=20 bar=1.00 sounds=2 total=40 unlocked=0 over=0
+5.00 st hp=20 bar=1.00 sounds=2 total=40 unlocked=0 over=0
+5.00 in damage
+5.00 ev Current 20 → 0
+5.00 ev !MissingReferenceException: 파괴된 HealthBar 의 Image 를 건드렸다 → 아래 줄(피격음, 업적, 게임 오버)이 실행되지 않았다
+5.00 ev !체력이 0 인데 게임 오버 창이 뜨지 않는다
+5.50 st hp=0 bar=1.00 sounds=2 total=40 unlocked=0 over=0
+6.00 st hp=0 bar=1.00 sounds=2 total=40 unlocked=0 over=0
+end st hp=0 bar=1.00 sounds=2 total=40 unlocked=0 over=0

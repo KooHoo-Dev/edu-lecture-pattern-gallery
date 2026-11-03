@@ -1,0 +1,16 @@
+# src f80728ebab44
+# state-player-actions air-attack-allowed naive=0
+0.20 in jump
+0.20 ev Idle → Jump
+0.50 st state=Jump x=4.00 y=1.45 hitbox=0
+0.50 in attack
+0.50 ev Jump → Attack
+0.60 in jump
+0.60 ev Attack 무시 (jump)
+0.93 ev Attack → Jump
+0.97 ev Jump → Idle
+1.00 st state=Idle x=4.00 y=0.00 hitbox=0
+1.50 st state=Idle x=4.00 y=0.00 hitbox=0
+2.00 st state=Idle x=4.00 y=0.00 hitbox=0
+2.50 st state=Idle x=4.00 y=0.00 hitbox=0
+end st state=Idle x=4.00 y=0.00 hitbox=0

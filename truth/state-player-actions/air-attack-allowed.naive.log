@@ -1,0 +1,13 @@
+# src f80728ebab44
+# state-player-actions air-attack-allowed naive=1
+0.20 in jump
+0.20 ev isJumping = true
+0.50 st jump=1 attack=0 hurt=0 x=4.00 y=1.45
+0.50 in attack
+0.60 in jump
+0.97 ev isJumping = false
+1.00 st jump=0 attack=0 hurt=0 x=4.00 y=0.00
+1.50 st jump=0 attack=0 hurt=0 x=4.00 y=0.00
+2.00 st jump=0 attack=0 hurt=0 x=4.00 y=0.00
+2.50 st jump=0 attack=0 hurt=0 x=4.00 y=0.00
+end st jump=0 attack=0 hurt=0 x=4.00 y=0.00

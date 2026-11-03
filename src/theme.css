@@ -1,0 +1,16 @@
+/* 패턴 갤러리 강조색 (kit 토큰을 덮어쓴다) */
+:root {
+  --accent: #7ee081;
+  --accent-ink: #062b0a;
+  --accent-soft: rgba(126, 224, 129, 0.14);
+  --warm: #ffb547;
+}
+:root[data-theme='light'] {
+  --accent: #2f7d32;
+  --accent-soft: rgba(47, 125, 50, 0.1);
+}
+/* 무대에 포커스가 있으면 테두리로 알린다 (키보드 조작 가능) */
+.stage:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
