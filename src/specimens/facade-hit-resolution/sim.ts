@@ -116,6 +116,8 @@ class Wreckage {
   Destroyed = new Event<[Drone]>()
   RewardGranted = new Event<[Drone, number, number]>()
   Destroy(target: Drone) {
+    // HitTaken 구독자가 같은 드론에 Hit 을 다시 불러도 크레딧이 두 번 들어가지 않게 거른다
+    if (target.IsDestroyed) return
     target.MarkDestroyed()
     this.Destroyed.invoke(target)
     this.Credits += target.Reward
@@ -163,7 +165,8 @@ class Gun {
 }
 
 class Trap {
-  Damage = 5
+  static DefaultDamage = 5
+  Damage = Trap.DefaultDamage
   private combat: CombatSystem
   private field: DroneField
   constructor(combat: CombatSystem, field: DroneField) {
@@ -176,7 +179,8 @@ class Trap {
 }
 
 class ShockDrone {
-  Damage = 6
+  static DefaultDamage = 6
+  Damage = ShockDrone.DefaultDamage
   private combat: CombatSystem
   private field: DroneField
   constructor(combat: CombatSystem, field: DroneField) {
@@ -196,6 +200,7 @@ class NaiveDrone {
   hp = 10
   armor = 0
   reward = 10
+  /** Destroy(gameObject) 를 흉내 낸다. 프레임 끝 지연은 흉내 내지 않는다 */
   removed = false
 }
 
@@ -203,6 +208,7 @@ class NaiveField {
   drones: NaiveDrone[] = []
   trapSlot = 0
   heavySlot = 2
+  /** 맨 앞에서 HP 가 남은 드론. 코어의 FrontAlive(파괴되지 않은 드론)와 이름은 같지만 뜻이 다르다 */
   FrontAlive(): NaiveDrone | null {
     for (const d of this.drones) if (!d.removed && d.hp > 0) return d
     return null
@@ -294,7 +300,7 @@ class NaiveTrap {
     const dmg = Math.max(1, this.damage - target.armor)
     this.popup.Show(target, dmg)
     target.hp = Math.max(0, target.hp - dmg)
-    this.flash.Play(target) // [!] 파괴 단계 없음
+    this.flash.Play(target) // [!] 여기서 HP 0 이면 보상하고 Remove 하는 파괴 단계를 빠뜨렸다
   }
 }
 
@@ -313,7 +319,7 @@ class NaiveShockDrone {
   Zap() {
     const target = this.field.Heavy()
     if (target === null) return
-    const dmg = this.damage // [!] 방어력 빼기 없음
+    const dmg = this.damage // [!] 방어력 빼기를 빠뜨렸다 (총·함정에만 더했다)
     this.popup.Show(target, dmg)
     target.hp = Math.max(0, target.hp - dmg)
     this.flash.Play(target)
@@ -392,6 +398,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   let nTrap: NaiveTrap | null = null
   let nShock: NaiveShockDrone | null = null
   const missingFlagged = [false, false, false]
+  const armorFlagged = [false, false, false]
 
   /** 패턴: 지금 처리 중인 명중의 표 한 줄 (이벤트가 채운다) */
   let current: HitRow | null = null
@@ -505,9 +512,13 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
 
     const expected = Math.max(DamageCalculator.MinDamage, baseDamage - d.armor)
     const calcOk = p.popup.lastAmount === expected
+    // 같은 드론의 같은 버그는 처음 한 번만 ✖ 로 쓰고, 다시 생기면 일반 사건 줄로 쓴다
     if (!calcOk) {
-      events.push(`!방어력 무시: ${d.name} 에 피해 ${p.popup.lastAmount} 그대로 (방어력 ${d.armor} 를 빼면 ${expected})`)
-      at.bug = clock
+      if (!armorFlagged[k]) {
+        armorFlagged[k] = true
+        events.push(`!방어력 무시: ${d.name} 에 피해 ${p.popup.lastAmount} 그대로 (방어력 ${d.armor} 를 빼면 ${expected})`)
+        at.bug = clock
+      } else events.push(`${d.name} 에 또 피해 ${p.popup.lastAmount} 그대로 (방어력 무시 계속, 빼면 ${expected})`)
     }
     if (d.hp === 0 && !d.removed && !missingFlagged[k]) {
       missingFlagged[k] = true

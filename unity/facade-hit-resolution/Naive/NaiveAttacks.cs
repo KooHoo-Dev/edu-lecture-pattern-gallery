@@ -1,6 +1,7 @@
 // 나쁜 예: 총, 함정, 전기 충격 코드가 명중 처리 다섯 단계(계산, 표시, 적용, 알림, 파괴)를 각자 복사해 들고 있다. 흔한 코드다.
 // 총 코드를 먼저 짜고 함정과 전기 충격에 복사했다. 방어력 규칙은 나중에 생겨 그때 고친 곳에만 들어갔다.
 // 실제로는 모두 MonoBehaviour 이고, removed = true 는 Destroy(target.gameObject) 를, removed 검사는 Unity 의 if (target == null) 을 흉내 낸다.
+// Destroy 가 프레임 끝까지 미뤄지는 지연은 흉내 내지 않는다 (removed 는 바로 선다).
 // Unity 없이 돌리려고 순수 C# 로 옮겼다. 갤러리의 '효과 끄기' 가 같은 입력으로 돌린다. 프로젝트에 넣지 않는다.
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ namespace PatternGallery.FacadeHitResolution.Naive
         public int hp = 10;
         public int armor;
         public int reward = 10;
-        /// <summary>Destroy(gameObject) 를 흉내 낸다</summary>
+        /// <summary>Destroy(gameObject) 를 흉내 낸다. 프레임 끝 지연은 흉내 내지 않는다</summary>
         public bool removed;
     }
 
@@ -25,7 +26,7 @@ namespace PatternGallery.FacadeHitResolution.Naive
         public int trapSlot;
         public int heavySlot = 2;
 
-        /// <summary>맨 앞에서 HP 가 남은 드론</summary>
+        /// <summary>맨 앞에서 HP 가 남은 드론. 코어의 FrontAlive(파괴되지 않은 드론)와 이름은 같지만 뜻이 다르다</summary>
         public NaiveDrone FrontAlive()
         {
             foreach (NaiveDrone d in drones)
@@ -106,7 +107,7 @@ namespace PatternGallery.FacadeHitResolution.Naive
             int dmg = Math.Max(1, damage - target.armor); // 방어력 규칙: 총과 함께 여기에도 더했다
             popup.Show(target, dmg);
             target.hp = Math.Max(0, target.hp - dmg);
-            flash.Play(target); // [!] 여기서 hp 가 0 인지 보고 보상을 주고 Remove 하는 파괴 단계를 빠뜨렸다
+            flash.Play(target); // [!] 여기서 HP 0 이면 보상하고 Remove 하는 파괴 단계를 빠뜨렸다
         }
     }
 
@@ -122,7 +123,7 @@ namespace PatternGallery.FacadeHitResolution.Naive
         {
             NaiveDrone target = field.Heavy();
             if (target == null) return;
-            int dmg = damage; // [!] 방어력 규칙 Math.Max(1, damage - target.armor) 를 총과 함정에만 더하고 여기는 빠뜨렸다
+            int dmg = damage; // [!] 방어력 빼기를 빠뜨렸다 (총·함정에만 더했다)
             popup.Show(target, dmg);
             target.hp = Math.Max(0, target.hp - dmg);
             flash.Play(target);

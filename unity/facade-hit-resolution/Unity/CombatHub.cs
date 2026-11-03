@@ -43,6 +43,12 @@ namespace PatternGallery.FacadeHitResolution
             Combat.Wreckage.Destroyed += OnDestroyed;
             Combat.Wreckage.RewardGranted += OnRewardGranted;
             foreach (Drone d in Field.All) d.HpChanged += OnHpChanged;
+            // 꺼져 있던 동안 파괴된 드론은 Destroyed 를 듣지 못했다. 지금 코어 상태로 오브젝트를 한 번 다시 맞춘다
+            foreach (Drone d in Field.All)
+            {
+                GameObject go = ObjectOf(d);
+                if (go != null && d.IsDestroyed) go.SetActive(false);
+            }
             RefreshText();
         }
 
@@ -132,6 +138,15 @@ namespace PatternGallery.FacadeHitResolution
         {
             int i = Field.IndexOf(d);
             return droneObjects != null && i >= 0 && i < droneObjects.Length ? droneObjects[i] : null;
+        }
+
+        /// <summary>씬의 드론 오브젝트에 맞는 코어 드론 (ObjectOf 의 반대). Drone Objects 칸에 없으면 null.
+        /// 물리 트리거로 들어온 오브젝트를 창구에 넘길 때 쓴다: combat.Hit("Trap", hub.DroneOf(other.gameObject), …)</summary>
+        public Drone DroneOf(GameObject go)
+        {
+            if (go == null || droneObjects == null) return null;
+            int i = System.Array.IndexOf(droneObjects, go);
+            return i >= 0 && i < Field.All.Count ? Field.All[i] : null;
         }
 
         void Log(string message)
