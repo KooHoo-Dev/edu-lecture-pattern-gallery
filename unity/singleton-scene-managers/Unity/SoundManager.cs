@@ -13,7 +13,8 @@ namespace PatternGallery.SingletonSceneManagers
             // 주인만 BGM 을 튼다. AudioSource 의 Play On Awake 는 꺼 둔다 (켜 두면 파괴를 예약한 복제본도 한 프레임 울린다)
             source = GetComponent<AudioSource>();
             source.loop = true;
-            if (source.clip != null && !source.isPlaying) source.Play();
+            // Inspector 의 Audio Generator 칸에 넣은 곡을 튼다 (칸이 비어 있으면 아무 소리도 나지 않을 뿐이다)
+            if (!source.isPlaying) source.Play();
         }
 
         /// <summary>곡을 바꾼다. 같은 곡이 이미 나오고 있으면 처음부터 다시 틀지 않는다</summary>

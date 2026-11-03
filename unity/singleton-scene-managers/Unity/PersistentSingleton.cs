@@ -23,7 +23,9 @@ namespace PatternGallery.SingletonSceneManagers
                 Destroy(gameObject); // [2] 늦게 온 복제본은 스스로 파괴한다. 실제 파괴는 이 프레임 끝이다
                 return; // [2] 빼먹으면 아래 줄(DontDestroyOnLoad, 초기화)이 복제본에서도 돈다
             }
-            // 루트 오브젝트에만 동작한다. 부모가 있으면 경고만 남기고 옮겨지지 않는다
+            // 루트 오브젝트에만 동작한다. 부모가 있으면 Unity 는 경고만 남기고 옮기지 않아 씬과 함께 파괴된다
+            if (transform.parent != null)
+                Debug.LogError($"[{typeof(T).Name}] DontDestroyOnLoad 는 루트 오브젝트에만 동작한다. 이 매니저를 Hierarchy 맨 위 단계로 옮긴다", this);
             DontDestroyOnLoad(gameObject); // 이긴 것만 씬을 넘어 산다
             OnClaimed();
         }
@@ -31,6 +33,8 @@ namespace PatternGallery.SingletonSceneManagers
         /// <summary>자리를 차지했을 때만 불린다. 초기화는 Awake 를 덮어쓰지 말고 여기서 한다</summary>
         protected virtual void OnClaimed() { }
 
+        // 파생 클래스에서 void OnDestroy() 를 새로 쓰면 이 메서드가 가려져 Release 가 빠진다 (CS0114).
+        // protected override void OnDestroy() 로 쓰고 base.OnDestroy() 를 부른다
         protected virtual void OnDestroy()
         {
             slot.Release((T)this); // 주인일 때만 비운다. 복제본이 파괴될 때는 아무 일도 없다

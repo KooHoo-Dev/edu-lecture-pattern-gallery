@@ -1,4 +1,4 @@
-# src 0086612b1582
+# src 69109095db13
 # singleton-scene-managers round-trip naive=0
 0.00 ev 씬 로드: 정비 기지
 0.00 ev SoundManager#1 Awake: TryClaim → 자리 차지
@@ -29,6 +29,7 @@
 3.30 in toBase
 3.30 ev 씬 언로드: 지표 탐사 구역
 3.30 ev ExpeditionManager#1 OnDisable → OnDestroy
+3.30 ev ExpeditionManager 파괴: 정산하지 않은 회로 조각 1개 사라짐
 3.30 ev ExpeditionManager 자리 비움
 3.30 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
 3.30 ev SoundManager#2 Awake: TryClaim 실패 (주인 SoundManager#1) → Destroy 후 return

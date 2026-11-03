@@ -136,9 +136,22 @@ function naiveDomain() {
     }
   }
 
+  class NaiveLabel {
+    Destroyed = false
+    private shown = ''
+    get text() {
+      return this.shown
+    }
+    set text(value: string) {
+      if (this.Destroyed) throw new MissingReference('MissingReferenceException: 파괴된 ExpeditionManager 의 Text 를 건드렸다')
+      this.shown = value
+    }
+  }
+
   class NaiveExpeditionManager {
     static Instance: NaiveExpeditionManager | null = null
     fragmentValue = 0
+    countLabel = new NaiveLabel()
     Fragments = 0
     Destroyed = false
     Awake() {
@@ -146,16 +159,13 @@ function naiveDomain() {
     }
     Pickup() {
       this.Fragments++
-      this.ShowCount()
+      this.countLabel.text = '회로 조각 ' + this.Fragments
     }
     TakeAll(): number {
       const credits = this.Fragments * this.fragmentValue
       this.Fragments = 0
-      this.ShowCount()
+      this.countLabel.text = '회로 조각 0'
       return credits
-    }
-    private ShowCount() {
-      if (this.Destroyed) throw new MissingReference('MissingReferenceException: 파괴된 ExpeditionManager 의 Text 를 건드렸다')
     }
   }
 
@@ -292,8 +302,9 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   const serials = new Map<string, number>()
   const spawned: SceneObject[] = []
   let clock = 0
-  const at = { persistentSlot: -9, sceneSlot: -9, reject: -9, settle: -9, refuse: -9, pickup: -9, ignore: -9, dup: -9, bug: -9, overwrite: -9 }
+  const at = { persistentSlot: -9, sceneSlot: -9, reject: -9, settle: -9, refuse: -9, pickup: -9, ignore: -9, dup: -9, bug: -9, nre: -9, lost: -9, overwrite: -9 }
   let lastSettled = 0
+  let lastLost = 0
 
   // 패턴
   let soundSlot: SingleSlot<SceneObject> | null = null
@@ -360,7 +371,14 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       if (persistent) scenes.DontDestroyOnLoad(o)
       onClaimed(o)
     }
-    o.OnDestroy = () => slot.Release(o)
+    o.OnDestroy = () => {
+      if (!persistent && slot.Current === o && o.Expedition !== null && o.Expedition.Fragments > 0) {
+        events.push(`ExpeditionManager 파괴: 정산하지 않은 회로 조각 ${o.Expedition.Fragments}개 사라짐`)
+        lastLost = o.Expedition.Fragments
+        at.lost = clock
+      }
+      slot.Release(o)
+    }
     return o
   }
 
@@ -409,6 +427,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       }
       o.OnDestroy = () => {
         m.Destroyed = true
+        m.countLabel.Destroyed = true
       }
     }
     return o
@@ -526,7 +545,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     } else if (name === 'settle') {
       if (N.NaiveExpeditionManager.Instance === null) {
         events.push('!빈 Instance 호출: NullReferenceException → 아래 줄(입금)이 실행되지 않았다')
-        at.bug = clock
+        at.nre = clock
       } else call(() => input.Settle(), '아래 줄(입금)이 실행되지 않았다')
     }
   }
@@ -553,7 +572,11 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
 
   /** 상자 둘째 줄: 파괴됨, 크레딧, 조각 수, BGM */
   const detailOf = (o: SceneObject) => {
-    if (o.Destroyed) return '파괴됨'
+    if (o.Destroyed) {
+      // 패턴: 정산하지 않은 조각은 씬과 함께 사라진다 (의도된 동작)
+      const lost = !isNaive && o.Kind === 'ExpeditionManager' ? (o.Expedition?.Fragments ?? 0) : 0
+      return lost > 0 ? `파괴됨 · 조각 ${lost}개 사라짐` : '파괴됨'
+    }
     if (o.Kind === 'CreditBank') {
       const c = isNaive ? o.NaiveBank!.Credits : o.Credits?.Balance
       return c === undefined ? '' : `${c} 크레딧`
@@ -631,8 +654,11 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       const lostCredits = isNaive && scenes.Count('CreditBank') > 1
       world.push({ kind: 'text', x: 0.3, y: 7.6, text: `CreditBank.Instance → ${credits ?? '없음'} 크레딧`, align: 'left', size: 22, color: lostCredits ? '#ff5d6c' : recent(at.settle, 0.8) ? '#7ee081' : '#c8d0de' })
       const ref = expeditionRef()
-      const refText = ref === 'none' ? 'ExpeditionManager.Instance → null (자리 비어 있음)' : ref === 'alive' ? `ExpeditionManager.Instance → 조각 ${fragmentsText()}` : 'ExpeditionManager.Instance → 파괴된 매니저'
-      world.push({ kind: 'text', x: 0.3, y: 6.85, text: refText, align: 'left', size: 20, color: ref === 'destroyed' ? '#ff5d6c' : '#8796ae' })
+      // 나쁜 예에서 빈 Instance 를 불렀으면 Instance 가 null 인 동안 붉게 둔다
+      const nullBug = isNaive && ref === 'none' && at.nre >= 0
+      const noneText = isNaive ? 'ExpeditionManager.Instance → null (아직 생긴 적 없음)' : 'ExpeditionManager.Instance → null (자리 비어 있음)'
+      const refText = ref === 'none' ? noneText : ref === 'alive' ? `ExpeditionManager.Instance → 조각 ${fragmentsText()}` : 'ExpeditionManager.Instance → 파괴된 매니저'
+      world.push({ kind: 'text', x: 0.3, y: 6.85, text: refText, align: 'left', size: 20, color: ref === 'destroyed' || nullBug ? '#ff5d6c' : '#8796ae' })
       world.push({ kind: 'text', x: 15.7, y: 8.3, text: `♪ BGM ${sounds}겹`, align: 'right', size: 24, color: sounds > 1 ? '#ff5d6c' : '#7ee081' })
       world.push({ kind: 'text', x: 15.7, y: 7.6, text: `조각 1개 = ${fragmentValue} 크레딧`, align: 'right', size: 20, color: '#8796ae' })
 
@@ -644,6 +670,8 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       // 잠깐 뜨는 글: 가장 최근 것 하나만 오른쪽 위에
       const flashes: [number, string, string][] = [
         [at.bug, 'MissingReferenceException', '#ff5d6c'],
+        [at.nre, 'NullReferenceException', '#ff5d6c'],
+        [at.lost, `정산하지 않은 조각 ${lastLost}개 사라짐`, '#ffd166'],
         [at.refuse, '정산 받지 않음: 탐사 구역에서만', '#ffd166'],
         [at.ignore, '기지에는 회로 조각이 없다', '#ffd166'],
         [at.settle, `+${lastSettled} 크레딧 입금`, '#7ee081'],
@@ -659,9 +687,10 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         if (recent(at.overwrite)) active.push('n-new', 'n-new-instance', 'n-instance')
         if (recent(at.dup)) active.push('n-old', 'n-old-instance')
         if (recent(at.bug)) active.push('n-caller', 'n-caller-exp', 'n-exp', 'n-exp-dead', 'n-dead')
+        if (recent(at.nre)) active.push('n-caller', 'n-caller-exp', 'n-exp')
       } else {
         if (recent(at.persistentSlot)) active.push('slot', 'persistent', 'persistent-slot')
-        if (recent(at.sceneSlot)) active.push('slot', 'scene', 'scene-slot', 'expedition')
+        if (recent(at.sceneSlot) || recent(at.lost)) active.push('slot', 'scene', 'scene-slot', 'expedition')
         if (recent(at.settle) || recent(at.refuse) || recent(at.pickup) || recent(at.ignore)) active.push('caller', 'caller-instance', 'instance', 'instance-slot')
       }
       return { world, active }
