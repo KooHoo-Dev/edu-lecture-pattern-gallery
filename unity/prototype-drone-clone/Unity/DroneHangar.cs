@@ -8,26 +8,27 @@ namespace PatternGallery.PrototypeDroneClone
 {
     public class DroneHangar : MonoBehaviour
     {
-        [Header("조절 값 (웹 갤러리와 같은 이름. Play 중에 바꿔도 반영된다)")]
+        [Header("조절 값 (Play 중에 바꿔도 반영된다. Module Name 밖은 웹 갤러리와 같은 이름)")]
         [Tooltip("활주로에 세울 수 있는 복제본 수. 가득 차면 복제를 받지 않는다")]
         [SerializeField] int maxClones = 5;
         [Tooltip("'첫 복제본에 피해' 한 번에 깎는 HP")]
         [SerializeField] int damageAmount = 40;
         [Tooltip("'견본 개조' 한 번에 견본에 더하는 속도. 개조 뒤의 복제본만 빨라진다")]
         [SerializeField] float upgradeSpeed = 2f;
+        [Tooltip("'마지막 복제본에 모듈' 이 다는 모듈 이름. 바꾸면 다음 장착부터 쓴다")]
+        [SerializeField] string moduleName = "냉각";
 
         [Header("견본 (Play 를 시작할 때 한 번만 읽는다)")]
         [SerializeField] string templateName = "정찰 드론";
         [SerializeField] int templateHp = 100;
         [SerializeField] float templateSpeed = 4f;
         [SerializeField] string[] templateModules = { "카메라" };
-        [Tooltip("'마지막 복제본에 모듈' 이 다는 모듈 이름")]
-        [SerializeField] string moduleName = "냉각";
 
         [Header("화면")]
         [Tooltip("받침대 위 견본의 모습 (장면에 놓인 DroneView)")]
         [SerializeField] DroneView templateView;
-        [Tooltip("복제본으로 Instantiate 할 프리팹 (Project 창의 에셋). 장면의 오브젝트를 넣으면 지금 상태까지 복제된다")]
+        [Tooltip("복제본으로 Instantiate 할 프리팹 (Project 창의 에셋). Instantiate 는 넣은 오브젝트의 지금 상태를 복제한다. " +
+                 "HP 를 뷰에 들고 있으면 장면의 다친 드론을 넣었을 때 다친 채 복제되지만, 이 표본은 복제 직후 코어 값으로 다시 그려서 드러나지 않는다")]
         [SerializeField] DroneView clonePrefab;
         [Tooltip("첫 복제본 자리. 비우면 이 오브젝트의 위치")]
         [SerializeField] Transform runwayStart;
@@ -69,12 +70,6 @@ namespace PatternGallery.PrototypeDroneClone
             upgradeAction = new InputAction("Upgrade", InputActionType.Button, "<Keyboard>/u");
         }
 
-        void Start()
-        {
-            if (templateView != null) templateView.Show(Hangar.Template);
-            RefreshStatus();
-        }
-
         void OnEnable()
         {
             Hangar.Cloned += OnCloned;
@@ -91,6 +86,8 @@ namespace PatternGallery.PrototypeDroneClone
             moduleAction.Enable();
             damageAction.Enable();
             upgradeAction.Enable();
+            // 꺼져 있던 동안 다른 스크립트가 Hangar 를 바꿨다면 그 이벤트는 듣지 못했다. 빠진 뷰를 만들고 모두 코어 값으로 다시 그린다
+            SyncViews();
         }
 
         void OnDisable()
@@ -130,17 +127,45 @@ namespace PatternGallery.PrototypeDroneClone
 
         void OnCloned(ScoutDrone drone)
         {
-            // 화면 쪽 복제: 프리팹(아무도 고치지 않는 견본)을 Instantiate 한다. 이것도 프로토타입 패턴이다
-            Vector3 origin = runwayStart != null ? runwayStart.position : transform.position;
-            Vector3 position = origin + Vector3.right * spacing * (Hangar.Clones.Count - 1);
-            if (clonePrefab != null)
-            {
-                DroneView view = Instantiate(clonePrefab, position, Quaternion.identity); // [2] 엔진의 복제: 프리팹의 직렬화된 상태를 통째로 복사한다
-                views[drone] = view;
-                view.Show(drone); // [3] 모듈 상자는 이 복제본의 목록대로 새로 만든다
-            }
+            DroneView view = CreateView(drone, Hangar.Clones.Count - 1);
+            if (view != null) view.Show(drone); // [3] HP 바와 모듈 상자를 이 복제본의 코어 값으로 새로 그린다 (Instantiate 한 원본의 상태는 덮인다)
             Log($"복제 {drone.Name} · HP {drone.Hp} 속도 {drone.Speed:0.00} · 모듈 [{string.Join(" ", drone.Modules)}]");
             RefreshStatus();
+        }
+
+        /// <summary>
+        /// 화면 쪽 복제: 프리팹(아무도 고치지 않는 견본)을 Instantiate 해 코어 드론과 짝짓는다. 이것도 프로토타입 패턴이다.
+        /// 이 오브젝트 아래에 만들어, 격납고를 지우면 뷰도 함께 사라진다. 자리(spacing)는 화면에만 있고 코어는 위치를 모른다.
+        /// </summary>
+        DroneView CreateView(ScoutDrone drone, int index)
+        {
+            if (clonePrefab == null) return null;
+            Vector3 origin = runwayStart != null ? runwayStart.position : transform.position;
+            Vector3 position = origin + Vector3.right * spacing * index;
+            DroneView view = Instantiate(clonePrefab, position, Quaternion.identity, transform); // [2] 엔진의 복제: 프리팹의 직렬화된 상태를 통째로 복사한다
+            views[drone] = view;
+            return view;
+        }
+
+        /// <summary>견본과 모든 복제본을 코어 값으로 다시 그린다. 뷰가 없거나 파괴됐으면(Unity 의 == null) 새로 만든다</summary>
+        void SyncViews()
+        {
+            if (templateView != null) templateView.Show(Hangar.Template);
+            for (int i = 0; i < Hangar.Clones.Count; i++)
+            {
+                ScoutDrone drone = Hangar.Clones[i];
+                DroneView view = ViewOf(drone);
+                if (view == null) view = CreateView(drone, i);
+                if (view != null) view.Show(drone);
+            }
+            RefreshStatus();
+        }
+
+        /// <summary>코어 드론의 뷰. 짝이 없거나 뷰가 파괴됐으면(Unity 의 == null 이 참) null</summary>
+        DroneView ViewOf(ScoutDrone drone)
+        {
+            if (views.TryGetValue(drone, out DroneView view) && view != null) return view;
+            return null;
         }
 
         void OnCloneRejected(int max)
@@ -150,14 +175,16 @@ namespace PatternGallery.PrototypeDroneClone
 
         void OnModuleAttached(ScoutDrone drone, string module)
         {
-            if (views.TryGetValue(drone, out DroneView view)) view.ShowModules(drone.Modules); // [4] 이 드론의 상자만 다시 그린다
+            DroneView view = ViewOf(drone);
+            if (view != null) view.ShowModules(drone.Modules); // [4] 이 드론의 상자만 다시 그린다
             Log($"{drone.Name} 에 {module} 장착 → 모듈 [{string.Join(" ", drone.Modules)}]");
             RefreshStatus();
         }
 
         void OnDamaged(ScoutDrone drone, int amount)
         {
-            if (views.TryGetValue(drone, out DroneView view)) view.ShowHp(drone);
+            DroneView view = ViewOf(drone);
+            if (view != null) view.ShowHp(drone);
             Log($"{drone.Name} 피해 {amount} → HP {drone.Hp}");
         }
 

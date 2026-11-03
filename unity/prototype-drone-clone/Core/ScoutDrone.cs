@@ -1,4 +1,4 @@
-// 정찰 드론(프로토타입): 값 필드(Name, Hp, Speed)와 참조 필드(Modules)를 들고, Clone() 으로 자기와 같은 드론을 만든다. UnityEngine 을 쓰지 않는다.
+// 정찰 드론(프로토타입): 값 형식(MaxHp, Hp, Speed)과 바꿀 수 없는 string(Name), 참조 필드(Modules)를 들고, Clone() 으로 자기와 같은 드론을 만든다. UnityEngine 을 쓰지 않는다.
 using System;
 using System.Collections.Generic;
 
@@ -27,10 +27,13 @@ namespace PatternGallery.PrototypeDroneClone
         /// <summary>갤러리와 하네스가 함께 쓰는 기본 견본: 정찰 드론, HP 100, 속도 4, 카메라 모듈</summary>
         public static ScoutDrone CreateDefaultTemplate() => new ScoutDrone("정찰 드론", 100, 4f, new[] { "카메라" });
 
-        /// <summary>자기와 같은 드론을 하나 더 만든다. 값 필드는 통째로 복사하고, 참조 필드는 깊은 복사가 필요한 것만 새로 만든다</summary>
+        /// <summary>
+        /// 자기와 같은 드론을 하나 더 만든다. 값 형식과 string 은 통째로 복사하고, 참조 필드는 복제본마다 따로 바뀌어야 하는 것만 새로 만든다.
+        /// 필드를 더하면 MemberwiseClone 이 조용히 공유하므로 이 메서드를 다시 본다.
+        /// </summary>
         public ScoutDrone Clone()
         {
-            var copy = (ScoutDrone)MemberwiseClone(); // [2] 값 필드(Name, MaxHp, Hp, Speed)를 한 번에 복사한다. Modules 는 아직 주소만 복사된 상태
+            var copy = (ScoutDrone)MemberwiseClone(); // [2] 값 형식(MaxHp, Hp, Speed)과 바꿀 수 없는 string(Name)을 한 번에 복사한다. Modules 는 아직 주소만 복사된 상태
             copy.Modules = new List<string>(Modules); // [3] 참조 필드는 새 목록으로 만든다. 이제 복제본에 단 모듈은 견본에 생기지 않는다
             return copy;
         }
