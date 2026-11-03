@@ -1,0 +1,62 @@
+# src 0086612b1582
+# singleton-scene-managers round-trip naive=1
+0.00 ev 씬 로드: 정비 기지
+0.00 ev SoundManager#1 Awake: Instance = this
+0.00 ev SoundManager#1 → DontDestroyOnLoad
+0.00 ev BGM 재생 (1겹)
+0.00 ev CreditBank#1 Awake: Instance = this
+0.00 ev CreditBank#1 → DontDestroyOnLoad
+0.40 in toField
+0.40 ev 씬 언로드: 정비 기지
+0.40 ev 씬 로드: 지표 탐사 구역 (DontDestroyOnLoad 2개는 그대로)
+0.40 ev ExpeditionManager#1 Awake: Instance = this
+0.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=0 expRef=alive
+1.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=0 expRef=alive
+1.00 in pickup
+1.00 ev ExpeditionManager#1 회로 조각 1
+1.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=1 expRef=alive
+1.50 in pickup
+1.50 ev ExpeditionManager#1 회로 조각 2
+2.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=2 expRef=alive
+2.10 in settle
+2.10 ev ExpeditionManager#1 회로 조각 0
+2.10 ev CreditBank#1 크레딧 0 → 60
+2.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=60 fragments=0 expRef=alive
+2.70 in pickup
+2.70 ev ExpeditionManager#1 회로 조각 1
+3.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=60 fragments=1 expRef=alive
+3.30 in toBase
+3.30 ev 씬 언로드: 지표 탐사 구역
+3.30 ev ExpeditionManager#1 OnDisable → OnDestroy
+3.30 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+3.30 ev SoundManager#2 Awake: Instance = this
+3.30 ev SoundManager#2 → DontDestroyOnLoad
+3.30 ev BGM 재생 (2겹)
+3.30 ev CreditBank#2 Awake: Instance = this
+3.30 ev CreditBank#2 → DontDestroyOnLoad
+3.30 ev !중복 매니저: SoundManager 2개 (BGM 2겹)
+3.30 ev !중복 매니저: CreditBank 2개 (Instance 는 새 은행 CreditBank#2, 크레딧 0)
+3.50 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=0 fragments=1 expRef=destroyed
+4.00 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=0 fragments=1 expRef=destroyed
+4.00 in settle
+4.00 ev !파괴된 매니저 호출: MissingReferenceException: 파괴된 ExpeditionManager 의 Text 를 건드렸다 → 아래 줄(입금)이 실행되지 않았다
+4.50 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=0 fragments=0 expRef=destroyed
+4.70 in toField
+4.70 ev 씬 언로드: 정비 기지
+4.70 ev 씬 로드: 지표 탐사 구역 (DontDestroyOnLoad 4개는 그대로)
+4.70 ev ExpeditionManager#2 Awake: Instance = this
+5.00 st scene=field sound=2 bank=2 expedition=1 bgm=2 credits=0 fragments=0 expRef=alive
+5.30 in toBase
+5.30 ev 씬 언로드: 지표 탐사 구역
+5.30 ev ExpeditionManager#2 OnDisable → OnDestroy
+5.30 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 4개는 그대로)
+5.30 ev SoundManager#3 Awake: Instance = this
+5.30 ev SoundManager#3 → DontDestroyOnLoad
+5.30 ev BGM 재생 (3겹)
+5.30 ev CreditBank#3 Awake: Instance = this
+5.30 ev CreditBank#3 → DontDestroyOnLoad
+5.30 ev !중복 매니저: SoundManager 3개 (BGM 3겹)
+5.30 ev !중복 매니저: CreditBank 3개 (Instance 는 새 은행 CreditBank#3, 크레딧 0)
+5.50 st scene=base sound=3 bank=3 expedition=0 bgm=3 credits=0 fragments=0 expRef=destroyed
+6.00 st scene=base sound=3 bank=3 expedition=0 bgm=3 credits=0 fragments=0 expRef=destroyed
+end st scene=base sound=3 bank=3 expedition=0 bgm=3 credits=0 fragments=0 expRef=destroyed

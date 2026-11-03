@@ -1,0 +1,41 @@
+# src 0086612b1582
+# singleton-scene-managers reload-base naive=0
+0.00 ev 씬 로드: 정비 기지
+0.00 ev SoundManager#1 Awake: TryClaim → 자리 차지
+0.00 ev SoundManager#1 → DontDestroyOnLoad
+0.00 ev BGM 재생 (1겹)
+0.00 ev CreditBank#1 Awake: TryClaim → 자리 차지
+0.00 ev CreditBank#1 → DontDestroyOnLoad
+0.40 in toBase
+0.40 ev 씬 언로드: 정비 기지
+0.40 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+0.40 ev SoundManager#2 Awake: TryClaim 실패 (주인 SoundManager#1) → Destroy 후 return
+0.40 ev SoundManager#2 OnEnable (파괴 예약 중에도 불린다)
+0.40 ev CreditBank#2 Awake: TryClaim 실패 (주인 CreditBank#1) → Destroy 후 return
+0.40 ev CreditBank#2 OnEnable (파괴 예약 중에도 불린다)
+0.40 ev 프레임 끝: SoundManager#2 OnDisable → OnDestroy
+0.40 ev 프레임 끝: CreditBank#2 OnDisable → OnDestroy
+0.50 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=0 fragments=- expRef=none
+1.00 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=0 fragments=- expRef=none
+1.10 in toBase
+1.10 ev 씬 언로드: 정비 기지
+1.10 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+1.10 ev SoundManager#3 Awake: TryClaim 실패 (주인 SoundManager#1) → Destroy 후 return
+1.10 ev SoundManager#3 OnEnable (파괴 예약 중에도 불린다)
+1.10 ev CreditBank#3 Awake: TryClaim 실패 (주인 CreditBank#1) → Destroy 후 return
+1.10 ev CreditBank#3 OnEnable (파괴 예약 중에도 불린다)
+1.10 ev 프레임 끝: SoundManager#3 OnDisable → OnDestroy
+1.10 ev 프레임 끝: CreditBank#3 OnDisable → OnDestroy
+1.50 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=0 fragments=- expRef=none
+1.80 in toBase
+1.80 ev 씬 언로드: 정비 기지
+1.80 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+1.80 ev SoundManager#4 Awake: TryClaim 실패 (주인 SoundManager#1) → Destroy 후 return
+1.80 ev SoundManager#4 OnEnable (파괴 예약 중에도 불린다)
+1.80 ev CreditBank#4 Awake: TryClaim 실패 (주인 CreditBank#1) → Destroy 후 return
+1.80 ev CreditBank#4 OnEnable (파괴 예약 중에도 불린다)
+1.80 ev 프레임 끝: SoundManager#4 OnDisable → OnDestroy
+1.80 ev 프레임 끝: CreditBank#4 OnDisable → OnDestroy
+2.00 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=0 fragments=- expRef=none
+2.50 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=0 fragments=- expRef=none
+end st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=0 fragments=- expRef=none

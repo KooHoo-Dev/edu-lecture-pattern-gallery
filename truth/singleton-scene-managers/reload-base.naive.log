@@ -1,0 +1,44 @@
+# src 0086612b1582
+# singleton-scene-managers reload-base naive=1
+0.00 ev 씬 로드: 정비 기지
+0.00 ev SoundManager#1 Awake: Instance = this
+0.00 ev SoundManager#1 → DontDestroyOnLoad
+0.00 ev BGM 재생 (1겹)
+0.00 ev CreditBank#1 Awake: Instance = this
+0.00 ev CreditBank#1 → DontDestroyOnLoad
+0.40 in toBase
+0.40 ev 씬 언로드: 정비 기지
+0.40 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+0.40 ev SoundManager#2 Awake: Instance = this
+0.40 ev SoundManager#2 → DontDestroyOnLoad
+0.40 ev BGM 재생 (2겹)
+0.40 ev CreditBank#2 Awake: Instance = this
+0.40 ev CreditBank#2 → DontDestroyOnLoad
+0.40 ev !중복 매니저: SoundManager 2개 (BGM 2겹)
+0.40 ev !중복 매니저: CreditBank 2개 (Instance 는 새 은행 CreditBank#2, 크레딧 0)
+0.50 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=0 fragments=- expRef=none
+1.00 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=0 fragments=- expRef=none
+1.10 in toBase
+1.10 ev 씬 언로드: 정비 기지
+1.10 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 4개는 그대로)
+1.10 ev SoundManager#3 Awake: Instance = this
+1.10 ev SoundManager#3 → DontDestroyOnLoad
+1.10 ev BGM 재생 (3겹)
+1.10 ev CreditBank#3 Awake: Instance = this
+1.10 ev CreditBank#3 → DontDestroyOnLoad
+1.10 ev !중복 매니저: SoundManager 3개 (BGM 3겹)
+1.10 ev !중복 매니저: CreditBank 3개 (Instance 는 새 은행 CreditBank#3, 크레딧 0)
+1.50 st scene=base sound=3 bank=3 expedition=0 bgm=3 credits=0 fragments=- expRef=none
+1.80 in toBase
+1.80 ev 씬 언로드: 정비 기지
+1.80 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 6개는 그대로)
+1.80 ev SoundManager#4 Awake: Instance = this
+1.80 ev SoundManager#4 → DontDestroyOnLoad
+1.80 ev BGM 재생 (4겹)
+1.80 ev CreditBank#4 Awake: Instance = this
+1.80 ev CreditBank#4 → DontDestroyOnLoad
+1.80 ev !중복 매니저: SoundManager 4개 (BGM 4겹)
+1.80 ev !중복 매니저: CreditBank 4개 (Instance 는 새 은행 CreditBank#4, 크레딧 0)
+2.00 st scene=base sound=4 bank=4 expedition=0 bgm=4 credits=0 fragments=- expRef=none
+2.50 st scene=base sound=4 bank=4 expedition=0 bgm=4 credits=0 fragments=- expRef=none
+end st scene=base sound=4 bank=4 expedition=0 bgm=4 credits=0 fragments=- expRef=none
