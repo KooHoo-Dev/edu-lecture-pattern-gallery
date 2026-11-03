@@ -1,4 +1,4 @@
-# src 87a38874bf5f
+# src 2a664d154d46
 # object-pool-projectiles slow-only naive=1
 0.00 ev 풀 준비: 4개 미리 만듦
 0.30 in slow
@@ -45,6 +45,6 @@
 4.85 ev 냉각탄 #1 명중 · 같은 프레임에 화면 밖도 참
 4.85 ev #1 반납 · 대기 5
 4.85 ev #1 반납 · 대기 6
-4.85 ev !이중 반납: #1 이 대기 줄에 3칸 (명중 처리와 화면 밖 처리가 각자 Release)
+4.85 ev #1 이 대기 줄에 3칸 (같은 탄이 또 이중 반납, 앞서 알린 버그)
 5.00 st made=4 active=3 idle=6 reuse=4 hits=5 #2 x=12.20 #3 x=8.60 #4 x=5.60
 end st made=4 active=3 idle=6 reuse=4 hits=5 #2 x=12.20 #3 x=8.60 #4 x=5.60

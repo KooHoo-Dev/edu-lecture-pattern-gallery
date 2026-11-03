@@ -20,8 +20,15 @@ namespace PatternGallery.ObjectPoolProjectiles
         int naiveReuse;
         /// <summary>나쁜 예: 한 번이라도 쏜 탄 (번호 - 1). 나쁜 예에는 빌려 준 횟수가 없어 여기서 센다</summary>
         readonly List<bool> naiveUsed = new List<bool>();
-        /// <summary>나쁜 예: 대기 줄에 두 칸 있는 탄 (번호 - 1). 켜지는 순간만 ✖ 로 쓴다</summary>
+        /// <summary>
+        /// 나쁜 예: 이중 반납 상태인 탄 (번호 - 1). 대기 줄에 두 칸 이상이거나, 그중 한 칸을 빌려 날면서 대기 줄에도 남은 동안 켜져 있다.
+        /// 켜지는 순간만 ✖ 로 쓴다. 켜진 채로 칸이 또 늘면 같은 탄의 같은 버그라 ✖ 가 아닌 사건 줄로 쓴다
+        /// </summary>
         readonly List<bool> doubled = new List<bool>();
+        /// <summary>나쁜 예: 직전 프레임의 대기 줄 칸 수 (번호 - 1)</summary>
+        readonly List<int> idleCount = new List<int>();
+        /// <summary>나쁜 예: 이전 상태 재사용을 이미 알린 채 날고 있는 탄 (번호 - 1). 꺼지면(반납) 지운다</summary>
+        readonly List<bool> staleShown = new List<bool>();
 
         public Target(Values v, bool isNaive)
         {
@@ -105,8 +112,12 @@ namespace PatternGallery.ObjectPoolProjectiles
                 events.Add($"!같은 탄을 또 빌려 줌: 날던 #{p.Id} 이 포구로 돌아간다 (한 발이 사라졌다)");
             float speed = naive.SpeedOf(p.Kind);
             float life = naive.LifeOf(p.Kind);
-            if (p.Speed != speed || p.Lifetime != life)
+            bool stale = p.Speed != speed || p.Lifetime != life;
+            while (staleShown.Count < p.Id) staleShown.Add(false);
+            // 이미 알린 채 날던 같은 객체를 또 빌렸다면 (SetActive(true) 가 아무것도 하지 않아 값이 그대로) 같은 버그라 다시 쓰지 않는다
+            if (stale && !staleShown[p.Id - 1])
                 events.Add($"!이전 상태 재사용: {K(p.Kind)} #{p.Id} 속도 {Fmt.F(p.Speed)} (있어야 할 {Fmt.F(speed)}) · 수명 {Fmt.F(p.Lifetime)} ({Fmt.F(life)})");
+            staleShown[p.Id - 1] = stale;
         }
 
         public void Tick(float dt)
@@ -132,7 +143,8 @@ namespace PatternGallery.ObjectPoolProjectiles
             {
                 NaiveProjectile p = naive.pool.all[i];
                 if (!wasActive[i] || p.Active) continue;
-                if (p.X >= naive.TargetFrontX)
+                if (i < staleShown.Count) staleShown[i] = false;
+                if (p.X >= naive.TargetX)
                     events.Add(p.X >= naive.ScreenRightX ? $"{K(p.Kind)} #{p.Id} 명중 · 같은 프레임에 화면 밖도 참" : $"{K(p.Kind)} #{p.Id} 명중");
                 else events.Add($"{K(p.Kind)} #{p.Id} {(p.X >= naive.ScreenRightX ? "화면 밖" : "수명 끝")}");
                 while (next < idle.Count && idle[next] == p)
@@ -147,8 +159,11 @@ namespace PatternGallery.ObjectPoolProjectiles
                 int count = 0;
                 foreach (NaiveProjectile q in idle) if (q == p) count++;
                 while (doubled.Count <= i) doubled.Add(false);
+                while (idleCount.Count <= i) idleCount.Add(0);
                 if (count > 1 && !doubled[i]) events.Add($"!이중 반납: #{p.Id} 이 대기 줄에 {count}칸 (명중 처리와 화면 밖 처리가 각자 Release)");
-                doubled[i] = count > 1;
+                else if (count > 1 && count > idleCount[i]) events.Add($"#{p.Id} 이 대기 줄에 {count}칸 (같은 탄이 또 이중 반납, 앞서 알린 버그)");
+                doubled[i] = count > 1 || (p.Active && count > 0);
+                idleCount[i] = count;
             }
         }
 

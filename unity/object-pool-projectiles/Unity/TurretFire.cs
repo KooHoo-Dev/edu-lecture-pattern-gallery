@@ -1,5 +1,6 @@
 // 포탑 어댑터: Input System 입력을 코어 Turret 에 넘기고, 풀이 탄을 처음 만들 때만 프리팹을 Instantiate 해 코어 탄과 짝짓는다.
-// 빌리면 SetActive(true), 돌려받으면 SetActive(false). 위치만 Update 에서 코어 값으로 옮긴다. 풀 규칙은 여기 없다 (Core/ 의 ProjectilePool, Turret).
+// 빌리면 SetActive(true), 돌려받으면 SetActive(false). 위치만 Update 에서 코어 값으로 옮긴다 (발사 때 저장한 시작점 기준). 풀 규칙은 여기 없다 (Core/ 의 ProjectilePool, Turret).
+// 왼쪽 위 상태 글은 확인용 IMGUI(OnGUI) 다. 실제 게임의 화면 글은 UGUI·TextMeshPro 로 만든다.
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -11,15 +12,15 @@ namespace PatternGallery.ObjectPoolProjectiles
         [Header("조절 값 (웹 갤러리와 같은 이름)")]
         [Tooltip("Play 를 시작할 때 미리 만들어 두는 탄 수. 시작한 뒤에 바꾸면 반영되지 않는다. 작으면 연사 때 대기 줄이 비어 그때 새로 Instantiate 한다")]
         [SerializeField] int poolSize = 4;
-        [Tooltip("빠른 탄 속도 (m/s). Play 중에 바꾸면 다음 발사부터 쓴다. 빠른 탄은 수명이 0.6초라 21 m/s 이하면 표적(포구에서 13m)까지 못 가고 공중에서 사라진다")]
+        [Tooltip("빠른 탄 속도 (m/s). Play 중에 바꾸면 다음 발사부터 쓴다. 빠른 탄은 수명이 0.6초라 21 m/s 이하면 표적 가운데(포구에서 13m)까지 못 가고 공중에서 사라진다")]
         [SerializeField] float fastSpeed = 14f;
-        [Tooltip("냉각탄 속도 (m/s). Play 중에 바꾸면 다음 발사부터 쓴다. 냉각탄은 수명이 3.5초라 3.8 m/s 이상이면 표적(포구에서 13m)까지 간다")]
+        [Tooltip("냉각탄 속도 (m/s). Play 중에 바꾸면 다음 발사부터 쓴다. 냉각탄은 수명이 3.5초라 3.8 m/s 이상이면 표적 가운데(포구에서 13m)까지 간다")]
         [SerializeField] float slowSpeed = 6f;
 
         [Header("화면")]
         [Tooltip("탄 프리팹 (Project 창의 에셋). 풀이 탄을 새로 만들 때만 Instantiate 한다. 스크립트는 필요 없다")]
         [SerializeField] GameObject projectilePrefab;
-        [Tooltip("탄이 나오는 곳. 코어의 포구(x 2)가 이 위치다. 표적 앞면과 화면 끝은 여기서 오른쪽 13m")]
+        [Tooltip("탄이 나오는 곳. 코어의 포구(x 2)가 이 위치다. 표적 가운데이자 화면 끝은 여기서 오른쪽 13m. 탄은 발사 순간의 위치에서 출발하고, 그 뒤에 포탑을 옮겨도 따라오지 않는다")]
         [SerializeField] Transform muzzle;
         [SerializeField] Color fastColor = new Color(1f, 0.82f, 0.4f);
         [SerializeField] Color slowColor = new Color(0.44f, 0.83f, 1f);
@@ -38,6 +39,8 @@ namespace PatternGallery.ObjectPoolProjectiles
             public SpriteRenderer Sprite;
             public Renderer Renderer;
             public TrailRenderer Trail;
+            /// <summary>발사 순간의 포구 위치. 날던 탄은 이 점에서 오른쪽으로 난다 (매 프레임 포구를 다시 읽으면 포탑을 옮길 때 날던 탄도 미끄러진다)</summary>
+            public Vector3 Origin;
         }
 
         ProjectilePool pool;
@@ -73,7 +76,7 @@ namespace PatternGallery.ObjectPoolProjectiles
             fastAction.Enable();
             slowAction.Enable();
             burstAction.Enable();
-            // 꺼져 있던 동안 다른 스크립트가 풀을 썼다면 그 이벤트는 듣지 못했다. 빠진 화면 오브젝트를 만들고 켜짐을 맞춘다
+            // 꺼져 있던 동안 다른 스크립트가 풀을 쓰거나 쐈다면 그 이벤트는 듣지 못했다. 빠진 화면 오브젝트를 만들고 켜짐·색·위치를 지금 코어 상태로 맞춘다
             SyncViews();
         }
 
@@ -121,14 +124,23 @@ namespace PatternGallery.ObjectPoolProjectiles
             foreach (Projectile p in Turret.Flying)
             {
                 View view = ViewOf(p);
-                if (view != null) view.Go.transform.position = WorldOf(p);
+                if (view != null) view.Go.transform.position = WorldOf(view, p);
             }
         }
 
-        Vector3 WorldOf(Projectile p)
+        Vector3 MuzzlePosition() => muzzle != null ? muzzle.position : transform.position;
+
+        /// <summary>코어의 가로 위치를 발사 때 저장한 시작점 기준의 월드 위치로</summary>
+        Vector3 WorldOf(View view, Projectile p) => view.Origin + Vector3.right * (p.X - Turret.Settings.MuzzleX);
+
+        /// <summary>발사 값으로 화면을 맞춘다: 시작점을 지금 포구로 저장하고, 위치와 색을 넣는다</summary>
+        void ApplyLaunch(View view, Projectile p)
         {
-            Vector3 origin = muzzle != null ? muzzle.position : transform.position;
-            return origin + Vector3.right * (p.X - Turret.Settings.MuzzleX);
+            view.Origin = MuzzlePosition() - Vector3.right * (p.X - Turret.Settings.MuzzleX);
+            view.Go.transform.position = WorldOf(view, p);
+            Color color = p.Kind == ProjectileKind.Fast ? fastColor : slowColor;
+            if (view.Sprite != null) view.Sprite.color = color;
+            else if (view.Renderer != null) view.Renderer.material.color = color;
         }
 
         void OnCreated(Projectile p)
@@ -168,8 +180,15 @@ namespace PatternGallery.ObjectPoolProjectiles
             foreach (Projectile p in Pool.All)
             {
                 View view = ViewOf(p);
-                if (view == null) CreateView(p);
-                else view.Go.SetActive(p.InUse);
+                if (view == null)
+                {
+                    CreateView(p);
+                    view = ViewOf(p);
+                }
+                if (view == null) continue;
+                view.Go.SetActive(p.InUse);
+                // 색은 OnFired 에서만 맞추므로 놓친 발사가 있으면 여기서 다시 맞춘다 (시작점은 지금 포구 기준으로 다시 잡는다)
+                if (p.InUse) ApplyLaunch(view, p);
             }
             RefreshStatus();
         }
@@ -185,11 +204,9 @@ namespace PatternGallery.ObjectPoolProjectiles
             View view = ViewOf(p);
             if (view != null)
             {
-                // 화면 쪽도 이전 상태를 남기지 않는다: 위치를 포구로, 색을 이번 종류로, 꼬리(TrailRenderer)는 이전 자리에서 이어지지 않게 비운다
-                view.Go.transform.position = WorldOf(p);
-                Color color = p.Kind == ProjectileKind.Fast ? fastColor : slowColor;
-                if (view.Sprite != null) view.Sprite.color = color;
-                else if (view.Renderer != null) view.Renderer.material.color = color;
+                // 화면 쪽도 이전 상태를 남기지 않는다: 시작점을 지금 포구로 저장하고 위치를 그리로, 색을 이번 종류로,
+                // 꼬리(TrailRenderer)는 이전 자리에서 이어지지 않게 비운다
+                ApplyLaunch(view, p);
                 if (view.Trail != null) view.Trail.Clear();
             }
             Log($"{(p.Kind == ProjectileKind.Fast ? "빠른 탄" : "냉각탄")} #{p.Id} 발사 · 속도 {p.Speed:0.00} 수명 {p.Life:0.00}");
