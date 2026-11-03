@@ -163,6 +163,7 @@ export const meta: PatternMeta = {
   ],
   related: [
     { id: 'observer-health-events', why: '피격을 체력 이벤트로 알리면 경직 상태 진입을 구독자 하나로 만들 수 있다' },
+    { id: 'state-drone-ai', why: '같은 상태 패턴을 적 AI 에 쓴다. 입력 대신 거리와 체력으로 전이하고, 나쁜 예는 enum + switch 다' },
     { id: 'command-undo-replay', why: '입력을 명령 객체로 바꾸면 상태 기계에 넣기 전에 기록하고 다시 재생할 수 있다' },
   ],
 }

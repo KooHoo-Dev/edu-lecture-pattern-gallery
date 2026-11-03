@@ -4,8 +4,8 @@
 
 ## 지금 상태
 
-- 표본 7개: 기준 샘플 `state-player-actions`, `observer-health-events` (구독 세션), 워커 파일럿 `command-undo-replay`, 묶음 2 `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` (워커, 표본당 구현 + 수정 약 $6.6). 모두 독립 리뷰를 반영했다.
-- 선정: `docs/selection.md` (Jay 교안 기준, 분석은 `docs/research/lecture-analysis.md`). 다음은 묶음 3 후보 (Jay 확정 전).
+- 표본 7개: 기준 샘플 `state-player-actions`, `observer-health-events` (구독 세션), 워커 파일럿 `command-undo-replay`, 묶음 2 `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers`, 묶음 3 `state-drone-ai`, `object-pool-projectiles`, `factory-drone-spawner`, `facade-hit-resolution` (워커, 표본당 구현 + 수정 약 $6.6~7.9). 모두 독립 리뷰를 반영했다. 표본 11개.
+- 선정: `docs/selection.md` (Jay 교안 기준, 분석은 `docs/research/lecture-analysis.md`). 다음 묶음은 3절 후보에서 고른다 (Jay 확정 전).
 - 배포: GitHub `KooHoo-Dev/edu-lecture-pattern-gallery` (공개). main push 마다 kit 의 재사용 워크플로가 빌드, `gallery check`, Pages 배포를 한다.
 
 ## 규칙

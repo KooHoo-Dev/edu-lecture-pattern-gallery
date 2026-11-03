@@ -1,5 +1,5 @@
 // 땅의 함정: 웹 무대와 같게 키로 터뜨린다. 코어 Trap 이 함정 자리(D1)에 선 드론을 골라 창구에 한 줄로 넘긴다.
-// 물리 트리거를 쓰지 않으므로 Collider 가 없어도 된다. 이 오브젝트를 D1 발밑에 두는 것은 보이기 위해서일 뿐이다.
+// 물리 트리거를 쓰지 않으므로 Collider 가 없어도 된다. setup 대로 빈 CombatHub 오브젝트에 붙인다 (함정 자리는 코어의 TrapSlot 이 정해서 이 오브젝트의 위치와 상관없다).
 using UnityEngine;
 using UnityEngine.InputSystem;
 

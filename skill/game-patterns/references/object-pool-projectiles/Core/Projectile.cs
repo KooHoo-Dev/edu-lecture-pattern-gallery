@@ -33,7 +33,8 @@ namespace PatternGallery.ObjectPoolProjectiles
 
         /// <summary>
         /// 발사. 이전에 누가 어떤 종류로 썼든 남는 값이 없게 종류, 위치, 속도, 수명을 한 곳에서 모두 새로 넣는다.
-        /// 필드를 더하면 여기에도 더한다 (Unity ObjectPool 의 actionOnGet 자리)
+        /// 필드를 더하면 여기에도 더한다. Get 다음에 호출자(Turret.Fire)가 부르는 초기화 자리다.
+        /// Unity ObjectPool 의 actionOnGet 은 Action&lt;T&gt; 라 발사마다 다른 종류·속도를 받지 못해 기본값 되돌리기와 SetActive 만 맡는다
         /// </summary>
         public void Launch(ProjectileKind kind, float x, float speed, float life)
         {

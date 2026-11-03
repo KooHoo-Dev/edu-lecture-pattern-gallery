@@ -33,7 +33,7 @@ namespace PatternGallery.FacadeHitResolution
         public void NotifyHit(string attacker, Drone target) => HitTaken?.Invoke(attacker, target); // [3]
     }
 
-    /// <summary>5단계: HP 0 인 드론을 화면에서 빼고 크레딧을 준다</summary>
+    /// <summary>5단계: HP 0 인 드론을 화면에서 빼고 크레딧을 준다. 이미 파괴된 드론이면 아무것도 하지 않는다</summary>
     public sealed class Wreckage
     {
         public int Credits { get; private set; }
@@ -45,6 +45,9 @@ namespace PatternGallery.FacadeHitResolution
 
         public void Destroy(Drone target)
         {
+            // HitTaken 구독자(폭발 연쇄, 반격)가 같은 드론에 Hit 을 다시 부르면 안쪽 Hit 이 먼저 파괴와 보상을 끝낸다.
+            // 바깥 Hit 이 Hp == 0 을 다시 보고 여기로 와도 크레딧이 두 번 들어가지 않게 거른다
+            if (target.IsDestroyed) return; // [4] 두 번 파괴하지 않는다
             target.MarkDestroyed(); // [4]
             Destroyed?.Invoke(target);
             Credits += target.Reward; // [4]
