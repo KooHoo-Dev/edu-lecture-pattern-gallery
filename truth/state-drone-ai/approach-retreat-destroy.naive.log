@@ -1,0 +1,36 @@
+# src 7a75f2891ed0
+# state-drone-ai approach-retreat-destroy naive=1
+0.30 in approach
+0.50 st state=Patrol x=9.75 harin=4.00 speed=2.50 charge=0.00 hp=3
+0.60 in approach
+0.60 ev state = Chase
+0.90 in approach
+1.00 st state=Chase x=8.54 harin=6.00 speed=2.50 charge=0.00 hp=3
+1.02 ev state = Attack
+1.02 ev speed = 0.00
+1.50 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=3
+1.62 ev !충전이 끝나지 않는다: chargeTime 0.60초가 지났는데 chargeTimer = 0.02
+2.00 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=3
+2.40 in retreat
+2.40 ev state = Chase
+2.40 ev !이동 멈춤: state = Chase 인데 speed = 0
+2.50 st state=Chase x=8.50 harin=5.00 speed=0.00 charge=0.02 hp=3
+3.00 st state=Chase x=8.50 harin=5.00 speed=0.00 charge=0.02 hp=3
+3.40 in approach
+3.40 ev state = Attack
+3.50 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=3
+4.00 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=3
+4.00 ev !충전이 끝나지 않는다: chargeTime 0.60초가 지났는데 chargeTimer = 0.02
+4.40 in hit
+4.40 ev hp = 2
+4.50 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=2
+4.90 in hit
+4.90 ev hp = 1
+5.00 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=1
+5.40 in hit
+5.40 ev state = Destroyed
+5.40 ev hp = 0
+5.50 st state=Destroyed x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=0
+6.00 st state=Destroyed x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=0
+6.50 st state=Destroyed x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=0
+end st state=Destroyed x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=0

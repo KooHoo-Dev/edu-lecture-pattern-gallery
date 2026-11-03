@@ -1,0 +1,25 @@
+# src 7a75f2891ed0
+# state-drone-ai lose-sight naive=0
+0.30 in approach
+0.50 st state=Patrol x=9.75 harin=4.00 speed=2.50 charge=0.00 hp=3
+0.60 in approach
+0.60 ev Patrol → Chase
+0.90 in approach
+1.00 st state=Chase x=8.54 harin=6.00 speed=2.50 charge=0.00 hp=3
+1.02 ev Chase → Attack
+1.50 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.47 hp=3
+1.62 ev 사격 → 하린 (거리 2.50)
+2.00 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.37 hp=3
+2.00 in retreat
+2.00 ev Attack → Chase
+2.15 in retreat
+2.30 in retreat
+2.45 in retreat
+2.45 ev Chase → Patrol
+2.50 st state=Patrol x=7.42 harin=2.00 speed=2.50 charge=0.00 hp=3
+3.00 st state=Patrol x=8.67 harin=2.00 speed=2.50 charge=0.00 hp=3
+3.50 st state=Patrol x=9.92 harin=2.00 speed=2.50 charge=0.00 hp=3
+4.00 st state=Patrol x=11.17 harin=2.00 speed=2.50 charge=0.00 hp=3
+4.50 st state=Patrol x=12.42 harin=2.00 speed=2.50 charge=0.00 hp=3
+5.00 st state=Patrol x=12.33 harin=2.00 speed=2.50 charge=0.00 hp=3
+end st state=Patrol x=12.33 harin=2.00 speed=2.50 charge=0.00 hp=3
