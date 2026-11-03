@@ -1,0 +1,24 @@
+# src d63874a1c3e8
+# prototype-drone-clone upgrade-then-clone naive=0
+0.30 in clone
+0.30 ev 복제 #1 · HP 100 속도 4.00 · 모듈 [카메라] (새 목록)
+0.50 st clones=1 tspeed=4.00 tmods=1 hp=100 speed=4.00 mods=1 shared=0
+0.90 in clone
+0.90 ev 복제 #2 · HP 100 속도 4.00 · 모듈 [카메라] (새 목록)
+1.00 st clones=2 tspeed=4.00 tmods=1 hp=100,100 speed=4.00,4.00 mods=1,1 shared=0
+1.50 st clones=2 tspeed=4.00 tmods=1 hp=100,100 speed=4.00,4.00 mods=1,1 shared=0
+1.60 in upgrade
+1.60 ev 견본 개조: 속도 4.00 → 6.00 (이미 나간 복제본은 그대로)
+2.00 st clones=2 tspeed=6.00 tmods=1 hp=100,100 speed=4.00,4.00 mods=1,1 shared=0
+2.30 in clone
+2.30 ev 복제 #3 · HP 100 속도 6.00 · 모듈 [카메라] (새 목록)
+2.50 st clones=3 tspeed=6.00 tmods=1 hp=100,100,100 speed=4.00,4.00,6.00 mods=1,1,1 shared=0
+3.00 st clones=3 tspeed=6.00 tmods=1 hp=100,100,100 speed=4.00,4.00,6.00 mods=1,1,1 shared=0
+3.00 in upgrade
+3.00 ev 견본 개조: 속도 6.00 → 8.00 (이미 나간 복제본은 그대로)
+3.50 st clones=3 tspeed=8.00 tmods=1 hp=100,100,100 speed=4.00,4.00,6.00 mods=1,1,1 shared=0
+3.70 in clone
+3.70 ev 복제 #4 · HP 100 속도 8.00 · 모듈 [카메라] (새 목록)
+4.00 st clones=4 tspeed=8.00 tmods=1 hp=100,100,100,100 speed=4.00,4.00,6.00,8.00 mods=1,1,1,1 shared=0
+4.50 st clones=4 tspeed=8.00 tmods=1 hp=100,100,100,100 speed=4.00,4.00,6.00,8.00 mods=1,1,1,1 shared=0
+end st clones=4 tspeed=8.00 tmods=1 hp=100,100,100,100 speed=4.00,4.00,6.00,8.00 mods=1,1,1,1 shared=0
