@@ -1,0 +1,31 @@
+# src caac516e2ec3
+# decorator-stat-buffs refresh-then-expire naive=0
+0.30 in cell
+0.30 ev 냉각 셀 받음 → 목록에 넣음 (3.00초)
+0.30 ev 사슬 다시 감싸기: 냉각 셀 +5 [기본 10]
+0.30 ev 출력 10.00 → 15.00
+0.50 st power=15.00 layers=1 cell=2.80 overload=0.00
+0.90 in overload
+0.90 ev 과부하 받음 → 목록에 넣음 (2.50초)
+0.90 ev 사슬 다시 감싸기: 과부하 ×2 [냉각 셀 +5 [기본 10]]
+0.90 ev 출력 15.00 → 30.00
+1.00 st power=30.00 layers=2 cell=2.30 overload=2.40
+1.50 st power=30.00 layers=2 cell=1.80 overload=1.90
+1.80 in cell
+1.80 ev 냉각 셀 다시 받음 → 층은 그대로, 남은 시간만 3.00초로
+2.00 st power=30.00 layers=2 cell=2.80 overload=1.40
+2.50 st power=30.00 layers=2 cell=2.30 overload=0.90
+3.00 st power=30.00 layers=2 cell=1.80 overload=0.40
+3.40 ev 과부하 끝 → 목록에서 뺌
+3.40 ev 사슬 다시 감싸기: 냉각 셀 +5 [기본 10]
+3.40 ev 출력 30.00 → 15.00
+3.50 st power=15.00 layers=1 cell=1.30 overload=0.00
+4.00 st power=15.00 layers=1 cell=0.80 overload=0.00
+4.50 st power=15.00 layers=1 cell=0.30 overload=0.00
+4.80 ev 냉각 셀 끝 → 목록에서 뺌
+4.80 ev 사슬 다시 감싸기: 기본 10
+4.80 ev 출력 15.00 → 10.00
+5.00 st power=10.00 layers=0 cell=0.00 overload=0.00
+5.50 st power=10.00 layers=0 cell=0.00 overload=0.00
+6.00 st power=10.00 layers=0 cell=0.00 overload=0.00
+end st power=10.00 layers=0 cell=0.00 overload=0.00

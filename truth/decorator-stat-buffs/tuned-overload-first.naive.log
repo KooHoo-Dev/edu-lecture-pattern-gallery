@@ -1,0 +1,26 @@
+# src caac516e2ec3
+# decorator-stat-buffs tuned-overload-first naive=1
+0.30 in overload
+0.30 ev power *= 1.5 : 10.00 → 15.00 (있어야 할 값 15.00)
+0.50 st power=15.00 expect=15.00 timers=1 cell=0.00 overload=3.30
+0.80 in cell
+0.80 ev power += 8 : 15.00 → 23.00 (있어야 할 값 27.00)
+1.00 st power=23.00 expect=27.00 timers=2 cell=1.80 overload=2.80
+1.50 st power=23.00 expect=27.00 timers=2 cell=1.30 overload=2.30
+1.60 in overload
+1.60 ev 앞 과부하 코루틴 멈춤 (남은 2.20초) → 그 power /= 1.5 는 돌지 않는다
+1.60 ev power *= 1.5 : 23.00 → 34.50 (있어야 할 값 27.00)
+1.60 ev !중복 적용 (과부하 ×1.5 를 두 번 곱했는데 끝날 때는 한 번만 나눈다)
+2.00 st power=34.50 expect=27.00 timers=2 cell=0.80 overload=3.10
+2.50 st power=34.50 expect=27.00 timers=2 cell=0.30 overload=2.60
+2.80 ev 냉각 셀 끝 power -= 8 : 34.50 → 26.50 (있어야 할 값 15.00)
+3.00 st power=26.50 expect=15.00 timers=1 cell=0.00 overload=2.10
+3.50 st power=26.50 expect=15.00 timers=1 cell=0.00 overload=1.60
+4.00 st power=26.50 expect=15.00 timers=1 cell=0.00 overload=1.10
+4.50 st power=26.50 expect=15.00 timers=1 cell=0.00 overload=0.60
+5.00 st power=26.50 expect=15.00 timers=1 cell=0.00 overload=0.10
+5.10 ev 과부하 끝 power /= 1.5 : 26.50 → 17.67 (있어야 할 값 10.00)
+5.10 ev !기본값 어긋남 (버프가 모두 끝났는데 power 17.67, 기본값 10.00)
+5.50 st power=17.67 expect=10.00 timers=0 cell=0.00 overload=0.00
+6.00 st power=17.67 expect=10.00 timers=0 cell=0.00 overload=0.00
+end st power=17.67 expect=10.00 timers=0 cell=0.00 overload=0.00

@@ -1,0 +1,158 @@
+import type { PatternMeta } from '../../stage/types.ts'
+
+export const meta: PatternMeta = {
+  id: 'decorator-stat-buffs',
+  title: '데코레이터 패턴: 버프 겹치기와 풀기',
+  titleEn: 'Decorator Pattern: Stacking and Clearing Buffs',
+  pattern: '데코레이터 패턴',
+  group: 'F',
+  order: 1,
+  oneLiner: '버프를 감싸는 층으로 겹치고, 층을 빼면 원래 값으로 돌아온다',
+  goals: [
+    '버프 시작에 `power += 5`, 끝에 `power -= 5` 하는 코드가 배율 버프나 같은 버프 다시 받기와 섞이면 왜 "버프가 다 끝났는데 공격력이 원래대로 안 돌아오는지" 설명할 수 있다.',
+    '기본값(`BasePower`)은 고치지 않고, 같은 인터페이스 `IPowerStat` 를 구현한 층(`AddLayer`, `MultiplyLayer`)이 안쪽 값을 감싸 자기 몫을 더하거나 곱하게 할 수 있다.',
+    '활성 버프 목록이 바뀔 때마다 기본값에서 사슬을 다시 감싸(더하기 층이 안쪽, 곱하기 층이 바깥) 중간 버프가 먼저 끝나도 그 층만 빠지게 할 수 있다.',
+    '버프 시간을 코루틴 대신 코어의 `Tick(dt)` 로 세고, 같은 버프는 겹치지 않고 남은 시간만 갱신할 수 있다.',
+  ],
+  tags: ['버프', '스탯 계산', '감싸기', '타이머'],
+  difficulty: 2,
+  params: [
+    { key: 'cellBonus', label: '냉각 셀 보너스', type: 'range', min: 1, max: 15, step: 1, default: 5, hint: '냉각 셀의 더하기 층이 안쪽 값에 더하는 양. 출력 막대가 그만큼 늘고, 나쁜 예는 다시 받을 때 이 양이 한 번 더 남아 기본값 어긋남이 커진다' },
+    { key: 'overloadMultiplier', label: '과부하 배율', type: 'range', min: 1.2, max: 3, step: 0.1, default: 2, unit: '배', hint: '과부하의 곱하기 층이 안쪽 값(기본값 + 냉각 셀)에 곱하는 배율. 막대 길이와 사슬 상자의 값이 바뀐다' },
+    { key: 'cellDuration', label: '냉각 셀 지속 시간', type: 'range', min: 1, max: 6, step: 0.5, default: 3, unit: '초', hint: '냉각 셀이 걸려 있는 시간. 다시 받으면 이 값으로 처음부터 센다. 길게 하면 자동 데모 안에 끝나지 않아 기본값 어긋남이 늦게 보인다' },
+    { key: 'overloadDuration', label: '과부하 지속 시간', type: 'range', min: 1, max: 6, step: 0.5, default: 2.5, unit: '초', hint: '과부하가 걸려 있는 시간. 냉각 셀보다 늦게 끝나면 나쁜 예가 푸는 순서가 바뀌어 다른 값에서 멈춘다' },
+  ],
+  presets: [
+    { id: 'standard', name: '기본', look: '냉각 셀 +5 (3초), 과부하 ×2 (2.5초). 나쁜 예는 12.5 에서 멈춘다', values: {} },
+    { id: 'long-overload', name: '긴 과부하', look: '과부하가 냉각 셀보다 늦게 끝난다. 나쁜 예는 15 에서 멈춘다', values: { overloadDuration: 5 } },
+    { id: 'big-burst', name: '큰 한 방', look: '보너스 +10, 배율 ×3. 막대가 크게 출렁이고 나쁜 예의 어긋남도 커진다', values: { cellBonus: 10, overloadMultiplier: 3 } },
+  ],
+  events: [
+    { id: 'cell', label: '냉각 셀' },
+    { id: 'overload', label: '과부하' },
+    { id: 'purge', label: '정화' },
+  ],
+  keys: { KeyC: 'cell', KeyO: 'overload', KeyX: 'purge' },
+  scenarios: [
+    {
+      id: 'refresh-then-expire',
+      label: '냉각 셀, 과부하, 냉각 셀 다시 받기, 하나씩 끝남',
+      duration: 6,
+      note: '자동 데모. 냉각 셀(3초) → 과부하(2.5초) → 냉각 셀 다시 받음 → 과부하 끝(3.4초쯤) → 냉각 셀 끝(4.8초쯤). 패턴은 10 → 15 → 30 → 30(시간만 갱신) → 15 → 10. 나쁜 예는 다시 받을 때 앞 코루틴을 멈춰 빼기를 건너뛰고 +5 를 또 더해(✖ 중복 적용) 35, 과부하가 끝날 때 뒤에 더한 +5 까지 나눠 17.5, 냉각 셀이 끝나 −5 로 12.5 에서 멈춘다(✖ 기본값 어긋남). 남은 2.5 는 빼지 못한 +5 를 반으로 나눈 것이라, 기본값 어긋남은 중복 적용의 결과이면서 푸는 순서가 섞인 결과다',
+      inputs: [
+        [0.3, 'cell'],
+        [0.9, 'overload'],
+        [1.8, 'cell'],
+      ],
+    },
+    {
+      id: 'purge-two-buffs',
+      label: '버프 둘이 걸린 중에 정화',
+      duration: 3,
+      note: '냉각 셀과 과부하가 걸린 뒤 정화. 패턴은 빈 목록에서 사슬을 다시 만들어 기본 10 으로 돌아오고, 한 번 더 누른 정화는 할 일이 없다고 알린다. 나쁜 예의 정화는 코루틴을 멈추고 끝 처리를 직접 하는데, 건 순서(+5 → ×2)와 다른 순서(−5 → ÷2)로 풀어 30 이 12.5 가 된다',
+      inputs: [
+        [0.3, 'cell'],
+        [0.8, 'overload'],
+        [1.8, 'purge'],
+        [2.4, 'purge'],
+      ],
+    },
+    {
+      id: 'tuned-overload-first',
+      label: '보너스 +8, 배율 ×1.5: 과부하 먼저, 과부하 다시 받기',
+      duration: 6,
+      values: { cellBonus: 8, overloadMultiplier: 1.5, cellDuration: 2, overloadDuration: 3.5 },
+      note: '과부하를 먼저 받아도 사슬은 늘 더하기 층이 안쪽이라 (10 + 8) × 1.5 = 27 이다. 과부하를 다시 받으면 시간만 갱신된다. 나쁜 예는 15 → 23 → 다시 곱해 34.5(✖ 중복 적용) → −8 → ÷1.5 로 17.67 에서 멈춘다(✖ 기본값 어긋남)',
+      inputs: [
+        [0.3, 'overload'],
+        [0.8, 'cell'],
+        [1.6, 'overload'],
+      ],
+    },
+  ],
+  diagram: {
+    nodes: [
+      { id: 'ctrl', label: 'PowerBuffs', sub: 'MonoBehaviour · 입력, UI', x: 22, y: 8 },
+      { id: 'buffset', label: 'BuffSet', sub: '활성 버프 목록 · Tick', x: 22, y: 36 },
+      { id: 'istat', label: 'IPowerStat', sub: 'float Value', x: 78, y: 36, kind: 'interface' },
+      { id: 'mul', label: 'MultiplyLayer', sub: '과부하 · 안쪽 값 × factor', x: 17, y: 64 },
+      { id: 'add', label: 'AddLayer', sub: '냉각 셀 · 안쪽 값 + amount', x: 50, y: 80 },
+      { id: 'base', label: 'BasePower', sub: '기본 10 · 고치지 않는다', x: 83, y: 94 },
+    ],
+    edges: [
+      { id: 'ctrl-buffset', from: 'ctrl', to: 'buffset', label: 'Apply · Purge · Tick', kind: 'call' },
+      { id: 'buffset-istat', from: 'buffset', to: 'istat', label: 'Power (바깥 층)', kind: 'ref' },
+      { id: 'buffset-mul', from: 'buffset', to: 'mul', label: 'new', kind: 'call' },
+      { id: 'mul-add', from: 'mul', to: 'add', label: 'inner', kind: 'ref' },
+      { id: 'add-base', from: 'add', to: 'base', label: 'inner', kind: 'ref' },
+      { id: 'i-mul', from: 'mul', to: 'istat', kind: 'implements' },
+      { id: 'i-add', from: 'add', to: 'istat', kind: 'implements' },
+      { id: 'i-base', from: 'base', to: 'istat', kind: 'implements' },
+    ],
+  },
+  naiveDiagram: {
+    nodes: [
+      { id: 'n-start', label: '시작 코드', sub: 'OnCell · OnOverload', x: 22, y: 12 },
+      { id: 'n-routine', label: '코루틴 핸들', sub: 'cellRoutine · overloadRoutine', x: 22, y: 50, kind: 'object' },
+      { id: 'n-end', label: '끝 코드', sub: 'CellEnd · OverloadEnd · OnPurge', x: 22, y: 88 },
+      { id: 'n-power', label: 'power', sub: 'float 하나 · 지금 값만 안다', x: 78, y: 50, kind: 'object' },
+    ],
+    edges: [
+      { id: 'start-routine', from: 'n-start', to: 'n-routine', label: 'Stop · Start', kind: 'call' },
+      { id: 'routine-end', from: 'n-routine', to: 'n-end', label: '시간이 되면', kind: 'call' },
+      { id: 'start-power', from: 'n-start', to: 'n-power', label: '+= · *=', kind: 'ref' },
+      { id: 'end-power', from: 'n-end', to: 'n-power', label: '-= · /=', kind: 'ref' },
+    ],
+  },
+  steps: [
+    { n: 1, label: '버프를 받으면 목록에 넣는다', body: '`PowerBuffs` 는 냉각 셀 키를 받으면 `BuffSet.Apply(Cell)` 만 부른다. `BuffSet` 은 출력 숫자를 고치지 않고 활성 버프 목록에 (종류, 남은 시간)을 넣는다. 같은 버프가 이미 있으면 층을 하나 더 두지 않고 남은 시간만 처음으로 되돌린다 (갱신). 기록의 "다시 받음 → 층은 그대로" 가 그 순간이다.', target: 'ctrl-buffset,buffset' },
+    { n: 2, label: '목록에서 사슬을 다시 감싼다', body: '목록이 바뀌면 `Rebuild` 가 `new BasePower(10)` 에서 시작해 냉각 셀마다 `AddLayer`, 과부하마다 `MultiplyLayer` 로 감싼다. **더하기 층이 안쪽, 곱하기 층이 바깥** 으로 고정이다. 받은 순서대로 감싸면 같은 두 버프가 (10 + 5) × 2 = 30 도 되고 10 × 2 + 5 = 25 도 된다. 데코레이터는 같은 인터페이스로 감싸 원본을 고치지 않는다. 여기서는 그 감싸기를 수정자 목록에서 매번 다시 만든다.', target: 'buffset-mul,mul,add,base' },
+    { n: 3, label: '값을 읽으면 바깥 층부터 안으로', body: '`BuffSet.Value` 는 바깥 층의 `Value` 를 읽는다. `MultiplyLayer` 는 안쪽(`inner`) 값을 읽어 ×2 하고, `AddLayer` 는 안쪽 값을 읽어 +5 한다. 맨 안쪽 `BasePower` 는 10 그대로다. 모두 `IPowerStat` 라 바깥 층은 안쪽이 기본값인지 다른 층인지 모른다. 미니 월드의 겹친 상자 오른쪽 숫자가 층마다 돌려준 값이다.', target: 'buffset-istat,mul-add,add-base,istat' },
+    { n: 4, label: '끝난 버프는 목록에서 빠진다', body: '`Tick(dt)` 가 남은 시간을 줄이다 0 이 된 버프를 목록에서 빼고 사슬을 처음부터 다시 만든다. 과부하가 먼저 끝나도 사슬 중간의 층을 떼어 내지 않으므로 냉각 셀 층은 그대로 남고, 모두 끝나면 사슬은 `BasePower` 하나라 출력이 정확히 기본값이다. 타이머가 코루틴이 아니라서 `StopCoroutine` 으로 끝 처리를 건너뛰는 일도 없다.', target: 'buffset,buffset-mul' },
+  ],
+  offNote: '출력 `float power` 하나를 버프가 시작할 때 `+=`, `*=` 하고, 코루틴이 끝날 때 `-=`, `/=` 하는 흔한 코드다. 냉각 셀을 다시 받으면 앞 코루틴을 `StopCoroutine` 으로 멈추고 새로 더하는데, 멈춘 코루틴의 빼기는 영영 돌지 않는다 (✖ 중복 적용). 과부하가 끝날 때의 나누기는 그 뒤에 더한 +5 까지 나눈다. 그래서 버프가 모두 끝나도 막대 끝이 기본값 눈금으로 돌아오지 않고 12.5 에서 멈춘다 (✖ 기본값 어긋남. 빼지 못한 +5 가 반으로 나뉘어 남은 것). 초록 점선 눈금이 같은 입력을 받은 데코레이터 코어의 출력(있어야 할 값)이다. 정화도 건 순서와 다른 순서로 풀어 같은 어긋남이 생긴다 (두 번째 시나리오).',
+  mistakes: [
+    { title: '버프가 다 끝났는데 공격력이 원래대로 안 돌아온다', body: '같은 버프를 다시 받을 때 `StopCoroutine` 으로 앞 코루틴을 멈추고 새로 시작했다. 멈춘 코루틴은 `yield` 뒤의 빼기 줄을 실행하지 않아 더한 값이 하나 남는다. 버프 시간을 코루틴 대신 목록과 `Tick(dt)` 로 세고, 출력은 목록에서 다시 계산한다. 다시 받으면 목록의 남은 시간만 갱신한다.' },
+    { title: '배율 버프를 풀었더니 10 이 9.999999 나 12.5 가 된다', body: '배율을 그 자리에서 곱해 두고 끝날 때 나누면, 그 사이에 더한 값까지 나뉘고 float 오차도 쌓인다. 곱하기와 더하기를 건 순서의 반대로 정확히 풀어야 하는데, 버프가 제각각 끝나면 그 순서를 지킬 수 없다. 출력을 고쳐 두지 말고 기본값에서 층을 감싸 매번 다시 계산한다.' },
+    { title: '최대 체력 버프가 끝났는데 체력이 최대치를 넘어 있다', body: '최대 체력만 층으로 되돌리고 현재 체력은 그대로 두었다. 최대 체력이 줄어드는 순간(`PowerChanged` 같은 알림)에 현재 체력을 새 최대치로 깎는다. 버프가 걸릴 때 현재 체력을 함께 늘릴지(비율 유지)도 게임 규칙으로 정해 한 곳에 둔다.' },
+    { title: '같은 버프를 연타했더니 끝없이 세진다', body: '같은 종류 버프의 갱신과 중첩을 구분하지 않았다. 이 표본은 같은 종류를 다시 받으면 층을 더하지 않고 남은 시간만 갱신한다. 중첩이 규칙이라면 종류마다 최대 중첩 수를 두고 목록에 그만큼만 넣는다. 어느 쪽이든 목록 한 곳에서 정한다.' },
+    { title: '중간 버프를 떼었더니 바깥 버프까지 사라졌다', body: '감싼 사슬에서 가운데 층만 직접 빼려고 바깥 층의 `inner` 를 끊거나, 바깥 층을 가리키던 참조를 버렸다. 층은 자기 안쪽만 알아서 사슬 중간을 고치기 어렵다. 층을 떼지 말고 활성 버프 목록에서 빼고, 목록으로 사슬을 처음부터 다시 만든다.' },
+  ],
+  unity: {
+    setup: [
+      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/decorator-stat-buffs/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
+      '`GameObject > UI > Image` 로 출력 막대를 만든다 (Canvas 와 EventSystem 이 함께 생긴다). 이름을 `PowerFill` 로 바꾸고 Rect Transform 의 Width 를 600, Height 를 30 으로 한다. Source Image 에 스프라이트(예: 기본 제공 `UISprite`)를 넣어야 Image Type 칸이 보인다. Image Type 을 `Filled`, Fill Method 를 `Horizontal`, Fill Origin 을 `Left` 로 둔다.',
+      '같은 방법으로 작은 Image 둘(`CellTimer`, `OverloadTimer`, Width 200, Height 12, Filled · Horizontal)을 만들고, `GameObject > UI > Legacy > Text` 로 Text 둘(`PowerText`, `ChainText`)을 만든다. `ChainText` 는 Width 를 800 으로 넓힌다. Canvas 는 Screen Space - Overlay 라 카메라 위치와 상관없이 Game 뷰에 보인다.',
+      '항상 켜져 있는 `Canvas` 에 `PowerBuffs` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(1 냉각 셀, 2 과부하, 3 정화)를 넣는다. `Power Fill`, `Power Text`, `Chain Text`, `Cell Timer Fill`, `Overload Timer Fill` 칸에 만든 것을 끌어 넣는다. 웹 갤러리 무대의 C/O/X 는 갤러리 단축키를 피한 것이라 Unity 와 다르다.',
+      'Play 하고 1, 2, 1 을 차례로 누른 뒤 기다린다. `ChainText` 가 `과부하 ×2 [냉각 셀 +5 [기본 10]]` 처럼 바뀌고, Console 에 `[PowerBuffs] 출력 15 → 30` 같은 줄이 남는다.',
+    ],
+    verify: '1, 2, 1 을 누르고 기다리면 출력이 10 → 15 → 30 → 15 → 10 으로 바뀌고, 모든 버프가 끝난 뒤 `PowerText` 가 정확히 10 이며 `ChainText` 가 `기본 10` 이다.',
+    pitfalls: [
+      '버프 시간은 `Update` 의 `Tick(Time.deltaTime)` 으로 센다. `Time.timeScale` 이 0(일시정지)이면 버프도 멈춘다. 일시정지 중에도 흘러야 하는 버프라면 `Time.unscaledDeltaTime` 을 넘긴다.',
+      '사슬은 목록이 바뀔 때만 다시 만든다 (버프를 받거나, 끝나거나, 정화하거나, Inspector 값이 바뀔 때). 매 프레임 `Rebuild` 하면 층 객체가 프레임마다 생겨 GC 가 늘어난다. 출력은 `PowerChanged` 를 받아 UI 에 옮기고 `Update` 에서 다시 읽지 않는다.',
+      '층 순서(더하기 안쪽, 곱하기 바깥)는 `BuffSet.Rebuild` 한 곳에 있다. "배율 뒤에 더하는 고정 보너스" 같은 규칙이 생기면 그 층을 곱하기 층 바깥에 감싸는 단계를 `Rebuild` 에 하나 더한다. 버프마다 순서를 따로 정하지 않는다.',
+      '`InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 버프 갱신이 두 번 일어난다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.',
+      'UGUI Filled Image 는 Source Image 에 스프라이트가 있어야 Image Type 칸이 보이고 `fillAmount` 가 화면에 나타난다. 막대가 가득 차는 출력은 `(Base Power + Cell Bonus) × Overload Multiplier × 1.4` 로 잡았다 (웹 무대와 같다).',
+    ],
+  },
+  prompt: {
+    goal: '무기 출력에 걸리는 더하기·곱하기 버프를 기본값을 고치지 않는 감싸기 층으로 만들고, 활성 버프 목록에서 사슬을 다시 감싸 버프가 모두 끝나면 정확히 기본값으로 돌아오게 한다.',
+    adaptIdeas: [
+      '이동 속도 버프(+%)와 둔화 디버프(×0.5)를 같은 방식으로 겹치고 풀고 싶다.',
+      '최대 체력 버프가 끝날 때 현재 체력이 새 최대치를 넘지 않게 하고 싶다.',
+      '같은 독 디버프는 최대 3번까지 중첩되고 각자 따로 끝나게 하고 싶다.',
+      '장비를 끼우고 뺄 때 공격력 보너스도 같은 사슬의 층으로 넣고 싶다.',
+      '버프 아이콘 줄에 남은 시간과 지금 출력을 함께 보여 주고 싶다.',
+    ],
+  },
+  inspiredBy: [],
+  original: '특정 게임의 재현이 아니라 널리 쓰이는 데코레이터 패턴을 무기 출력 버프에 적용했다. 정석 감싸기(층이 안쪽을 감싼다)와 수정자 목록(걸린 버프를 목록으로 든다)을 "목록에서 사슬을 다시 만든다" 로 이었다. 인물과 문구는 이 갤러리의 가상 세계(외곽 탐사대)이고, 코드는 이 갤러리에서 새로 작성했다.',
+  references: [
+    { label: 'Refactoring Guru: Decorator', url: 'https://refactoring.guru/design-patterns/decorator' },
+    { label: 'Microsoft C# 인터페이스', url: 'https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/types/interfaces' },
+  ],
+  related: [
+    { id: 'observer-health-events', why: '출력이 바뀌면 `PowerChanged` 로 알려, UI 와 사운드가 각자 구독해 반응하게 할 수 있다' },
+    { id: 'state-player-actions', why: '시간을 `Tick(dt)` 로만 받는 코어라 같은 방식으로 에디터 없이 확인할 수 있다' },
+  ],
+}
