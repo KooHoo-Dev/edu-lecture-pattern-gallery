@@ -28,7 +28,7 @@ namespace PatternGallery.FacadeHitResolution
             Feed.ShowDamage(target, damage); // [2] (2) 숫자 표시
             target.TakeDamage(damage); // [3] (3) HP 적용
             Feed.NotifyHit(attacker, target); // [3] (4) 피격 알림
-            if (target.Hp == 0) Wreckage.Destroy(target); // [4] (5) 파괴 처리와 보상
+            if (target.Hp == 0) Wreckage.Destroy(target); // [4] (5) 파괴 처리와 보상 (이미 파괴됐으면 Destroy 가 거른다)
             return true;
         }
     }

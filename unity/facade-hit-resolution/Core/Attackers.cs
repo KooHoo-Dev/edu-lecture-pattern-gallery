@@ -23,7 +23,9 @@ namespace PatternGallery.FacadeHitResolution
     /// <summary>땅의 함정: 함정 위에 선 드론 (D1 자리)</summary>
     public sealed class Trap
     {
-        public int Damage = 5;
+        public const int DefaultDamage = 5;
+
+        public int Damage = DefaultDamage;
         readonly CombatSystem combat;
         readonly DroneField field;
 
@@ -39,7 +41,9 @@ namespace PatternGallery.FacadeHitResolution
     /// <summary>정비 드론의 전기 충격: 중장갑 드론 (D3)</summary>
     public sealed class ShockDrone
     {
-        public int Damage = 6;
+        public const int DefaultDamage = 6;
+
+        public int Damage = DefaultDamage;
         readonly CombatSystem combat;
         readonly DroneField field;
 

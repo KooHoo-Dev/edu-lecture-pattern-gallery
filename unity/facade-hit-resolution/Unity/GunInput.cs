@@ -9,7 +9,7 @@ namespace PatternGallery.FacadeHitResolution
     {
         [Tooltip("명중 처리 창구. 씬의 CombatHub 오브젝트를 끌어 넣는다")]
         [SerializeField] CombatHub hub;
-        [Tooltip("한 발의 기본 피해. 방어력은 창구가 뺀다")]
+        [Tooltip("한 발의 기본 피해. 방어력은 창구가 뺀다. Unity 전용 칸이다 (웹 갤러리에는 조절 값이 없고 4 로 고정)")]
         [SerializeField] int gunDamage = 4;
         [Tooltip("컴포넌트를 붙일 때 Reset 이 Q 를 넣는다")]
         [SerializeField] InputAction fireAction;

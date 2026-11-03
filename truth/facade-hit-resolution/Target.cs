@@ -31,6 +31,7 @@ namespace PatternGallery.FacadeHitResolution
         readonly NaiveTrap nTrap;
         readonly NaiveShockDrone nShock;
         readonly bool[] missingFlagged = new bool[3];
+        readonly bool[] armorFlagged = new bool[3];
 
         public Target(Values v, bool isNaive)
         {
@@ -130,8 +131,16 @@ namespace PatternGallery.FacadeHitResolution
             if (wallet.credits > credits0) events.Add($"보상 +{wallet.credits - credits0} 크레딧 (합 {wallet.credits})");
 
             int expected = Math.Max(DamageCalculator.MinDamage, baseDamage - d.armor);
+            // 같은 드론의 같은 버그는 처음 한 번만 ✖ 로 쓰고, 다시 생기면 일반 사건 줄로 쓴다
             if (popup.lastAmount != expected)
-                events.Add($"!방어력 무시: {d.name} 에 피해 {popup.lastAmount} 그대로 (방어력 {d.armor} 를 빼면 {expected})");
+            {
+                if (!armorFlagged[k])
+                {
+                    armorFlagged[k] = true;
+                    events.Add($"!방어력 무시: {d.name} 에 피해 {popup.lastAmount} 그대로 (방어력 {d.armor} 를 빼면 {expected})");
+                }
+                else events.Add($"{d.name} 에 또 피해 {popup.lastAmount} 그대로 (방어력 무시 계속, 빼면 {expected})");
+            }
             if (d.hp == 0 && !d.removed && !missingFlagged[k])
             {
                 missingFlagged[k] = true;

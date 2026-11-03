@@ -1,4 +1,4 @@
-# src f7112174ac79
+# src a21f186a4523
 # facade-hit-resolution thick-armor-strong-trap naive=1
 0.40 in shock
 0.40 ev ShockDrone 코드 → D3 (다섯 단계를 직접)
@@ -29,7 +29,7 @@
 2.80 ev 알림 D3 피격 (ShockDrone)
 2.80 ev 파괴 D3 (화면에서 뺀다)
 2.80 ev 보상 +20 크레딧 (합 20)
-2.80 ev !방어력 무시: D3 에 피해 6 그대로 (방어력 5 를 빼면 1)
+2.80 ev D3 에 또 피해 6 그대로 (방어력 무시 계속, 빼면 1)
 3.00 st credits=20 D1=0 D2=6 D3=gone ecredits=10 eD1=gone eD2=6 eD3=8
 3.50 st credits=20 D1=0 D2=6 D3=gone ecredits=10 eD1=gone eD2=6 eD3=8
 3.60 in trap
