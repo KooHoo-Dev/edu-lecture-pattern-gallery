@@ -160,10 +160,15 @@ abstract class DroneSpawner {
     const drone = this.CreateDrone()
     this.exit.Place(drone)
     this.radar.Register(drone)
+    this.OnSpawned(drone)
     this.Spawned.invoke(drone)
     return drone
   }
+  /** 팩토리 메서드 (추상 단계): 자식이 반드시 구현한다 */
   protected abstract CreateDrone(): Drone
+  /** 훅 (선택 단계): 기본 본문이 비어 있다 */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected OnSpawned(_drone: Drone): void {}
 }
 
 class ScoutSpawner extends DroneSpawner {
@@ -279,6 +284,8 @@ const SCALE = (d: Drone) => (d instanceof ScoutDrone ? 0.6 : d instanceof HeavyD
 const head = (d: Drone) => SY(d.Slot) + 1.4 * SCALE(d)
 const body = (d: Drone) => SY(d.Slot) + 0.55 * SCALE(d)
 const TURRET = { x: 15.1, y: 5.5 }
+/** 웨이브 끝 상자: 왼쪽 위 글 오른쪽, 포탑 위. 드론 둘째 줄의 HP 바(y 6 안팎)보다 위라 겹치지 않는다 */
+const WAVE_BOX = { x: 9.3, y: 6.75, w: 6.4, h: 0.85 }
 
 const STATIC: WorldItem[] = [
   { kind: 'box', x: 0, y: 0, w: 16, h: 1, fill: C.ground },
@@ -333,7 +340,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   const onWaveCleared = () => {
     events.push('웨이브 끝')
     if (naive && exit.Drones.length > 0) {
-      events.push(`!레이더 누락: 웨이브 끝을 알렸는데 출구 앞에 아직 있다: ${Names(exit.Drones)}`)
+      events.push(`!거짓 웨이브 끝: 출구 앞에 아직 ${Names(exit.Drones)} (레이더 누락의 결과)`)
       at.bug = clock
     }
   }
@@ -498,12 +505,12 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         for (const d of wrongKind) if (drones.includes(d)) world.push({ kind: 'text', x: SX(d.Slot), y: head(d) + 1.75, text: '방패 차례였다', size: 16, color: C.warn })
       }
 
-      // 웨이브 끝: 레이더가 알린 뒤 새 등록이 없으면 남는다
+      // 웨이브 끝: 레이더가 알린 뒤 새 등록이 없으면 남는다. 드론 줄(두 줄까지)과 겹치지 않게 오른쪽 위에 둔다
       if (radar.IsCleared) {
         const left = drones.length
         const bad = left > 0
-        world.push({ kind: 'box', x: 3.6, y: 4.75, w: 7.2, h: 0.95, fill: bad ? C.clearBug : C.clearOk, stroke: bad ? C.bug : C.ok, label: bad ? `웨이브 끝 ✖ 출구 앞에 ${left}대 남음` : '웨이브 끝 · 출구 앞 0대' })
-        if (bad) for (const d of drones) world.push({ kind: 'arrow', x1: 9.2, y1: 4.75, x2: SX(d.Slot), y2: head(d) + 2.05, color: C.bug, dashed: true })
+        world.push({ kind: 'box', x: WAVE_BOX.x, y: WAVE_BOX.y, w: WAVE_BOX.w, h: WAVE_BOX.h, fill: bad ? C.clearBug : C.clearOk, stroke: bad ? C.bug : C.ok, label: bad ? `거짓 웨이브 끝 ✖ 출구 앞에 ${left}대 남음` : '웨이브 끝 · 출구 앞 0대' })
+        if (bad) for (const d of drones) world.push({ kind: 'arrow', x1: WAVE_BOX.x + WAVE_BOX.w / 2, y1: WAVE_BOX.y, x2: SX(d.Slot), y2: head(d) + 2.05, color: C.bug, dashed: true })
       }
 
       // 왼쪽 위: 레이더 수와 섞인 순서

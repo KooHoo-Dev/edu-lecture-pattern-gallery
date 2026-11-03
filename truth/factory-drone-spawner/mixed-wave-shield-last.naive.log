@@ -1,4 +1,4 @@
-# src 2b4fcbf1e2ae
+# src 5038e00cdb3f
 # factory-drone-spawner mixed-wave-shield-last naive=1
 0.40 in next
 0.40 ev 섞인 순서 1번째 (count 0) → SpawnDrone("scout")
@@ -46,7 +46,7 @@
 4.30 ev 중장갑 #2 파괴
 4.30 ev 레이더 해제 중장갑 #2 → 살아 있는 드론 0
 4.30 ev 웨이브 끝
-4.30 ev !레이더 누락: 웨이브 끝을 알렸는데 출구 앞에 아직 있다: 방패 #4
+4.30 ev !거짓 웨이브 끝: 출구 앞에 아직 방패 #4 (레이더 누락의 결과)
 4.30 ev 방패 #4 피해 1 → HP 1
 4.50 st radar=0 field=1 cleared=1 count=3 drones=방패4:1
 5.00 st radar=0 field=1 cleared=1 count=3 drones=방패4:1

@@ -83,7 +83,7 @@ namespace PatternGallery.FactoryDroneSpawner
         {
             events.Add("웨이브 끝");
             if (naive != null && exit.Drones.Count > 0)
-                events.Add($"!레이더 누락: 웨이브 끝을 알렸는데 출구 앞에 아직 있다: {Names(exit.Drones)}");
+                events.Add($"!거짓 웨이브 끝: 출구 앞에 아직 {Names(exit.Drones)} (레이더 누락의 결과)");
         }
 
         /// <summary>코어에 입력을 넣는다 (나쁜 예 모드에서는 그림자)</summary>
