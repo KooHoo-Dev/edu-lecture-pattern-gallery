@@ -20,7 +20,7 @@ You review specimens for the Pattern Gallery: interactive lessons on game progra
 ## Files for you (read only)
 
 - The specimen files listed above for your id.
-- Web stage captures in `_review/<id>/`: `live-final-*` (t=1.3), `live-off-1-*` (effect off), `live-step-N-*` (step N), `live-late-*` and `live-late-off-*` (t=4.3), all with the auto demo frozen at that time. `live-home-*` is the gallery home.
+- Web stage captures in `_review/<id>/` (made by `node tools/workflow/review-shots.mjs <id>`), all with the auto demo (first scenario) frozen at the given time: `live-t<sec>-*` and `live-t<sec>-off-*` (effect off) at 1.3 s, the middle and the end of the demo; `live-bug-<k>-*` effect off 0.05 s after each ✖ kind first appears; `live-step<N>-*` step N at the middle of the demo (the step text may describe events that happen later; check those in code and logs).
 - Logs in `truth/<id>/`.
 
 ## What to report
