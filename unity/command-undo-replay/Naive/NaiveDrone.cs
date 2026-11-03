@@ -37,7 +37,7 @@ namespace PatternGallery.CommandUndoReplay.Naive
         {
             if (isReplaying) return;
             Step(Directions.Dx(dir), Directions.Dy(dir));
-            moves.Add(dir); // 누른 방향을 기록한다 (벽에 막혀 제자리였어도 입력은 입력이다)
+            moves.Add(dir); // [!] 실제로 간 길이 아니라 누른 방향을 기록한다 (막혀 제자리였어도). 되돌리기로 위치가 어긋나면 이 방향을 다시 눌러도 지금 칸으로 오지 않는다
             if (moves.Count > historyLimit) moves.RemoveAt(0);
             redoMoves.Clear();
         }
@@ -64,7 +64,7 @@ namespace PatternGallery.CommandUndoReplay.Naive
         public void OnReplay()
         {
             if (isReplaying || moves.Count == 0) return;
-            X = startX; // [!] 기록의 첫 위치를 모르니 게임 시작 자리로 옮긴다. 오래된 기록을 버렸으면 그곳이 아니다
+            X = startX; // [!] 기록의 첫 위치를 모르니 게임 시작 자리로 옮긴다. 오래된 기록을 버렸으면 남은 첫 방향은 그곳에서 누른 것이 아니다
             Y = startY;
             isReplaying = true;
             replayIndex = 0;
