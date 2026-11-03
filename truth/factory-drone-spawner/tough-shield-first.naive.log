@@ -1,4 +1,4 @@
-# src 2b4fcbf1e2ae
+# src 5038e00cdb3f
 # factory-drone-spawner tough-shield-first naive=1
 0.30 in shield
 0.30 ev 방패 #1 → 출구 앞 자리 0
@@ -38,7 +38,7 @@
 3.10 ev 중장갑 #3 파괴
 3.10 ev 레이더 해제 중장갑 #3 → 살아 있는 드론 0
 3.10 ev 웨이브 끝
-3.10 ev !레이더 누락: 웨이브 끝을 알렸는데 출구 앞에 아직 있다: 방패 #1
+3.10 ev !거짓 웨이브 끝: 출구 앞에 아직 방패 #1 (레이더 누락의 결과)
 3.50 st radar=0 field=1 cleared=1 count=2 drones=방패1:1
 3.70 in volley
 3.70 ev 일제 사격: 1대에 피해 1

@@ -1,5 +1,6 @@
 // 드론 한 대의 화면: HP 바. 코어 Drone 의 이벤트를 듣고 HP 바를 고치고, 파괴되면 자기 오브젝트를 지운다. 규칙은 모른다.
-// 이 컴포넌트가 붙은 오브젝트를 종류마다 프리팹으로 만들어 WaveSpawnerInput 의 프리팹 칸에 넣는다. new 로 만들지 않는다 (MonoBehaviour).
+// 이 컴포넌트가 붙은 오브젝트를 종류마다 프리팹으로 만들어 WaveSpawnerInput 의 Spawner Slots 칸에 넣는다. new 로 만들지 않는다 (MonoBehaviour).
+// OnEnable 에서 지금 HP 로 바를 다시 맞춘다 (꺼져 있던 동안 받은 피해는 이벤트로 오지 않는다).
 using UnityEngine;
 
 namespace PatternGallery.FactoryDroneSpawner
@@ -26,6 +27,12 @@ namespace PatternGallery.FactoryDroneSpawner
 
         void OnEnable()
         {
+            // 꺼져 있던 동안 파괴된 드론이면 Destroyed 를 못 들었으니 여기서 지운다
+            if (drone != null && !drone.IsAlive)
+            {
+                Destroy(gameObject);
+                return;
+            }
             Subscribe();
             ShowHp();
         }

@@ -30,7 +30,7 @@ namespace PatternGallery.FactoryDroneSpawner.Naive
         /// <summary>섞인 순서의 다음 종류 하나</summary>
         public Drone SpawnNext()
         {
-            string type = types[count % 2]; // [!] 종류가 둘이던 때의 2 를 그대로 두었다. 0, 1 만 나와 방패 차례에 정찰이 나온다
+            string type = types[count % 2]; // [!] 종류가 둘일 때의 2 그대로라 방패(2번)를 못 고른다
             count++;
             return SpawnDrone(type);
         }
@@ -56,7 +56,7 @@ namespace PatternGallery.FactoryDroneSpawner.Naive
             else if (type == "shield")
             {
                 Drone drone = new ShieldDrone(shieldHp);
-                exit.Place(drone); // [!] 정찰 분기를 복사하다 다음 줄 radar.Register(drone) 를 빠뜨렸다. 레이더가 방패를 세지 않는다
+                exit.Place(drone); // [!] 복붙하다 다음 줄 radar.Register(drone) 를 빠뜨렸다
                 Spawned?.Invoke(drone);
                 return drone;
             }
