@@ -1,0 +1,42 @@
+# src 12a84d0d0a29
+# strategy-turret-targeting short-range naive=1
+0.00 ev D1 등장 (HP 8)
+0.00 ev D2 등장 (HP 10)
+0.18 ev D3 등장 (HP 2)
+0.30 in strongest
+0.30 ev mode = "strongest"
+0.50 st mode=strongest 레이저=없음 D1 x=1.40 hp=8 D2 x=0.65 hp=10 D3 x=0.70 hp=2
+0.80 ev D4 등장 (HP 5)
+1.00 st mode=strongest 레이저=없음 D1 x=2.80 hp=8 D2 x=1.30 hp=10 D3 x=1.80 hp=2 D4 x=0.40 hp=5
+1.40 ev D5 등장 (HP 3)
+1.50 st mode=strongest 레이저=없음 D1 x=4.20 hp=8 D2 x=1.95 hp=10 D3 x=2.90 hp=2 D4 x=1.40 hp=5 D5 x=0.25 hp=3
+1.95 ev 레이저 없음 → D1
+1.95 ev 발사 → D1 (HP 7/8)
+2.00 st mode=strongest 레이저=D1 D1 x=5.60 hp=7 D2 x=2.60 hp=10 D3 x=4.00 hp=2 D4 x=2.40 hp=5 D5 x=1.50 hp=3
+2.35 ev 발사 → D1 (HP 6/8)
+2.50 st mode=strongest 레이저=D1 D1 x=7.00 hp=6 D2 x=3.25 hp=10 D3 x=5.10 hp=2 D4 x=3.40 hp=5 D5 x=2.75 hp=3
+2.75 ev 발사 → D1 (HP 5/8)
+3.00 st mode=strongest 레이저=D1 D1 x=8.40 hp=5 D2 x=3.90 hp=10 D3 x=6.20 hp=2 D4 x=4.40 hp=5 D5 x=4.00 hp=3
+3.00 in first
+3.00 ev mode = "first"
+3.15 ev 발사 → D1 (HP 4/8)
+3.50 st mode=first 레이저=D1 D1 x=9.80 hp=4 D2 x=4.55 hp=10 D3 x=7.30 hp=2 D4 x=5.40 hp=5 D5 x=5.25 hp=3
+3.55 ev 발사 → D1 (HP 3/8)
+3.73 ev 레이저 D1 → D3
+3.95 ev 발사 → D3 (HP 1/2)
+4.00 st mode=first 레이저=D3 D1 x=11.20 hp=3 D2 x=5.20 hp=10 D3 x=8.40 hp=1 D4 x=6.40 hp=5 D5 x=6.50 hp=3
+4.20 in weakest
+4.20 ev mode = "weakest"
+4.23 ev 레이저 D3 → D5
+4.35 ev 발사 → D3 (HP 0/2)
+4.35 ev D3 파괴
+4.35 ev !조준 엇갈림: 레이저 D5, 명중 D3
+4.50 st mode=weakest 레이저=D5 D1 x=12.60 hp=3 D2 x=5.85 hp=10 D4 x=7.40 hp=5 D5 x=7.75 hp=3
+4.68 ev 레이저 D5 → D4
+4.75 ev 발사 → D5 (HP 2/3)
+5.00 st mode=weakest 레이저=D4 D1 x=14.00 hp=3 D2 x=6.50 hp=10 D4 x=8.40 hp=5 D5 x=9.00 hp=2
+5.15 ev 발사 → D5 (HP 1/3)
+5.33 ev 레이저 D4 → D2
+5.35 ev D1 기지 도달 (HP 3 남음)
+5.50 st mode=weakest 레이저=D2 D2 x=7.15 hp=10 D4 x=9.40 hp=5 D5 x=10.25 hp=1
+end st mode=weakest 레이저=D2 D2 x=7.15 hp=10 D4 x=9.40 hp=5 D5 x=10.25 hp=1
