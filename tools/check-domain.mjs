@@ -49,6 +49,9 @@ export default async function checkDomain({ project, ids, err, warn }) {
       err(`${id}: meta.ts 나 sim.ts 를 Node 가 읽지 못한다 (타입은 import type, 상대 경로는 .ts 확장자): ${e.message}`)
       continue
     }
+    // 패턴 필터: meta.pattern 이 갤러리 설정의 facet.options 에 있어야 필터 칩에 나온다 (묶음 2 에서 넷이 빠졌다)
+    const config = readFileSync(join(root, 'src', 'gallery.config.tsx'), 'utf8')
+    if (meta.pattern && !config.includes(`value: '${meta.pattern}'`)) err(`${id}: 패턴 '${meta.pattern}' 이 src/gallery.config.tsx 의 facet.options 에 없다 (구독 세션에 요청한다)`)
     const src = sourceHash(root, id)
     let compared = 0
     // 나쁜 예의 버그(! 줄)는 모두 첫 시나리오(자동 데모)에도 나와야 한다 (가이드 8절)

@@ -55,7 +55,11 @@ export const config = defineGallery<PatternSpecimen>({
   facet: {
     label: '패턴',
     options: [
+      { value: '싱글턴 패턴', label: '싱글턴' },
+      { value: '프로토타입 패턴', label: '프로토타입' },
+      { value: '데코레이터 패턴', label: '데코레이터' },
       { value: '상태 패턴', label: '상태' },
+      { value: '전략 패턴', label: '전략' },
       { value: '관찰자 패턴', label: '관찰자' },
       { value: '명령 패턴', label: '명령' },
     ],
