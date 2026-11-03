@@ -6,10 +6,10 @@ namespace PatternGallery.StrategyTurretTargeting
 {
     public sealed class Turret
     {
-        /// <summary>기본 배치의 포탑 위치. 기지(15) 앞, 드론이 지나쳐 가는 자리</summary>
+        /// <summary>하네스와 웹 무대의 포탑 위치. 기지(15) 앞, 드론이 지나쳐 가는 자리 (Unity 에서는 TurretController 가 오브젝트 자리로 정한다)</summary>
         public const float DefaultX = 8f;
 
-        /// <summary>포탑의 가로 위치 (드론이 나오는 왼쪽 끝이 0)</summary>
+        /// <summary>포탑의 가로 위치 (드론이 나오는 왼쪽 끝이 0). 거리는 이 가로 위치로만 잰다</summary>
         public readonly float X;
         /// <summary>규칙 값. TurretController 가 Inspector 값으로 채우고, Play 중 값을 바꾸면 OnValidate 가 다시 넣는다</summary>
         public float Range = 6f;

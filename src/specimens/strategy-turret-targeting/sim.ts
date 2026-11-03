@@ -65,11 +65,11 @@ class DroneWave {
 
   static CreateDefaultTable() {
     return [
-      new DroneSpec(0, 2.8, 8, 1.8), // D1 빠른 선두
-      new DroneSpec(0, 1.3, 10, 2.4), // D2 느리고 단단하다
-      new DroneSpec(0.2, 2.2, 2, 4.4), // D3 약하다
-      new DroneSpec(0.8, 2, 5, 1), // D4
-      new DroneSpec(1.4, 2.5, 3, 3.7), // D5
+      new DroneSpec(0, 2.8, 8, 2.2), // D1 빠른 선두
+      new DroneSpec(0, 1.3, 10, 1), // D2 느리고 단단하다
+      new DroneSpec(0.2, 2.2, 2, 1.6), // D3 약하다
+      new DroneSpec(0.8, 2, 5, 2.2), // D4
+      new DroneSpec(1.4, 2.5, 3, 3.4), // D5
     ]
   }
 
@@ -324,9 +324,13 @@ const KOREAN: Record<string, string> = { Nearest: '가까운 것', Strongest: '�
 const MODE_KOREAN: Record<string, string> = { nearest: '가까운 것', strongest: '체력 많은 것', first: '선두', weakest: '체력 적은 것' }
 const C = { ground: '#22314a', base: '#22385a', baseLine: '#5cc8ff', turret: '#3a4a66', turretLine: '#8796ae', laser: '#7ee081', naiveLaser: '#ffb547', hit: '#ffe08a', bug: '#ff5d6c', dim: '#8796ae', ok: '#7ee081', warn: '#ffb547', hp: '#ff9b8a', range: '#56688a' }
 const TURRET_TOP = 1.85
-/** 드론의 발 높이와 몸 가운데 */
+/** 드론 크기 (actor scale). 서로 앞지르는 드론의 층 차이(1.2)에 HP 바까지 들어가게 */
+const DRONE_SCALE = 0.6
+/** 드론의 발 높이와 몸 가운데. 높이(Altitude)는 화면에만 쓰고 거리는 가로(x)로만 잰다 */
 const footY = (d: Drone) => 1 + d.Altitude
-const bodyY = (d: Drone) => footY(d) + 0.35
+const bodyY = (d: Drone) => footY(d) + 0.3
+/** HP 바의 꽉 찬 값: 표에서 가장 단단한 드론의 HP (고정). 드론마다 MaxHp 로 나누면 HP 2 와 HP 10 이 같은 길이로 보인다 */
+const HP_FULL = Math.max(...DroneWave.CreateDefaultTable().map(s => s.Hp))
 
 function fieldItems(turretX: number, range: number): WorldItem[] {
   const left = Math.max(0.05, turretX - range)
@@ -345,10 +349,11 @@ function fieldItems(turretX: number, range: number): WorldItem[] {
 function droneItems(drones: readonly Drone[]): WorldItem[] {
   const items: WorldItem[] = []
   for (const d of drones) {
-    // 이름은 삼각형 왼쪽(지나온 쪽)에, HP 바는 머리 위에 붙여 드론 하나가 차지하는 높이를 줄인다
-    items.push({ kind: 'actor', x: d.X, y: footY(d), role: 'enemy', scale: 0.7, facing: 1 })
-    items.push({ kind: 'text', x: d.X - 0.42, y: footY(d) + 0.12, text: d.Name, align: 'right', size: 18, color: '#e6edf7' })
-    items.push({ kind: 'bar', x: d.X - 0.4, y: footY(d) + 1.02, w: 0.8, value: d.Hp / d.MaxHp, fill: C.hp })
+    // HP 바는 머리 위에, 이름은 바의 왼쪽에 둔다. 이름이 몸 가운데에서 명중 링의 가장 큰 반지름(0.65)보다 멀고,
+    // 레이저는 포탑(아래)에서 몸 가운데로 들어오므로 링과 레이저가 이름을 가리지 않는다
+    items.push({ kind: 'actor', x: d.X, y: footY(d), role: 'enemy', scale: DRONE_SCALE, facing: 1 })
+    items.push({ kind: 'bar', x: d.X - 0.4, y: footY(d) + 0.86, w: 0.8, value: d.Hp / HP_FULL, fill: C.hp })
+    items.push({ kind: 'text', x: d.X - 0.5, y: footY(d) + 0.86, text: d.Name, align: 'right', size: 18, color: '#e6edf7' })
   }
   return items
 }
@@ -358,7 +363,7 @@ const laser = (turretX: number, d: Drone, color: string): WorldItem => ({ kind: 
 /** 명중 링을 보이는 시간 (초). 발사 간격의 하한(0.2초)보다 짧지 않게 두되, 방식을 바꾼 뒤 지난 명중이 오래 남아 엇갈림처럼 보이지 않게 짧게 */
 const RING_TIME = 0.25
 /** 명중 링: 맞은 드론을 따라가며 크기만 줄어든다 (밝기가 번쩍이지 않는다) */
-const hitRing = (x: number, y: number, since: number, color: string): WorldItem => ({ kind: 'ring', x, y, r: 0.45 + 0.3 * Math.max(0, 1 - since / RING_TIME), color })
+const hitRing = (x: number, y: number, since: number, color: string): WorldItem => ({ kind: 'ring', x, y, r: 0.4 + 0.25 * Math.max(0, 1 - since / RING_TIME), color })
 
 export const createSim: SimFactory = (values: ParamValues, naive: boolean): PatternSim => {
   const range = f(Number(values.range))
@@ -497,8 +502,17 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       const world: WorldItem[] = [...FIELD, ...droneItems(wave.Active)]
       if (aim) world.push(laser(n.X, aim, C.naiveLaser))
       world.push(...ringItems(lastMismatch ? C.bug : C.hit))
+      if (lastMismatch && lastHit) {
+        // 엇갈린 동안 남는 표식: 마지막으로 총알이 맞은 드론을 빨간 점선 상자로 둘러 둔다 (링은 0.25초면 사라진다).
+        // 파괴되어 목록에서 빠졌으면 터진 자리에 남긴다
+        if (wave.Active.includes(lastHit)) {
+          hitX = lastHit.X
+          hitY = bodyY(lastHit)
+        }
+        world.push({ kind: 'box', x: hitX - 0.42, y: hitY - 0.4, w: 0.84, h: 0.88, stroke: C.bug, dashed: true })
+      }
       const hot = clock - at.bug < 0.8
-      const shotLine = lastHit ? `마지막 발사: 레이저 ${N(aimAtShot)} / 명중 ${N(lastHit)}${lastMismatch ? '  ✖ 엇갈림' : ''}` : '아직 쏘지 않았다'
+      const shotLine = lastHit ? `마지막 발사: 레이저 ${N(aimAtShot)} / 명중 ${N(lastHit)}${lastMismatch ? '  ✖ 엇갈림 (점선 상자 = 총알이 맞은 드론)' : ''}` : '아직 쏘지 않았다'
       world.push(
         { kind: 'text', x: 0.4, y: 8.3, text: `mode = "${n.mode}"  (${MODE_KOREAN[n.mode] ?? n.mode})`, align: 'left', size: 26, color: hot ? C.bug : C.warn },
         { kind: 'text', x: 0.4, y: 7.6, text: shotLine, align: 'left', size: 20, color: lastMismatch ? C.bug : C.dim },

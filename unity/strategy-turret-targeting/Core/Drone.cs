@@ -51,14 +51,18 @@ namespace PatternGallery.StrategyTurretTargeting
         public const float SpawnX = 0f;
         public const float BaseX = 15f;
 
-        /// <summary>기본 배치. HP 가 서로 달라 조준 방식마다 고르는 드론이 갈린다</summary>
+        /// <summary>
+        /// 기본 배치. HP 가 서로 달라 조준 방식마다 고르는 드론이 갈린다.
+        /// 높이(마지막 값)는 화면에만 쓴다. 서로 앞지르는 D2, D4, D5 만 층을 나누고 차이는 작게 두어,
+        /// 가로 거리로 가까운 드론이 눈으로도 가깝게 보이게 한다
+        /// </summary>
         public static DroneSpec[] CreateDefaultTable() => new[]
         {
-            new DroneSpec(0f, 2.8f, 8, 1.8f),   // D1 빠른 선두
-            new DroneSpec(0f, 1.3f, 10, 2.4f),  // D2 느리고 단단하다
-            new DroneSpec(0.2f, 2.2f, 2, 4.4f), // D3 약하다
-            new DroneSpec(0.8f, 2f, 5, 1f),     // D4
-            new DroneSpec(1.4f, 2.5f, 3, 3.7f), // D5
+            new DroneSpec(0f, 2.8f, 8, 2.2f),   // D1 빠른 선두
+            new DroneSpec(0f, 1.3f, 10, 1f),    // D2 느리고 단단하다
+            new DroneSpec(0.2f, 2.2f, 2, 1.6f), // D3 약하다
+            new DroneSpec(0.8f, 2f, 5, 2.2f),   // D4
+            new DroneSpec(1.4f, 2.5f, 3, 3.4f), // D5
         };
 
         readonly DroneSpec[] table;
