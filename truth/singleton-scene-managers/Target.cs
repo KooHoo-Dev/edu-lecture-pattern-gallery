@@ -6,8 +6,10 @@
 //  1. Single 모드 SceneManager.LoadScene: (1) 지금 씬의 오브젝트 중 DontDestroyOnLoad 가 아닌 것을 OnDisable → OnDestroy,
 //     (2) 새 씬에 놓인 오브젝트를 놓인 순서대로 Awake → OnEnable (오브젝트 하나의 Awake 와 OnEnable 을 부른 뒤 다음 오브젝트).
 //     DontDestroyOnLoad 로 옮긴 오브젝트는 씬이 바뀌어도 남는다.
-//     출처: Unity 매뉴얼 "이벤트 함수 실행 순서" https://docs.unity3d.com/6000.3/Documentation/Manual/execution-order.html
-//           스크립트 레퍼런스 Object.DontDestroyOnLoad https://docs.unity3d.com/6000.3/Documentation/ScriptReference/Object.DontDestroyOnLoad.html
+//     출처: (1)→(2) 순서(옛 씬 OnDestroy 뒤에 새 씬 Awake)는 문서에 명시되지 않음. 동기 LoadScene 에서 관찰되는 동작 기준이다.
+//           매뉴얼 "이벤트 함수 실행 순서"(execution-order)와 SceneManager.LoadScene 레퍼런스는 이 순서를 적지 않는다.
+//           LoadSceneAsync 나 Additive 에서는 옛 씬 파괴가 새 씬 Awake 보다 늦을 수 있다 (meta 의 pitfalls).
+//           DontDestroyOnLoad 동작: 스크립트 레퍼런스 Object.DontDestroyOnLoad https://docs.unity3d.com/6000.3/Documentation/ScriptReference/Object.DontDestroyOnLoad.html
 //  2. Awake 안에서 Destroy(gameObject) 를 불러도 그 자리에서는 예약만 된다. 실제 파괴(OnDisable → OnDestroy)는 그 프레임 끝이고,
 //     그 사이 같은 오브젝트의 OnEnable 은 불린다 (스크립트 레퍼런스 Object.Destroy: 실제 파괴는 지금 Update 루프 뒤로 미뤄진다).
 //     그래서 어댑터는 Destroy 뒤에 return 해야 한다. 흉내는 예약(PendingDestroy)과 프레임 끝(EndOfFrame)으로 나눈다.
@@ -235,7 +237,13 @@ namespace PatternGallery.SingletonSceneManagers
                 if (persistent) scenes.DontDestroyOnLoad(o);
                 OnClaimed(o);
             };
-            o.OnDestroy = () => slot.Release(o);
+            o.OnDestroy = () =>
+            {
+                // ExpeditionManager 의 OnDestroy override: 주인이 정산하지 않은 조각을 들고 사라지면 알린 뒤 base.OnDestroy (Release)
+                if (!persistent && ReferenceEquals(slot.Current, o) && o.Expedition != null && o.Expedition.Fragments > 0)
+                    events.Add($"ExpeditionManager 파괴: 정산하지 않은 회로 조각 {o.Expedition.Fragments}개 사라짐");
+                slot.Release(o);
+            };
             return o;
         }
 
@@ -295,7 +303,11 @@ namespace PatternGallery.SingletonSceneManagers
                     m.Awake();
                     events.Add($"{o.Name} Awake: Instance = this");
                 };
-                o.OnDestroy = () => m.Destroyed = true;
+                o.OnDestroy = () =>
+                {
+                    m.Destroyed = true;
+                    m.countLabel.Destroyed = true; // 같은 씬의 Text 도 함께 파괴된다
+                };
             }
             return o;
         }

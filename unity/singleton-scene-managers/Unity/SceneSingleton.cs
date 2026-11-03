@@ -26,6 +26,7 @@ namespace PatternGallery.SingletonSceneManagers
 
         protected virtual void OnClaimed() { }
 
+        // 파생 클래스는 protected override void OnDestroy() 로 쓰고 base.OnDestroy() 를 부른다 (ExpeditionManager 참고)
         protected virtual void OnDestroy()
         {
             slot.Release((T)this); // [3] 씬 종속 매니저는 OnDestroy 에서 자리를 비운다. 빼먹으면 Instance 가 파괴된 매니저를 가리킨다
