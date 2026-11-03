@@ -21,7 +21,10 @@ function markedLines(specimen: PatternSpecimen, mark: string, folder: (path: str
   for (const f of specimen.files) {
     if (!folder(f.path)) continue
     f.code.split(/\r?\n/).forEach((line, i) => {
-      if (line.includes(`// [${mark}]`)) out.push({ file: f.name, no: i + 1, text: line.replace(/\s*\/\/ \[[^\]]+\].*$/, '').trim() })
+      if (!line.includes(`// [${mark}]`)) return
+      // 문제 줄(`// [!] 설명`)은 설명도 함께 보인다. 빠뜨린 단계가 원인이면 코드 줄만으로는 무엇이 틀렸는지 안 보인다
+      const note = mark === '!' ? line.split('// [!]')[1]?.trim() : undefined
+      out.push({ file: f.name, no: i + 1, text: line.replace(/\s*\/\/ \[[^\]]+\].*$/, '').trim(), note: note || undefined })
     })
   }
   return out

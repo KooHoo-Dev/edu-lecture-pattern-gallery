@@ -319,6 +319,8 @@ export interface CodeLine {
   file: string
   no: number
   text: string
+  /** 문제 줄의 설명 (`// [!]` 뒤 글). 코드 아래에 흐리게 */
+  note?: string
 }
 
 export function drawCode(g: CanvasRenderingContext2D, lines: CodeLine[], r: Rect, empty: string, tone: string) {
@@ -352,6 +354,14 @@ export function drawCode(g: CanvasRenderingContext2D, lines: CodeLine[], r: Rect
     g.fillText(l.text, r.x + 74, y, r.w - 90)
     g.letterSpacing = '0px'
     y += 28
+    if (l.note) {
+      g.fillStyle = C.faint
+      g.font = font(15, 500)
+      let note = `↳ ${l.note}`
+      while (note.length > 4 && g.measureText(note).width > r.w - 90) note = `${note.slice(0, -2)}…`
+      g.fillText(note, r.x + 74, y - 4)
+      y += 22
+    }
   }
 }
 
