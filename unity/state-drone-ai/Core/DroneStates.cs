@@ -1,4 +1,4 @@
-// 드론 상태들: 순찰, 추격, 공격, 파괴. 상태마다 Tick 에서 거리를 보고 다음 상태를 스스로 정하고, 들어갈 때 바꾼 것은 나올 때 되돌린다.
+// 드론 상태들: 순찰, 추격, 공격, 파괴. 상태마다 Tick 에서 거리를 보고 d.ChangeState 를 불러 스스로 전이하고, 들어갈 때 바꾼 것은 나올 때 되돌린다.
 namespace PatternGallery.StateDroneAi
 {
     public interface IDroneState
@@ -68,6 +68,13 @@ namespace PatternGallery.StateDroneAi
     {
         public string Name => "Attack";
 
+        /// <summary>
+        /// 나가는 경계의 여유 (m). 공격 거리 + 이만큼보다 멀어져야 추격으로 나간다.
+        /// 들어가는 경계(&lt;= AttackRange)와 나가는 경계가 같으면, 대상이 드론보다 느리게 물러날 때 Unity 의 연속 이동에서
+        /// 멈춤 → 벗어남 → 한 프레임 쫓아 다시 들어옴을 매 프레임 되풀이한다 (전이와 CrossFade 가 매 프레임, 충전은 늘 처음부터)
+        /// </summary>
+        public const float LeaveMargin = 0.5f;
+
         public void Enter(Drone d)
         {
             d.Speed = 0f; // [3] 멈춰서 쏜다
@@ -85,11 +92,12 @@ namespace PatternGallery.StateDroneAi
 
         public void Tick(Drone d, float dt)
         {
-            if (d.Distance > d.Settings.AttackRange)
+            if (d.Distance > d.Settings.AttackRange + LeaveMargin)
             {
-                d.ChangeState(DroneStates.Chase); // [1] 벗어나면 다시 쫓는다
+                d.ChangeState(DroneStates.Chase); // [1] 여유까지 벗어나면 다시 쫓는다
                 return;
             }
+            d.FaceTarget(); // 대상이 드론을 지나쳐 가도 등을 돌린 채 쏘지 않게 돌아본다
             d.ChargeTimer += dt; // [4] 공격 상태의 일: 충전하고 다 차면 쏜다
             if (d.ChargeTimer >= d.Settings.ChargeTime)
             {
@@ -108,6 +116,7 @@ namespace PatternGallery.StateDroneAi
             d.Speed = 0f;
         }
 
+        /// <summary>나가는 전이가 없어 Enter 에서 멈춘 속도를 되돌리지 않는다. 부활을 더하면 여기서 속도를 되돌린다</summary>
         public void Exit(Drone d) { }
 
         /// <summary>파괴된 드론은 아무것도 하지 않는다. 이 상태에서 나가는 전이도 없다</summary>

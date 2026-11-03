@@ -144,6 +144,9 @@ const ChaseState: IDroneState = {
   },
 }
 
+/** AttackState.LeaveMargin: 공격 거리 + 이만큼보다 멀어져야 추격으로 나간다 (들어가는 경계와 나가는 경계를 띄운다) */
+const LeaveMargin = f(0.5)
+
 const AttackState: IDroneState = {
   Name: 'Attack',
   Enter(d) {
@@ -158,10 +161,11 @@ const AttackState: IDroneState = {
     d.Charging = false
   },
   Tick(d, dt) {
-    if (d.Distance > d.Settings.AttackRange) {
+    if (d.Distance > f(d.Settings.AttackRange + LeaveMargin)) {
       d.ChangeState(DroneStates.Chase)
       return
     }
+    d.FaceTarget()
     d.ChargeTimer = f(d.ChargeTimer + dt)
     if (d.ChargeTimer >= d.Settings.ChargeTime) {
       d.Fire()
@@ -175,6 +179,7 @@ const DestroyedState: IDroneState = {
   Enter(d) {
     d.Speed = 0
   },
+  /** 나가는 전이가 없어 되돌리지 않는다. 부활을 더하면 여기서 속도를 되돌린다 */
   Exit() {},
   Tick() {},
 }
@@ -204,7 +209,6 @@ class NaiveDrone {
   speed = 0
   hp = 0
   chargeTimer = 0
-  isCharging = false
   shots = 0
 
   Start() {
@@ -219,7 +223,6 @@ class NaiveDrone {
   }
 
   StartCharge() {
-    this.isCharging = true
     this.chargeTimer = 0
   }
 
@@ -308,7 +311,12 @@ function scene(d: DroneLook, harinX: number, chargeColor: string, chargeLabel: s
       { kind: 'text', x: d.x + d.attack - 0.12, y: 1.15, text: `공격 ${d.attack.toFixed(1)}m`, align: 'right', size: 16, color: C.warn },
     )
   }
-  world.push({ kind: 'actor', x: d.x, y: 1, role: 'enemy', label: destroyed ? '잔해 드론 · 파괴' : '잔해 드론', pose: POSE[d.state], facing: d.facing === 1 ? 1 : -1 })
+  world.push({ kind: 'actor', x: d.x, y: 1, role: 'enemy', label: destroyed ? undefined : '잔해 드론', pose: POSE[d.state], facing: d.facing === 1 ? 1 : -1 })
+  if (destroyed) {
+    // 쓰러진 드론의 이름표는 낮게 놓이므로 가운데에 두면 가까이 선 하린과 겹친다. 하린 반대쪽으로 붙여 쓴다
+    const away = harinX <= d.x ? 1 : -1
+    world.push({ kind: 'text', x: d.x - away * 0.25, y: 1.75, text: '잔해 드론 · 파괴', align: away > 0 ? 'left' : 'right', size: 20, color: C.text })
+  }
   if (d.state === 'Attack') {
     const left = d.x - 0.8
     world.push(
@@ -348,9 +356,14 @@ export const createSim: SimFactory =(values: ParamValues, naive: boolean): Patte
     settings.ChargeTime = num('chargeTime')
     settings.MoveSpeed = num('moveSpeed')
     const drone = new Drone(settings)
+    /** 마지막 전이를 누가 불렀나: 상태의 Tick 이면 그 상태 노드, 피해(TakeHit)면 null */
+    let changeBy: string | null = null
+    let changeFrom = 'pc'
     drone.StateChanged.add((from, to) => {
       events.push(`${from} → ${to}`)
       lastChangeAt = clock
+      changeFrom = STATE_NODE[from]
+      changeBy = to === 'Destroyed' ? null : STATE_NODE[from]
     })
     drone.Fired.add(x => {
       events.push(`사격 → 하린 (거리 ${F2(Math.abs(f(x - drone.X)))})`)
@@ -390,14 +403,18 @@ export const createSim: SimFactory =(values: ParamValues, naive: boolean): Patte
         )
         world.push(
           { kind: 'text', x: 0.4, y: 8.3, text: `현재 상태 객체: ${name}State`, align: 'left', size: 26, color: C.accent },
-          { kind: 'text', x: 0.4, y: 7.6, text: `Speed ${F2(drone.Speed)} · 충전 ${drone.Charging ? `${F2(drone.ChargeTimer)} / ${F2(settings.ChargeTime)}초` : '꺼짐'} · HP ${drone.Hp}/${settings.MaxHp} · 거리 ${F2(drone.Distance)}m`, align: 'left', size: 20, color: C.dim },
+          { kind: 'text', x: 0.4, y: 7.6, text: `Speed ${F2(drone.Speed)} · 충전 ${drone.Charging ? `${F2(drone.ChargeTimer)} / ${F2(settings.ChargeTime)}초` : '꺼짐'} · HP ${drone.Hp}/${settings.MaxHp} · 거리 ${F2(drone.Distance)}m${name === 'Attack' ? ` (${F2(f(settings.AttackRange + LeaveMargin))}m 넘으면 추격)` : ''}`, align: 'left', size: 20, color: C.dim },
         )
         if (clock - lastFireAt < 0.25) world.push({ kind: 'arrow', x1: drone.X + drone.Facing * 0.35, y1: 1.75, x2: shotX + (shotX < drone.X ? 0.3 : -0.3), y2: 1.75, color: C.warn }, { kind: 'ring', x: shotX, y: 1.7, r: 0.6, color: C.warn })
         if (clock - lastHitAt < 0.3) world.push(...hitMark(harinX, drone.X))
         const active = [STATE_NODE[name]]
         if (clock - lastMoveAt < 0.3) active.push('ctrl', 'ctrl-drone')
         if (clock - lastHitAt < 0.3) active.push('ctrl-drone', 'drone')
-        if (clock - lastChangeAt < 0.3) active.push('change', 'drone')
+        if (clock - lastChangeAt < 0.3) {
+          // 상태의 Tick 이 부른 전이면 그 상태와 ChangeState 화살표, 피해로 파괴됐으면 Drone.TakeHit 이 불러 Exit 하는 상태만
+          if (changeBy) active.push('change', 'drone', changeBy)
+          else active.push('drone', changeFrom)
+        }
         return { world, active }
       },
     }
@@ -415,10 +432,13 @@ export const createSim: SimFactory =(values: ParamValues, naive: boolean): Patte
   let lastShots = n.shots
   let attackTime = 0
   const bug = { stuck: false, charge: false }
+  /** 이 드론에서 ✖ 로 이미 쓴 버그 (Target.cs 의 reportedStuck, reportedCharge) */
+  const reported = { stuck: false, charge: false }
   let bugAt = -9
-  const report = (now: boolean, key: keyof typeof bug, message: string) => {
+  const report = (now: boolean, key: keyof typeof bug, message: string, again: string) => {
     if (now && !bug[key]) {
-      events.push(message)
+      events.push(reported[key] ? again : `!${message}`)
+      reported[key] = true
       bugAt = clock
     }
     bug[key] = now
@@ -436,8 +456,13 @@ export const createSim: SimFactory =(values: ParamValues, naive: boolean): Patte
     lastHp = n.hp
     if (n.shots !== lastShots) events.push('사격')
     lastShots = n.shots
-    report(moving() && n.speed === 0, 'stuck', `!이동 멈춤: state = ${n.state} 인데 speed = 0`)
-    report(n.state === 'Attack' && attackTime >= n.ChargeTime, 'charge', `!충전이 끝나지 않는다: chargeTime ${F2(n.ChargeTime)}초가 지났는데 chargeTimer = ${F2(n.chargeTimer)}`)
+    report(moving() && n.speed === 0, 'stuck', `이동 멈춤: state = ${n.state} 인데 speed = 0`, `또 멈춤 (state = ${n.state}, speed = 0)`)
+    report(
+      n.state === 'Attack' && attackTime >= n.ChargeTime,
+      'charge',
+      `충전이 끝나지 않는다: chargeTime ${F2(n.ChargeTime)}초가 지났는데 chargeTimer = ${F2(n.chargeTimer)}`,
+      `또 충전이 끝나지 않음 (chargeTimer = ${F2(n.chargeTimer)})`,
+    )
   }
   const step = (toward: number) => {
     const dir = n.X >= harinX ? 1 : -1
