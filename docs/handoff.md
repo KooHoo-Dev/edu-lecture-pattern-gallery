@@ -4,8 +4,8 @@
 
 ## 지금 상태
 
-- 기준 샘플 2개(`state-player-actions`, `observer-health-events`)와 시나리오 무대, dotnet 대조 하네스, 워커 잡 틀이 있다. 워커 파일럿 잡 `jobs/command-undo-replay.md` 를 만들어 두었다.
-- 배포: 아직. GitHub 리포가 생기면 main push 마다 kit 의 재사용 워크플로가 빌드, `gallery check`, Pages 배포를 한다.
+- 표본 3개: 기준 샘플 `state-player-actions`, `observer-health-events` (구독 세션), 워커 파일럿 `command-undo-replay` (구현 + 수정 잡 약 $6.5). 모두 독립 리뷰를 반영했다.
+- 배포: GitHub `KooHoo-Dev/edu-lecture-pattern-gallery` (공개). main push 마다 kit 의 재사용 워크플로가 빌드, `gallery check`, Pages 배포를 한다.
 
 ## 규칙
 
