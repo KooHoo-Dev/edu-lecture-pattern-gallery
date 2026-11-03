@@ -10,7 +10,7 @@ namespace PatternGallery.StateDroneAi
         [Header("조절 값 (웹 갤러리와 같은 이름. Play 중에 바꿔도 반영된다)")]
         [Tooltip("대상이 가로(x) 거리 이 안에 들어오면 쫓는다 (m)")]
         [SerializeField] float detectRange = 5f;
-        [Tooltip("대상이 가로(x) 거리 이 안이면 멈춰서 충전하고 쏜다 (m)")]
+        [Tooltip("대상이 가로(x) 거리 이 안이면 멈춰서 충전하고 쏜다 (m). 나갈 때는 이보다 AttackState.LeaveMargin(0.5m) 더 멀어져야 다시 쫓는다")]
         [SerializeField] float attackRange = 2.5f;
         [Tooltip("멈춘 뒤 한 발을 쏘기까지의 충전 시간 (초). 바꾸면 지금 충전 중인 한 발부터 새 값으로 비교한다")]
         [SerializeField] float chargeTime = 0.6f;
@@ -83,8 +83,11 @@ namespace PatternGallery.StateDroneAi
             DroneCore.Destroyed += OnDestroyed;
             testHitAction.performed += OnTestHit;
             testHitAction.Enable();
-            // 시작 상태(Patrol)는 바뀐 적이 없어 StateChanged 가 오지 않는다. 지금 상태의 색과 글을 한 번 맞춘다
-            ShowState(DroneCore.State.Name);
+            // 색과 Animator 는 이벤트로만 맞춘다. 시작 상태는 바뀐 적이 없어 StateChanged 가 오지 않고,
+            // 껐다 켜면 Animator 는 기본 상태로 돌아가지만 코어는 그대로다. 그래서 켤 때마다 지금 코어 상태로 한 번 맞춘다
+            string now = DroneCore.State.Name;
+            ShowState(now);
+            if (animator != null && animator.isActiveAndEnabled) animator.Play(now, 0, 0f); // 전환 없이 바로 그 상태로
         }
 
         void OnDisable()
@@ -107,8 +110,12 @@ namespace PatternGallery.StateDroneAi
             s.AttackRange = attackRange;
             s.ChargeTime = chargeTime;
             s.MoveSpeed = moveSpeed;
-            // 움직이는 상태(순찰, 추격)면 지금 속도도 바꾼다. 멈춘 상태(공격, 파괴)는 그대로 두고, 공격은 Exit 가 되돌릴 때 새 값을 쓴다
-            if (droneCore.Speed > 0f) droneCore.Speed = moveSpeed;
+            // 지금 속도는 상태를 보고 넣는다 (Speed > 0 으로 고르면 moveSpeed 를 0 으로 했다 되돌릴 때 순찰이 멈춘 채 남는다).
+            // 멈춘 상태(공격, 파괴)는 그대로 두고, 공격은 Exit 가 되돌릴 때 새 값을 쓴다
+            IDroneState state = droneCore.State;
+            bool stopped = state == DroneStates.Attack || state == DroneStates.Destroyed;
+            if (!stopped) droneCore.Speed = moveSpeed;
+            RefreshText();
         }
 
         void OnTestHit(InputAction.CallbackContext _) => TakeHit(1);
@@ -121,7 +128,8 @@ namespace PatternGallery.StateDroneAi
             // 대상의 x 를 코어 좌표로 바꿔 넘긴다. 대상이 없으면 아주 먼 곳으로 보아 감지하지 않는다
             float targetX = target != null ? target.position.x - origin.x : float.PositiveInfinity;
             DroneCore.Tick(Time.deltaTime, targetX); // [4] 무엇을 할지는 지금 상태가 정한다. 여기에는 상태를 묻는 if 가 없다
-            // 원리를 보이려고 transform 을 직접 옮긴다. 코어의 X 는 순찰과 추격 상태만 바꾸므로 공격·파괴 중에는 제자리다
+            // 원리를 보이려고 transform 을 직접 옮긴다. 코어의 X 는 순찰과 추격 상태만 바꾸므로 공격·파괴 중에는 제자리다.
+            // 모든 상태에서 매 프레임 덮어쓰므로 다른 스크립트(넉백 등)가 옮긴 x 는 남지 않는다. 그런 이동은 코어에 알린다
             transform.position = origin + new Vector3(DroneCore.X, 0f, 0f);
             transform.localScale = new Vector3(Mathf.Abs(baseScale.x) * DroneCore.Facing, baseScale.y, baseScale.z);
         }
@@ -130,7 +138,7 @@ namespace PatternGallery.StateDroneAi
         {
             Log($"{from} → {to}");
             ShowState(to); // [3] 들어간 상태의 색, 애니메이션
-            if (animator != null) animator.CrossFade(to, 0.05f); // 상태 이름 = Animator 상태 이름
+            if (animator != null) animator.CrossFadeInFixedTime(to, 0.05f); // 상태 이름 = Animator 상태 이름. 0.05초에 걸쳐 넘어간다
         }
 
         void OnFired(float targetX)

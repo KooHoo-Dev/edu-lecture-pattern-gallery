@@ -1,4 +1,4 @@
-# src 7a75f2891ed0
+# src f2686ae40aa4
 # state-drone-ai approach-retreat-destroy naive=0
 0.30 in approach
 0.50 st state=Patrol x=9.75 harin=4.00 speed=2.50 charge=0.00 hp=3

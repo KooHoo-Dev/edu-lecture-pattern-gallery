@@ -26,7 +26,6 @@ namespace PatternGallery.StateDroneAi.Naive
         public float speed;
         public int hp;
         public float chargeTimer;
-        public bool isCharging;
         /// <summary>쏜 횟수 (사격 효과 대신)</summary>
         public int shots;
 
@@ -43,9 +42,9 @@ namespace PatternGallery.StateDroneAi.Naive
             if (hp <= 0) state = DroneState.Destroyed;
         }
 
+        /// <summary>충전을 처음부터 시작한다. 실제 게임이라면 여기서 충전 이펙트와 소리도 켠다</summary>
         void StartCharge()
         {
-            isCharging = true;
             chargeTimer = 0f;
         }
 
@@ -84,10 +83,10 @@ namespace PatternGallery.StateDroneAi.Naive
                 case DroneState.Attack:
                     if (distance > AttackRange)
                     {
-                        state = DroneState.Chase; // [!] 멈출 때 0 으로 한 speed 를 되돌리는 곳이 없다. 추격 case 가 speed 0 으로 걷는다
+                        state = DroneState.Chase; // [!] 공격에 들 때 0 으로 한 speed 를 되돌리지 않아 추격이 제자리에 선다
                         break;
                     }
-                    StartCharge(); // [!] 들어갈 때 한 번 할 일(충전 시작)을 case 안에서 매 프레임 부른다. chargeTimer 가 매번 0 이 된다
+                    StartCharge(); // [!] 한 번 할 충전 시작을 매 프레임 불러 chargeTimer 가 매번 0 이 된다
                     chargeTimer += dt;
                     if (chargeTimer >= ChargeTime)
                     {

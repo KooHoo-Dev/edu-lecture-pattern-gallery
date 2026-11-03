@@ -26,7 +26,8 @@ namespace PatternGallery.StateDroneAi
         int lastShots;
         /// <summary>나쁜 예가 공격 case 를 돈 시간. 패턴이라면 충전이 다 찼을 시각을 알려고 센다</summary>
         float attackTime;
-        bool bugStuck, bugCharge;
+        /// <summary>버그가 지금 켜져 있는지와, 이 드론에서 ✖ 로 이미 썼는지</summary>
+        bool bugStuck, bugCharge, reportedStuck, reportedCharge;
 
         public Target(Values v, bool isNaive)
         {
@@ -90,9 +91,14 @@ namespace PatternGallery.StateDroneAi
             NaiveEvents();
         }
 
-        void Bug(bool now, ref bool last, string message)
+        /// <summary>버그가 켜지는 순간 쓴다. 같은 드론의 같은 버그는 ✖('!')로 한 번만 쓰고, 다시 켜지면 '!' 없는 사건 줄(again)로 쓴다</summary>
+        void Bug(bool now, ref bool last, ref bool reported, string message, string again)
         {
-            if (now && !last) events.Add(message);
+            if (now && !last)
+            {
+                events.Add(reported ? again : "!" + message);
+                reported = true;
+            }
             last = now;
         }
 
@@ -107,8 +113,12 @@ namespace PatternGallery.StateDroneAi
             if (naive.shots != lastShots) events.Add("사격");
             lastShots = naive.shots;
             bool moving = naive.state == DroneState.Patrol || naive.state == DroneState.Chase;
-            Bug(moving && naive.speed == 0f, ref bugStuck, $"!이동 멈춤: state = {naive.state} 인데 speed = 0");
-            Bug(naive.state == DroneState.Attack && attackTime >= naive.ChargeTime, ref bugCharge, $"!충전이 끝나지 않는다: chargeTime {Fmt.F(naive.ChargeTime)}초가 지났는데 chargeTimer = {Fmt.F(naive.chargeTimer)}");
+            Bug(moving && naive.speed == 0f, ref bugStuck, ref reportedStuck,
+                $"이동 멈춤: state = {naive.state} 인데 speed = 0",
+                $"또 멈춤 (state = {naive.state}, speed = 0)");
+            Bug(naive.state == DroneState.Attack && attackTime >= naive.ChargeTime, ref bugCharge, ref reportedCharge,
+                $"충전이 끝나지 않는다: chargeTime {Fmt.F(naive.ChargeTime)}초가 지났는데 chargeTimer = {Fmt.F(naive.chargeTimer)}",
+                $"또 충전이 끝나지 않음 (chargeTimer = {Fmt.F(naive.chargeTimer)})");
         }
 
         public IEnumerable<string> Drain()
