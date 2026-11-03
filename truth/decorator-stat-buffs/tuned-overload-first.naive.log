@@ -1,4 +1,4 @@
-# src caac516e2ec3
+# src 0553052f8d9c
 # decorator-stat-buffs tuned-overload-first naive=1
 0.30 in overload
 0.30 ev power *= 1.5 : 10.00 → 15.00 (있어야 할 값 15.00)

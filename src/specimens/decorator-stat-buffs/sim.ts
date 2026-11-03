@@ -25,46 +25,73 @@ class Event<T extends unknown[]> {
 
 interface IPowerStat {
   readonly Value: number
+  readonly Label: string
 }
 
 class BasePower implements IPowerStat {
   readonly Value: number
+  get Label() {
+    return '기본 ' + StatText.Num(this.Value)
+  }
   constructor(value: number) {
     this.Value = value
   }
 }
 
-/** C# 의 abstract class. Value 는 자식이 덮어쓴다 */
+/** C# 의 abstract class. Value, Label 은 자식이 덮어쓴다 */
 class PowerDecorator implements IPowerStat {
   readonly Inner: IPowerStat
-  constructor(inner: IPowerStat) {
+  readonly Name: string
+  constructor(inner: IPowerStat, name: string) {
     this.Inner = inner
+    this.Name = name
   }
   get Value(): number {
+    throw new Error('abstract')
+  }
+  get Label(): string {
     throw new Error('abstract')
   }
 }
 
 class AddLayer extends PowerDecorator {
   readonly Amount: number
-  constructor(inner: IPowerStat, amount: number) {
-    super(inner)
+  constructor(inner: IPowerStat, name: string, amount: number) {
+    super(inner, name)
     this.Amount = amount
   }
   override get Value() {
     return f(this.Inner.Value + this.Amount)
   }
+  override get Label() {
+    return this.Name + ' +' + StatText.Num(this.Amount)
+  }
 }
 
 class MultiplyLayer extends PowerDecorator {
   readonly Factor: number
-  constructor(inner: IPowerStat, factor: number) {
-    super(inner)
+  constructor(inner: IPowerStat, name: string, factor: number) {
+    super(inner, name)
     this.Factor = factor
   }
   override get Value() {
     return f(this.Inner.Value * this.Factor)
   }
+  override get Label() {
+    return this.Name + ' ×' + StatText.Num(this.Factor)
+  }
+}
+
+const StatText = {
+  /** C# 의 ToString("0.##") */
+  Num(v: number) {
+    return String(Number(v.toFixed(2)))
+  },
+
+  Describe(stat: IPowerStat): string {
+    if (stat instanceof PowerDecorator) return stat.Label + ' [' + StatText.Describe(stat.Inner) + ']'
+    return stat.Label
+  },
 }
 
 /* ───────── Core/BuffSet.cs ───────── */
@@ -119,6 +146,10 @@ class BuffSet {
     return kind === 'Cell' ? this.Settings.CellDuration : this.Settings.OverloadDuration
   }
 
+  static NameOf(kind: BuffKind) {
+    return kind === 'Cell' ? '냉각 셀' : '과부하'
+  }
+
   RemainingOf(kind: BuffKind) {
     const b = this.Find(kind)
     return b === null ? 0 : b.Remaining
@@ -137,8 +168,9 @@ class BuffSet {
       return
     }
     this.active.push(new ActiveBuff(kind, this.DurationOf(kind)))
-    this.BuffApplied.invoke(kind, this.DurationOf(kind))
     this.Rebuild()
+    this.BuffApplied.invoke(kind, this.DurationOf(kind))
+    this.AnnounceChain()
   }
 
   Purge() {
@@ -148,12 +180,13 @@ class BuffSet {
     }
     const count = this.active.length
     this.active.length = 0
-    this.BuffsPurged.invoke(count)
     this.Rebuild()
+    this.BuffsPurged.invoke(count)
+    this.AnnounceChain()
   }
 
   Tick(dt: number) {
-    let changed = false
+    let ended: BuffKind[] | null = null
     for (let i = 0; i < this.active.length; ) {
       const b = this.active[i]
       b.Remaining = f(b.Remaining - dt)
@@ -162,37 +195,32 @@ class BuffSet {
         continue
       }
       this.active.splice(i, 1)
-      this.BuffExpired.invoke(b.Kind)
-      changed = true
+      if (ended === null) ended = []
+      ended.push(b.Kind)
     }
-    if (changed) this.Rebuild()
+    if (ended === null) return
+    this.Rebuild()
+    for (const kind of ended) this.BuffExpired.invoke(kind)
+    this.AnnounceChain()
   }
 
   SettingsChanged() {
     this.Rebuild()
+    this.AnnounceChain()
   }
 
   private Rebuild() {
     let stat: IPowerStat = new BasePower(this.Settings.BasePower)
-    for (const b of this.active) if (b.Kind === 'Cell') stat = new AddLayer(stat, this.Settings.CellBonus)
-    for (const b of this.active) if (b.Kind === 'Overload') stat = new MultiplyLayer(stat, this.Settings.OverloadMultiplier)
+    for (const b of this.active) if (b.Kind === 'Cell') stat = new AddLayer(stat, BuffSet.NameOf(b.Kind), this.Settings.CellBonus)
+    for (const b of this.active) if (b.Kind === 'Overload') stat = new MultiplyLayer(stat, BuffSet.NameOf(b.Kind), this.Settings.OverloadMultiplier)
     this.Power = stat
-    this.ChainRebuilt.invoke(this.Power)
+  }
 
+  private AnnounceChain() {
+    this.ChainRebuilt.invoke(this.Power)
     const previous = this.current
     this.current = this.Power.Value
     if (this.current !== previous) this.PowerChanged.invoke(previous, this.current)
-  }
-
-  static Describe(stat: IPowerStat): string {
-    if (stat instanceof MultiplyLayer) return `과부하 ×${BuffSet.Num(stat.Factor)} [${BuffSet.Describe(stat.Inner)}]`
-    if (stat instanceof AddLayer) return `냉각 셀 +${BuffSet.Num(stat.Amount)} [${BuffSet.Describe(stat.Inner)}]`
-    return `기본 ${BuffSet.Num(stat.Value)}`
-  }
-
-  /** C# 의 ToString("0.##") */
-  static Num(v: number) {
-    return String(Number(v.toFixed(2)))
   }
 }
 
@@ -222,8 +250,8 @@ class NaivePowerBuffs {
   basePower = f(10)
   cellBonus = f(5)
   overloadMultiplier = f(2)
-  cellDuration = f(3)
-  overloadDuration = f(2.5)
+  cellDuration = f(4)
+  overloadDuration = f(2)
   power = f(10)
   cellRoutine: WaitTimer | null = null
   overloadRoutine: WaitTimer | null = null
@@ -289,8 +317,10 @@ class NaivePowerBuffs {
 /* ───────── truth/decorator-stat-buffs/Target.cs 와 같은 어댑터 + 무대 그림 ───────── */
 
 const F2 = (v: number) => v.toFixed(2)
-const Num = BuffSet.Num
-const NAME: Record<BuffKind, string> = { Cell: '냉각 셀', Overload: '과부하' }
+const Num = StatText.Num
+const Name = BuffSet.NameOf
+/** 출력 막대가 가득 차는 값. 조절 값 범위의 최대값 (10 + 15) × 3 으로 고정 (Unity 어댑터의 FullScale 과 같다) */
+const FULL = 75
 const Left = (t: WaitTimer | null) => (t === null ? 0 : t.Remaining)
 
 /** 출력 막대 (가로 3 ~ 15) */
@@ -309,10 +339,10 @@ function layersOf(stat: IPowerStat): Layer[] {
   const out: Layer[] = []
   let s: IPowerStat = stat
   for (;;) {
-    if (s instanceof MultiplyLayer) out.push({ node: 'mul', label: `과부하 ×${Num(s.Factor)}`, value: s.Value, kind: 'Overload' })
-    else if (s instanceof AddLayer) out.push({ node: 'add', label: `냉각 셀 +${Num(s.Amount)}`, value: s.Value, kind: 'Cell' })
+    if (s instanceof MultiplyLayer) out.push({ node: 'mul', label: s.Label, value: s.Value, kind: 'Overload' })
+    else if (s instanceof AddLayer) out.push({ node: 'add', label: s.Label, value: s.Value, kind: 'Cell' })
     else {
-      out.push({ node: 'base', label: `기본 ${Num(s.Value)}`, value: s.Value, kind: null })
+      out.push({ node: 'base', label: s.Label, value: s.Value, kind: null })
       return out
     }
     s = (s as PowerDecorator).Inner
@@ -341,8 +371,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     CellDuration: num('cellDuration'),
     OverloadDuration: num('overloadDuration'),
   }
-  /** 막대가 가득 차는 출력 (Unity 어댑터의 FullScale 과 같다) */
-  const full = (settings.BasePower + settings.CellBonus) * settings.OverloadMultiplier * 1.4
+  const full = FULL
   const events: string[] = []
   const buffs = new BuffSet(settings)
   let clock = 0
@@ -350,13 +379,13 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   const recent = (t: number, within = 0.3) => clock - t < within
 
   if (!isNaive) {
-    buffs.BuffApplied.add((k, d) => events.push(`${NAME[k]} 받음 → 목록에 넣음 (${F2(d)}초)`))
-    buffs.BuffRefreshed.add((k, r) => events.push(`${NAME[k]} 다시 받음 → 층은 그대로, 남은 시간만 ${F2(r)}초로`))
-    buffs.BuffExpired.add(k => events.push(`${NAME[k]} 끝 → 목록에서 뺌`))
+    buffs.BuffApplied.add((k, d) => events.push(`${Name(k)} 받음 → 목록에 넣음 (${F2(d)}초)`))
+    buffs.BuffRefreshed.add((k, r) => events.push(`${Name(k)} 다시 받음 → 층은 그대로, 남은 시간만 ${F2(r)}초로`))
+    buffs.BuffExpired.add(k => events.push(`${Name(k)} 끝 → 목록에서 뺌`))
     buffs.BuffsPurged.add(n => events.push(`정화 → 버프 ${n}개를 목록에서 뺌`))
     buffs.NothingToPurge.add(() => events.push('정화할 버프가 없다'))
     buffs.ChainRebuilt.add(p => {
-      events.push(`사슬 다시 감싸기: ${BuffSet.Describe(p)}`)
+      events.push(`사슬 다시 감싸기: ${StatText.Describe(p)}`)
       at.rebuild = clock
     })
     buffs.PowerChanged.add((from, to) => {
@@ -380,11 +409,11 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       view(): SimView {
         const power = buffs.Value
         const layers = layersOf(buffs.Power)
-        const timers = buffs.Active.map(b => `${NAME[b.Kind]} ${F2(b.Remaining)}초`).join(', ')
+        const timers = buffs.Active.map(b => `${Name(b.Kind)} ${F2(b.Remaining)}초`).join(', ')
         const world: WorldItem[] = [
           { kind: 'box', x: 0, y: 0, w: 16, h: 1, fill: '#22314a' },
           { kind: 'actor', x: 1.4, y: 1, role: 'ally', label: '하린', pose: buffs.Active.length ? 'attack' : 'idle' },
-          { kind: 'text', x: 0.4, y: 8.3, text: `출력 ${F2(power)} = ${BuffSet.Describe(buffs.Power)}`, align: 'left', size: 24, color: '#7ee081' },
+          { kind: 'text', x: 0.4, y: 8.3, text: `출력 ${F2(power)} = ${StatText.Describe(buffs.Power)}`, align: 'left', size: 24, color: '#7ee081' },
           { kind: 'text', x: 0.4, y: 7.6, text: buffs.Active.length ? `활성 버프 ${buffs.Active.length}개: ${timers}` : '활성 버프 없음 · 사슬은 BasePower 하나', align: 'left', size: 20, color: COLOR.dim },
           { kind: 'text', x: 15, y: 5.05, text: '감싸기 사슬 = BuffSet.Power', align: 'right', size: 18, color: COLOR.dim },
         ]
@@ -540,7 +569,8 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         const d = f(n.power - n.basePower)
         world.push(
           { kind: 'box', x: x - 0.05, y: BAR.y - 0.2, w: 0.1, h: 0.72, fill: COLOR.bug },
-          { kind: 'text', x: x + 0.2, y: BAR.y - 0.6, text: `멈춘 막대 끝 ${F2(n.power)} (기본값 ${d > 0 ? '+' : ''}${F2(d)})`, align: 'left', size: 18, color: COLOR.bug },
+          // 기본값 눈금 글과 겹치지 않게 그 오른쪽에 둔다
+          { kind: 'text', x: Math.max(x + 0.2, xAt(n.basePower) + 1), y: BAR.y - 0.6, text: `멈춘 막대 끝 ${F2(n.power)} (기본값 ${d > 0 ? '+' : ''}${F2(d)})`, align: 'left', size: 18, color: COLOR.bug },
         )
       }
       // 돌고 있는 코루틴 (흉내 낸 타이머)

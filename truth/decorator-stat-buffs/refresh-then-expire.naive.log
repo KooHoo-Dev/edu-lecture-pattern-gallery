@@ -1,26 +1,27 @@
-# src caac516e2ec3
+# src 0553052f8d9c
 # decorator-stat-buffs refresh-then-expire naive=1
 0.30 in cell
 0.30 ev power += 5 : 10.00 → 15.00 (있어야 할 값 15.00)
-0.50 st power=15.00 expect=15.00 timers=1 cell=2.80 overload=0.00
-0.90 in overload
-0.90 ev power *= 2 : 15.00 → 30.00 (있어야 할 값 30.00)
-1.00 st power=30.00 expect=30.00 timers=2 cell=2.30 overload=2.40
-1.50 st power=30.00 expect=30.00 timers=2 cell=1.80 overload=1.90
-1.80 in cell
-1.80 ev 앞 냉각 셀 코루틴 멈춤 (남은 1.50초) → 그 power -= 5 는 돌지 않는다
-1.80 ev power += 5 : 30.00 → 35.00 (있어야 할 값 30.00)
-1.80 ev !중복 적용 (냉각 셀 +5 를 두 번 더했는데 끝날 때는 한 번만 뺀다)
-2.00 st power=35.00 expect=30.00 timers=2 cell=2.80 overload=1.40
-2.50 st power=35.00 expect=30.00 timers=2 cell=2.30 overload=0.90
-3.00 st power=35.00 expect=30.00 timers=2 cell=1.80 overload=0.40
-3.40 ev 과부하 끝 power /= 2 : 35.00 → 17.50 (있어야 할 값 15.00)
-3.50 st power=17.50 expect=15.00 timers=1 cell=1.30 overload=0.00
-4.00 st power=17.50 expect=15.00 timers=1 cell=0.80 overload=0.00
-4.50 st power=17.50 expect=15.00 timers=1 cell=0.30 overload=0.00
-4.80 ev 냉각 셀 끝 power -= 5 : 17.50 → 12.50 (있어야 할 값 10.00)
-4.80 ev !기본값 어긋남 (버프가 모두 끝났는데 power 12.50, 기본값 10.00)
-5.00 st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00
-5.50 st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00
+0.50 st power=15.00 expect=15.00 timers=1 cell=3.80 overload=0.00
+0.80 in overload
+0.80 ev power *= 2 : 15.00 → 30.00 (있어야 할 값 30.00)
+1.00 st power=30.00 expect=30.00 timers=2 cell=3.30 overload=1.80
+1.50 st power=30.00 expect=30.00 timers=2 cell=2.80 overload=1.30
+1.50 in cell
+1.50 ev 앞 냉각 셀 코루틴 멈춤 (남은 2.80초) → 그 power -= 5 는 돌지 않는다
+1.50 ev power += 5 : 30.00 → 35.00 (있어야 할 값 30.00)
+1.50 ev !중복 적용 (냉각 셀 +5 를 두 번 더했는데 끝날 때는 한 번만 뺀다)
+2.00 st power=35.00 expect=30.00 timers=2 cell=3.50 overload=0.80
+2.50 st power=35.00 expect=30.00 timers=2 cell=3.00 overload=0.30
+2.80 ev 과부하 끝 power /= 2 : 35.00 → 17.50 (있어야 할 값 15.00)
+3.00 st power=17.50 expect=15.00 timers=1 cell=2.50 overload=0.00
+3.50 st power=17.50 expect=15.00 timers=1 cell=2.00 overload=0.00
+4.00 st power=17.50 expect=15.00 timers=1 cell=1.50 overload=0.00
+4.50 st power=17.50 expect=15.00 timers=1 cell=1.00 overload=0.00
+5.00 st power=17.50 expect=15.00 timers=1 cell=0.50 overload=0.00
+5.50 st power=17.50 expect=15.00 timers=1 cell=0.00 overload=0.00
+5.50 ev 냉각 셀 끝 power -= 5 : 17.50 → 12.50 (있어야 할 값 10.00)
+5.50 ev !기본값 어긋남 (버프가 모두 끝났는데 power 12.50, 기본값 10.00)
 6.00 st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00
+6.50 st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00
 end st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00

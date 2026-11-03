@@ -1,0 +1,21 @@
+# src 0553052f8d9c
+# decorator-stat-buffs cell-ends-first naive=1
+0.30 in cell
+0.30 ev power += 5 : 10.00 → 15.00 (있어야 할 값 15.00)
+0.50 st power=15.00 expect=15.00 timers=1 cell=3.80 overload=0.00
+1.00 st power=15.00 expect=15.00 timers=1 cell=3.30 overload=0.00
+1.50 st power=15.00 expect=15.00 timers=1 cell=2.80 overload=0.00
+2.00 st power=15.00 expect=15.00 timers=1 cell=2.30 overload=0.00
+2.50 st power=15.00 expect=15.00 timers=1 cell=1.80 overload=0.00
+2.60 in overload
+2.60 ev power *= 2 : 15.00 → 30.00 (있어야 할 값 30.00)
+3.00 st power=30.00 expect=30.00 timers=2 cell=1.30 overload=1.60
+3.50 st power=30.00 expect=30.00 timers=2 cell=0.80 overload=1.10
+4.00 st power=30.00 expect=30.00 timers=2 cell=0.30 overload=0.60
+4.30 ev 냉각 셀 끝 power -= 5 : 30.00 → 25.00 (있어야 할 값 20.00)
+4.50 st power=25.00 expect=20.00 timers=1 cell=0.00 overload=0.10
+4.60 ev 과부하 끝 power /= 2 : 25.00 → 12.50 (있어야 할 값 10.00)
+4.60 ev !기본값 어긋남 (버프가 모두 끝났는데 power 12.50, 기본값 10.00)
+5.00 st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00
+5.50 st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00
+end st power=12.50 expect=10.00 timers=0 cell=0.00 overload=0.00
