@@ -1,0 +1,39 @@
+# src 7a75f2891ed0
+# state-drone-ai approach-retreat-destroy naive=0
+0.30 in approach
+0.50 st state=Patrol x=9.75 harin=4.00 speed=2.50 charge=0.00 hp=3
+0.60 in approach
+0.60 ev Patrol → Chase
+0.90 in approach
+1.00 st state=Chase x=8.54 harin=6.00 speed=2.50 charge=0.00 hp=3
+1.02 ev Chase → Attack
+1.50 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.47 hp=3
+1.62 ev 사격 → 하린 (거리 2.50)
+2.00 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.37 hp=3
+2.22 ev 사격 → 하린 (거리 2.50)
+2.40 in retreat
+2.40 ev Attack → Chase
+2.50 st state=Chase x=8.29 harin=5.00 speed=2.50 charge=0.00 hp=3
+2.82 ev Chase → Attack
+3.00 st state=Attack x=7.50 harin=5.00 speed=0.00 charge=0.17 hp=3
+3.40 in approach
+3.42 ev 사격 → 하린 (거리 1.50)
+3.50 st state=Attack x=7.50 harin=6.00 speed=0.00 charge=0.07 hp=3
+4.00 st state=Attack x=7.50 harin=6.00 speed=0.00 charge=0.57 hp=3
+4.02 ev 사격 → 하린 (거리 1.50)
+4.40 in hit
+4.40 ev 피해 1 (HP 2/3)
+4.50 st state=Attack x=7.50 harin=6.00 speed=0.00 charge=0.47 hp=2
+4.62 ev 사격 → 하린 (거리 1.50)
+4.90 in hit
+4.90 ev 피해 1 (HP 1/3)
+5.00 st state=Attack x=7.50 harin=6.00 speed=0.00 charge=0.37 hp=1
+5.22 ev 사격 → 하린 (거리 1.50)
+5.40 in hit
+5.40 ev 피해 1 (HP 0/3)
+5.40 ev Attack → Destroyed
+5.40 ev 파괴
+5.50 st state=Destroyed x=7.50 harin=6.00 speed=0.00 charge=0.00 hp=0
+6.00 st state=Destroyed x=7.50 harin=6.00 speed=0.00 charge=0.00 hp=0
+6.50 st state=Destroyed x=7.50 harin=6.00 speed=0.00 charge=0.00 hp=0
+end st state=Destroyed x=7.50 harin=6.00 speed=0.00 charge=0.00 hp=0

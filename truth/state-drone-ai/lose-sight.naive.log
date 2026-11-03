@@ -1,0 +1,27 @@
+# src 7a75f2891ed0
+# state-drone-ai lose-sight naive=1
+0.30 in approach
+0.50 st state=Patrol x=9.75 harin=4.00 speed=2.50 charge=0.00 hp=3
+0.60 in approach
+0.60 ev state = Chase
+0.90 in approach
+1.00 st state=Chase x=8.54 harin=6.00 speed=2.50 charge=0.00 hp=3
+1.02 ev state = Attack
+1.02 ev speed = 0.00
+1.50 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=3
+1.62 ev !충전이 끝나지 않는다: chargeTime 0.60초가 지났는데 chargeTimer = 0.02
+2.00 st state=Attack x=8.50 harin=6.00 speed=0.00 charge=0.02 hp=3
+2.00 in retreat
+2.00 ev state = Chase
+2.00 ev !이동 멈춤: state = Chase 인데 speed = 0
+2.15 in retreat
+2.30 in retreat
+2.30 ev state = Patrol
+2.45 in retreat
+2.50 st state=Patrol x=8.50 harin=2.00 speed=0.00 charge=0.02 hp=3
+3.00 st state=Patrol x=8.50 harin=2.00 speed=0.00 charge=0.02 hp=3
+3.50 st state=Patrol x=8.50 harin=2.00 speed=0.00 charge=0.02 hp=3
+4.00 st state=Patrol x=8.50 harin=2.00 speed=0.00 charge=0.02 hp=3
+4.50 st state=Patrol x=8.50 harin=2.00 speed=0.00 charge=0.02 hp=3
+5.00 st state=Patrol x=8.50 harin=2.00 speed=0.00 charge=0.02 hp=3
+end st state=Patrol x=8.50 harin=2.00 speed=0.00 charge=0.02 hp=3
