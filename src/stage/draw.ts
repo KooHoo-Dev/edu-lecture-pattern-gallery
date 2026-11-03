@@ -305,7 +305,9 @@ export function drawLog(g: CanvasRenderingContext2D, entries: LogEntry[], r: Rec
     } else {
       g.fillStyle = e.bug ? C.bug : fresh ? C.accent : C.text
       g.font = font(20, e.bug ? 700 : 500, !e.bug)
+      g.letterSpacing = '0.01px' // 합자 끄기 (코드 줄 칸과 같다)
       g.fillText(`${e.bug ? '✖ ' : ''}${e.text}`, r.x + 104, y, r.w - 120)
+      g.letterSpacing = '0px'
     }
   })
   g.restore()

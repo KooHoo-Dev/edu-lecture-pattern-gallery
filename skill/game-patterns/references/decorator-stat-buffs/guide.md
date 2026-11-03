@@ -13,34 +13,36 @@
 
 ## 넣는 순서
 1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/decorator-stat-buffs/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
-2. `GameObject > UI > Image` 로 출력 막대를 만든다 (Canvas 와 EventSystem 이 함께 생긴다). 이름을 `PowerFill` 로 바꾸고 Rect Transform 의 Width 를 600, Height 를 30 으로 한다. Source Image 에 스프라이트(예: 기본 제공 `UISprite`)를 넣어야 Image Type 칸이 보인다. Image Type 을 `Filled`, Fill Method 를 `Horizontal`, Fill Origin 을 `Left` 로 둔다.
-3. 같은 방법으로 작은 Image 둘(`CellTimer`, `OverloadTimer`, Width 200, Height 12, Filled · Horizontal)을 만들고, `GameObject > UI > Legacy > Text` 로 Text 둘(`PowerText`, `ChainText`)을 만든다. `ChainText` 는 Width 를 800 으로 넓힌다. Canvas 는 Screen Space - Overlay 라 카메라 위치와 상관없이 Game 뷰에 보인다.
-4. 항상 켜져 있는 `Canvas` 에 `PowerBuffs` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(1 냉각 셀, 2 과부하, 3 정화)를 넣는다. `Power Fill`, `Power Text`, `Chain Text`, `Cell Timer Fill`, `Overload Timer Fill` 칸에 만든 것을 끌어 넣는다. 웹 갤러리 무대의 C/O/X 는 갤러리 단축키를 피한 것이라 Unity 와 다르다.
-5. Play 하고 1, 2, 1 을 차례로 누른 뒤 기다린다. `ChainText` 가 `과부하 ×2 [냉각 셀 +5 [기본 10]]` 처럼 바뀌고, Console 에 `[PowerBuffs] 출력 15 → 30` 같은 줄이 남는다.
+2. `GameObject > UI (Canvas) > Image` 로 출력 막대를 만든다 (Canvas 와 EventSystem 이 함께 생긴다). 이름을 `PowerFill` 로 바꾸고 Rect Transform 의 Width 를 600, Height 를 30 으로 한다. Source Image 에 스프라이트(예: 기본 제공 `UISprite`)를 넣어야 Image Type 칸이 보인다. Image Type 을 `Filled`, Fill Method 를 `Horizontal`, Fill Origin 을 `Left` 로 둔다.
+3. 같은 방법으로 작은 Image 둘(`CellTimer`, `OverloadTimer`, Width 200, Height 12, 같은 스프라이트, Filled · Horizontal · Left)을 만들고, `GameObject > UI (Canvas) > Legacy > Text` 로 Text 둘(`PowerText`, `ChainText`)을 만든다. 두 Text 는 Font Size 를 24, Alignment 를 가운데로 하고 Height 를 40 으로, `PowerText` 는 Width 400, `ChainText` 는 Width 800 으로 한다. Canvas 는 Screen Space - Overlay 라 카메라 위치와 상관없이 Game 뷰에 보인다.
+4. 새 UI 는 모두 Canvas 가운데에 겹쳐 생기므로 Rect Transform 의 Pos X·Y 를 나눈다: `PowerText` (0, 120), `PowerFill` (0, 70), `ChainText` (0, 20), `CellTimer` (−110, −30), `OverloadTimer` (110, −30). 막대 위에 숫자, 아래에 사슬 글과 타이머 둘이 나란히 놓인다.
+5. 항상 켜져 있는 `Canvas` 에 `PowerBuffs` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(1 냉각 셀, 2 과부하, 3 정화)를 넣는다. `Power Fill`, `Power Text`, `Chain Text`, `Cell Timer Fill`, `Overload Timer Fill` 칸에 만든 것을 끌어 넣는다. 조절 값 칸 중 `Base Power` 는 웹 갤러리에 없는 칸이다 (웹은 10 고정). 웹 갤러리 무대의 C/O/X 는 갤러리 단축키를 피한 것이라 Unity 와 다르다.
+6. Play 하고 1, 2, 1 을 차례로 누른 뒤 기다린다. `ChainText` 가 `과부하 ×2 [냉각 셀 +5 [기본 10]]` 처럼 바뀌고, Console 에 `[PowerBuffs] 출력 15 → 30`, `[PowerBuffs] 과부하 끝 → 목록에서 뺌` 같은 줄이 남는다.
 
 ## 확인
-1, 2, 1 을 누르고 기다리면 출력이 10 → 15 → 30 → 15 → 10 으로 바뀌고, 모든 버프가 끝난 뒤 `PowerText` 가 정확히 10 이며 `ChainText` 가 `기본 10` 이다.
+1, 2, 1 을 누르고 기다리면 출력이 10 → 15 → 30 → 15 → 10 으로 바뀌고, 모든 버프가 끝난 뒤 `PowerText` 가 정확히 10 이며 `ChainText` 가 `기본 10` 이다. 2 를 먼저 누르고 1 을 눌러도 (10 + 5) × 2 = 30 이고 끝나면 10 이다. Play 중 Inspector 의 `Cell Bonus` 를 바꾸면 냉각 셀이 걸린 동안 막대 길이가 바로 바뀐다.
 
 ## 기본 Inspector 값
 | 필드 | 뜻 | 값 |
 |---|---|---|
 | `cellBonus` | 냉각 셀 보너스 | 5 |
 | `overloadMultiplier` | 과부하 배율 | 2배 |
-| `cellDuration` | 냉각 셀 지속 시간 | 3초 |
-| `overloadDuration` | 과부하 지속 시간 | 2.5초 |
+| `cellDuration` | 냉각 셀 지속 시간 | 4초 |
+| `overloadDuration` | 과부하 지속 시간 | 2초 |
 
 ## 동작 단계
 1. **버프를 받으면 목록에 넣는다**: `PowerBuffs` 는 냉각 셀 키를 받으면 `BuffSet.Apply(Cell)` 만 부른다. `BuffSet` 은 출력 숫자를 고치지 않고 활성 버프 목록에 (종류, 남은 시간)을 넣는다. 같은 버프가 이미 있으면 층을 하나 더 두지 않고 남은 시간만 처음으로 되돌린다 (갱신). 기록의 "다시 받음 → 층은 그대로" 가 그 순간이다.
-2. **목록에서 사슬을 다시 감싼다**: 목록이 바뀌면 `Rebuild` 가 `new BasePower(10)` 에서 시작해 냉각 셀마다 `AddLayer`, 과부하마다 `MultiplyLayer` 로 감싼다. **더하기 층이 안쪽, 곱하기 층이 바깥** 으로 고정이다. 받은 순서대로 감싸면 같은 두 버프가 (10 + 5) × 2 = 30 도 되고 10 × 2 + 5 = 25 도 된다. 데코레이터는 같은 인터페이스로 감싸 원본을 고치지 않는다. 여기서는 그 감싸기를 수정자 목록에서 매번 다시 만든다.
+2. **목록에서 사슬을 다시 감싼다**: 목록이 바뀌면 `Rebuild` 가 `new BasePower(10)` 에서 시작해 냉각 셀마다 `AddLayer`, 과부하마다 `MultiplyLayer` 로 감싼다. **더하기 층이 안쪽, 곱하기 층이 바깥** 으로 고정이다. 받은 순서대로 감싸면 같은 두 버프가 (10 + 5) × 2 = 30 도 되고 10 × 2 + 5 = 25 도 된다. 더하기를 안쪽에 두는 것은 보너스도 배율을 받게 하는 흔한 관례다. 공식 한 줄 `(기본 + Σ보너스) × Π배율` 로 써도 지금은 같은 값이지만, 층으로 두면 상한이나 조건부 층을 다른 층을 고치지 않고 더할 수 있고, 지금 걸린 사슬을 눈으로 확인할 수 있다 (층마다 자기 `Label` 을 들어 `ChainText` 와 미니 월드의 겹친 상자가 사슬을 그대로 보인다). 데코레이터는 같은 인터페이스로 감싸 원본을 고치지 않는다. 여기서는 그 감싸기를 수정자 목록에서 매번 다시 만든다.
 3. **값을 읽으면 바깥 층부터 안으로**: `BuffSet.Value` 는 바깥 층의 `Value` 를 읽는다. `MultiplyLayer` 는 안쪽(`inner`) 값을 읽어 ×2 하고, `AddLayer` 는 안쪽 값을 읽어 +5 한다. 맨 안쪽 `BasePower` 는 10 그대로다. 모두 `IPowerStat` 라 바깥 층은 안쪽이 기본값인지 다른 층인지 모른다. 미니 월드의 겹친 상자 오른쪽 숫자가 층마다 돌려준 값이다.
-4. **끝난 버프는 목록에서 빠진다**: `Tick(dt)` 가 남은 시간을 줄이다 0 이 된 버프를 목록에서 빼고 사슬을 처음부터 다시 만든다. 과부하가 먼저 끝나도 사슬 중간의 층을 떼어 내지 않으므로 냉각 셀 층은 그대로 남고, 모두 끝나면 사슬은 `BasePower` 하나라 출력이 정확히 기본값이다. 타이머가 코루틴이 아니라서 `StopCoroutine` 으로 끝 처리를 건너뛰는 일도 없다.
+4. **끝난 버프는 목록에서 빠진다**: `Tick(dt)` 가 남은 시간을 줄이다 0 이 된 버프를 목록에서 빼고 사슬을 처음부터 다시 만든다. 과부하가 먼저 끝나도 사슬 중간의 층을 떼어 내지 않으므로 냉각 셀 층은 그대로 남고, 모두 끝나면 사슬은 `BasePower` 하나라 출력이 정확히 기본값이다. 타이머가 코루틴이 아니라서 `StopCoroutine` 으로 끝 처리를 건너뛰는 일도 없다. 알림(`BuffExpired`, `ChainRebuilt`, `PowerChanged`)은 끝난 버프를 모두 빼고 사슬을 다시 만든 **뒤에** 보낸다. 그래서 핸들러가 `Value` 를 읽으면 새 값이 나오고, 핸들러가 `Apply` 를 불러도 도는 중인 목록이 바뀌지 않는다. `BuffApplied`, `BuffsPurged` 도 같다.
 
 ## 주의할 점
 - 버프 시간은 `Update` 의 `Tick(Time.deltaTime)` 으로 센다. `Time.timeScale` 이 0(일시정지)이면 버프도 멈춘다. 일시정지 중에도 흘러야 하는 버프라면 `Time.unscaledDeltaTime` 을 넘긴다.
 - 사슬은 목록이 바뀔 때만 다시 만든다 (버프를 받거나, 끝나거나, 정화하거나, Inspector 값이 바뀔 때). 매 프레임 `Rebuild` 하면 층 객체가 프레임마다 생겨 GC 가 늘어난다. 출력은 `PowerChanged` 를 받아 UI 에 옮기고 `Update` 에서 다시 읽지 않는다.
 - 층 순서(더하기 안쪽, 곱하기 바깥)는 `BuffSet.Rebuild` 한 곳에 있다. "배율 뒤에 더하는 고정 보너스" 같은 규칙이 생기면 그 층을 곱하기 층 바깥에 감싸는 단계를 `Rebuild` 에 하나 더한다. 버프마다 순서를 따로 정하지 않는다.
 - `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 버프 갱신이 두 번 일어난다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.
-- UGUI Filled Image 는 Source Image 에 스프라이트가 있어야 Image Type 칸이 보이고 `fillAmount` 가 화면에 나타난다. 막대가 가득 차는 출력은 `(Base Power + Cell Bonus) × Overload Multiplier × 1.4` 로 잡았다 (웹 무대와 같다).
+- UGUI Filled Image 는 Source Image 에 스프라이트가 있어야 Image Type 칸이 보이고 `fillAmount` 가 화면에 나타난다. 막대가 가득 차는 출력은 조절 값 범위의 최대값 (10 + 15) × 3 = 75 로 고정했다 (웹 무대와 같다). 조절 값으로 계산하면 값을 바꿔도 막대 길이가 같아 보인다. `Base Power` 를 크게 올리면 이 기준도 함께 고친다.
+- `BuffApplied`, `BuffExpired` 같은 알림은 사슬을 다시 만든 뒤에 온다. 핸들러에서 `Buffs.Value` 를 읽으면 새 출력이다. Inspector 값을 바꿔 사슬만 다시 만들어지면(출력이 같으면 `PowerChanged` 는 오지 않는다) `ChainRebuilt` 핸들러가 글과 막대를 함께 맞춘다.
 
 ## 흔한 실수
 - **버프가 다 끝났는데 공격력이 원래대로 안 돌아온다**: 같은 버프를 다시 받을 때 `StopCoroutine` 으로 앞 코루틴을 멈추고 새로 시작했다. 멈춘 코루틴은 `yield` 뒤의 빼기 줄을 실행하지 않아 더한 값이 하나 남는다. 버프 시간을 코루틴 대신 목록과 `Tick(dt)` 로 세고, 출력은 목록에서 다시 계산한다. 다시 받으면 목록의 남은 시간만 갱신한다.

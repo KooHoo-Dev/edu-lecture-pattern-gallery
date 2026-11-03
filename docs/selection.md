@@ -1,7 +1,7 @@
 # 표본 선정 (패턴 갤러리)
 
 - 작성: 2026-11-03. 개정: 2026-11-03 (Jay 교안 기준, 묶음 2 확정).
-- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 확정 (Jay, 2026-11-03).** 묶음 3 은 후보.
+- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03).** 묶음 3 은 후보.
 - 형식은 kit `design.md` 6절 (Shader Gallery 의 `docs/shader-selection.md` 형식). 공통 규칙은 kit-guide.
 - 교안 분석: [`research/lecture-analysis.md`](research/lecture-analysis.md). 교안 = `3000-Unity-3D/Assets/19. Legacy/2. OOP And Design Pattern/` (OOP 기초 3편 + 생성 5, 구조 5, 행동 5). 표본은 교안을 그대로 옮기지 않는다 (Jay 확인). 교안의 강조점과 함정은 가져오고, 상황은 외곽 탐사대로, 글은 증상에서 시작한다.
 
@@ -147,7 +147,7 @@
 | 묶음 | 표본 | 상태 |
 |---|---|---|
 | 1 | `state-player-actions`, `observer-health-events`, `command-undo-replay` | 끝남, 배포 |
-| 2 | `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` | **확정 (Jay, 2026-11-03)** |
+| 2 | `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` | 끝남, 배포 (2026-11-03) |
 | 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | 후보. 묶음 2 실측 비용을 보고 11-19 전에 돌릴지 정한다 |
 
 묶음 2 를 이 넷으로 고른 이유: 넷 다 무대에서 버그가 바로 보이고, 교안의 생성·구조·행동을 고루 덮고, 교안 예제가 이미 게임 상황(타워 조준, 스탯 버프, 적 복제, 매니저)이라 수업 흐름에 바로 붙는다. 싱글턴만 코어가 얇은 위험이 있어 맨 뒤에 돌린다.

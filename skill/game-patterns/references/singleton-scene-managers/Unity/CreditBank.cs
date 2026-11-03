@@ -10,7 +10,11 @@ namespace PatternGallery.SingletonSceneManagers
 
         Credits credits;
 
-        /// <summary>처음 읽을 때 만든다. 다른 오브젝트의 OnEnable 이 이 오브젝트의 Awake 보다 먼저 불려도 null 이 아니게</summary>
+        /// <summary>
+        /// 처음 읽을 때 만든다 (표본 공통 규칙). 다른 오브젝트는 CreditBank.Instance 로만 닿는데 Instance 는 이 오브젝트의
+        /// Awake(TryClaim) 전에는 null 이라, 그 경우는 부르는 쪽의 null 확인이 막는다. 지연 생성이 맡는 것은 그 밖의 경우다:
+        /// 주인이 된 뒤 처음 읽는 곳(자기 OnEnable)에서 만들고, 주인이 아닌 복제본은 읽지 않으므로 만들지 않는다.
+        /// </summary>
         public Credits Credits => credits ??= new Credits(startCredits);
 
         void OnEnable()
