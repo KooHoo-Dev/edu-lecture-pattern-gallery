@@ -56,69 +56,69 @@ namespace PatternGallery.CommandUndoReplay
                 undone.Clear(); // [2] 새 명령 뒤에는 되돌린 명령을 다시 할 수 없다
                 RedoCleared?.Invoke(count);
             }
+            // 벽에 막혀 제자리였던 명령도 기록한다 (선택이다. 안 움직인 명령을 빼려면 Execute 가 움직였는지를 돌려주게 하고 여기서 거른다)
             Push(command); // [2] 기록에 넣는다
             Executed?.Invoke(command);
             return true;
         }
 
-        public bool Undo()
+        /// <summary>마지막 명령을 되돌린다. 받지 않았으면 InputIgnored, 되돌릴 것이 없으면 NothingToDo 로 알린다</summary>
+        public void Undo()
         {
             if (IsReplaying)
             {
                 InputIgnored?.Invoke("undo");
-                return false;
+                return;
             }
             if (done.Count == 0)
             {
                 NothingToDo?.Invoke("undo");
-                return false;
+                return;
             }
             ICommand last = done[done.Count - 1];
             done.RemoveAt(done.Count - 1);
             last.Undo(); // [3] 어떻게 되돌릴지는 명령이 안다
             undone.Add(last);
             Undid?.Invoke(last);
-            return true;
         }
 
-        public bool Redo()
+        /// <summary>마지막으로 되돌린 명령을 다시 실행한다. 받지 않았으면 InputIgnored, 다시 할 것이 없으면 NothingToDo 로 알린다</summary>
+        public void Redo()
         {
             if (IsReplaying)
             {
                 InputIgnored?.Invoke("redo");
-                return false;
+                return;
             }
             if (undone.Count == 0)
             {
                 NothingToDo?.Invoke("redo");
-                return false;
+                return;
             }
             ICommand next = undone[undone.Count - 1];
             undone.RemoveAt(undone.Count - 1);
             next.Execute();
             Push(next);
             Redid?.Invoke(next);
-            return true;
         }
 
-        /// <summary>기록을 거꾸로 되돌려 처음 위치로 간 뒤, ReplayInterval 마다 하나씩 다시 실행한다</summary>
-        public bool StartReplay()
+        /// <summary>기록을 거꾸로 되돌려 처음 위치로 간 뒤, ReplayInterval 마다 하나씩 다시 실행한다. 받지 않았으면 InputIgnored, 기록이 없으면 NothingToDo 로 알린다</summary>
+        public void StartReplay()
         {
             if (IsReplaying)
             {
                 InputIgnored?.Invoke("replay");
-                return false;
+                return;
             }
             if (done.Count == 0)
             {
                 NothingToDo?.Invoke("replay");
-                return false;
+                return;
             }
             for (int i = done.Count - 1; i >= 0; i--) done[i].Undo(); // [4] 처음 위치로: 기록을 뒤에서부터 되돌린다
             replayIndex = 0;
             replayTimer = ReplayInterval;
             ReplayStarted?.Invoke(done.Count);
-            return true;
         }
 
         /// <summary>매 프레임 (MonoBehaviour.Update 의 Time.deltaTime)</summary>

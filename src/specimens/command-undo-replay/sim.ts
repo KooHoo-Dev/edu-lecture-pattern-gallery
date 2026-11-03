@@ -179,52 +179,49 @@ class CommandHistory {
     return true
   }
 
-  Undo() {
+  Undo(): void {
     if (this.IsReplaying) {
       this.InputIgnored.invoke('undo')
-      return false
+      return
     }
     if (this.done.length === 0) {
       this.NothingToDo.invoke('undo')
-      return false
+      return
     }
     const last = this.done.pop()!
     last.Undo()
     this.undone.push(last)
     this.Undid.invoke(last)
-    return true
   }
 
-  Redo() {
+  Redo(): void {
     if (this.IsReplaying) {
       this.InputIgnored.invoke('redo')
-      return false
+      return
     }
     if (this.undone.length === 0) {
       this.NothingToDo.invoke('redo')
-      return false
+      return
     }
     const next = this.undone.pop()!
     next.Execute()
     this.Push(next)
     this.Redid.invoke(next)
-    return true
   }
 
-  StartReplay() {
+  StartReplay(): void {
     if (this.IsReplaying) {
       this.InputIgnored.invoke('replay')
-      return false
+      return
     }
     if (this.done.length === 0) {
       this.NothingToDo.invoke('replay')
-      return false
+      return
     }
     for (let i = this.done.length - 1; i >= 0; i--) this.done[i].Undo()
     this.replayIndex = 0
     this.replayTimer = this.ReplayInterval
     this.ReplayStarted.invoke(this.done.length)
-    return true
   }
 
   Tick(dt: number) {
@@ -373,6 +370,27 @@ function bumpMark(x: number, y: number, d: Direction): WorldItem {
   return { kind: 'arrow', x1: c.x + Directions.Dx(d) * 0.1, y1: c.y + Directions.Dy(d) * 0.1, x2: c.x + Directions.Dx(d) * 0.46, y2: c.y + Directions.Dy(d) * 0.46, color: C.bump }
 }
 
+/** 정비 드론: 격자 한 칸 안에 들어가게 줄인다. 라벨은 길 화살표를 가리지 않게 격자 위 범례(legend)로 뺀다 */
+const droneActor = (x: number, y: number): WorldItem => ({ kind: 'actor', x, y: y - 0.42, role: 'neutral', scale: 0.6 })
+const legend = (text: string): WorldItem => ({ kind: 'text', x: GX, y: GY + 6.45, text, align: 'left', size: 15, color: C.dim })
+
+/** 입력 종류마다 그 입력이 지나는 구조 그림 노드와 화살표 */
+type Kind = 'move' | 'undo' | 'redo' | 'replay' | 'refused' | ''
+const PATH: Record<Exclude<Kind, ''>, string[]> = {
+  // 어댑터 → 기록 → ICommand → MoveCommand → Drone
+  move: ['cmdr', 'cmdr-move', 'cmdr-history', 'history', 'history-icommand', 'icommand', 'move-icommand', 'move', 'move-drone', 'drone'],
+  // 기록 → ICommand.Undo (MoveCommand 가 구현) → Drone (저장한 위치에 놓는다)
+  undo: ['history', 'history-icommand', 'icommand', 'move-icommand', 'move', 'move-drone', 'drone'],
+  // 기록 → ICommand.Execute → MoveCommand → Drone
+  redo: ['history', 'history-icommand', 'icommand', 'move-icommand', 'move', 'move-drone', 'drone'],
+  // 기록 → 명령마다 뒤에서부터 Undo → Drone 이 처음 위치로 (그 뒤는 REPLAY_STEP)
+  replay: ['cmdr-history', 'history', 'history-icommand', 'icommand', 'move-icommand', 'move', 'move-drone', 'drone'],
+  // 기록이 받지 않았거나 할 것이 없다
+  refused: ['cmdr-history', 'history'],
+}
+/** 리플레이가 명령 하나를 다시 실행할 때: 기록 → ICommand.Execute → MoveCommand → Drone */
+const REPLAY_STEP = ['history', 'history-icommand', 'icommand', 'move-icommand', 'move', 'move-drone', 'drone']
+
 const arrows = (list: readonly string[], max: number) => (list.length > max ? `… ${list.slice(-max).join(' ')}` : list.join(' ')) || '(비어 있음)'
 
 /** 표시 위치: 격자 칸으로 미끄러지는 연출 (Unity 어댑터의 Update 와 같은 일. 기록에는 들어가지 않는다) */
@@ -380,6 +398,11 @@ class Glide {
   x: number
   y: number
   constructor(x: number, y: number) {
+    this.x = x
+    this.y = y
+  }
+  /** 미끄러지지 않고 바로 놓는다 (리플레이 시작: Unity 어댑터의 OnReplayStarted 와 같다) */
+  snap(x: number, y: number) {
     this.x = x
     this.y = y
   }
@@ -405,6 +428,8 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   let clock = 0
   const at = { input: -9, bump: -9, step: -9, bug: -9 }
   let lastInput = ''
+  /** 마지막 입력을 코어가 어떻게 처리했는지 (구조 그림 강조용) */
+  let kind: Kind = ''
   let bumpDir: Direction = 'Up'
   let note = ''
 
@@ -429,15 +454,18 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   if (!naive) {
     history.Executed.add(c => {
       events.push(`실행 ${c} ${Where(c as MoveCommand)} · 기록 ${history.Done.length}개`)
+      kind = 'move'
       if ((c as MoveCommand).Blocked) note = '벽에 막혀 제자리. 그래도 기록에 남는다'
     })
     history.Undid.add(c => {
       const m = c as MoveCommand
       events.push(Undone(m))
+      kind = 'undo'
       note = m.Blocked ? `되돌린 위치 ${P(m.FromX, m.FromY)}: 막혔던 이동이라 제자리` : `되돌린 위치 ${P(m.FromX, m.FromY)}: 저장한 이전 위치`
     })
     history.Redid.add(c => {
       events.push(`다시 하기 ${c} ${Where(c as MoveCommand)}`)
+      kind = 'redo'
       note = `다시 하기 ${c}`
     })
     history.RedoCleared.add(n => {
@@ -450,6 +478,8 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     })
     history.ReplayStarted.add(n => {
       events.push(`리플레이 시작: 처음 위치 ${P(drone.X, drone.Y)} 로 되돌리고 ${n}개 다시 실행`)
+      kind = 'replay'
+      glide.snap(drone.X, drone.Y) // 처음 칸까지 미끄러지지 않게 바로 놓는다
       note = `처음 위치 ${P(drone.X, drone.Y)} 로 되돌렸다`
     })
     history.ReplayStepped.add((c, i) => {
@@ -462,10 +492,12 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     })
     history.InputIgnored.add(s => {
       events.push(`리플레이 중 무시 (${Label(s)})`)
+      kind = 'refused'
       note = `리플레이 중이라 ${Label(s)} 를 받지 않았다`
     })
     history.NothingToDo.add(s => {
       events.push(Nothing(s))
+      kind = 'refused'
       note = Nothing(s)
     })
     drone.Bumped.add(d => {
@@ -477,6 +509,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       input(name) {
         at.input = clock
         lastInput = name
+        kind = ''
         CoreInput(name)
       },
       tick(dt) {
@@ -505,7 +538,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         }
         const p = center(glide.x, glide.y)
         if (clock - at.bump < 0.3) world.push({ kind: 'ring', x: p.x, y: p.y, r: 0.42, color: C.bump }, bumpMark(drone.X, drone.Y, bumpDir))
-        world.push({ kind: 'actor', x: p.x, y: p.y - 0.38, role: 'neutral', label: '정비 드론' })
+        world.push(droneActor(p.x, p.y), legend(`◆ 정비 드론 ${P(drone.X, drone.Y)}   파란 화살표: 지나온 길   점선: 다시 하기   주황: 벽에 막힘`))
         const doneText = done.map(c => c.toString())
         const redoText = [...history.Undone].reverse().map(c => c.toString())
         world.push(
@@ -513,15 +546,13 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           { kind: 'text', x: 0.4, y: 7.6, text: history.IsReplaying ? `▶ 리플레이 ${history.ReplayIndex}/${done.length}` : `다시 하기  ${arrows(redoText, 6)}`, align: 'left', size: 20, color: history.IsReplaying ? C.warn : C.dim },
           { kind: 'text', x: 15.6, y: 7.6, text: note, align: 'right', size: 18, color: C.dim },
         )
-        const active: string[] = ['history']
-        if (clock - at.input < 0.3) {
-          if (PARSE[lastInput]) active.push('cmdr', 'cmdr-move', 'move', 'cmdr-history', 'move-drone', 'drone')
-          else if (lastInput === 'replay') active.push('cmdr', 'cmdr-history', 'history-icommand', 'icommand')
-          else active.push('cmdr', 'cmdr-history', 'history-icommand', 'icommand', 'move', 'move-drone', 'drone')
-        }
-        if (history.IsReplaying || clock - at.step < 0.3) active.push('history-icommand', 'icommand')
-        if (clock - at.step < 0.3) active.push('move', 'move-drone', 'drone')
-        return { world, active }
+        // 늘 켜 두는 노드는 없다. 입력 직후 0.3초는 그 입력이 지난 길만, 리플레이 중에는 기록을 들고 있는 CommandHistory 만,
+        // 리플레이가 명령 하나를 다시 실행한 직후 0.3초는 Execute 가 지나는 길만 켠다
+        const active = new Set<string>()
+        if (clock - at.input < 0.3 && kind) for (const id of PATH[kind]) active.add(id)
+        if (history.IsReplaying) active.add('history')
+        if (clock - at.step < 0.3) for (const id of REPLAY_STEP) active.add(id)
+        return { world, active: [...active] }
       },
     }
   }
@@ -533,6 +564,11 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   let lastDesync = false
   let replayFromX = 0
   let replayFromY = 0
+  /** 리플레이 전 위치를 그림에 남길지. 리플레이를 시작할 때 켜고, 다음에 받은 이동·되돌리기·다시 하기가 끈다 */
+  let showReplayFrom = false
+  /** 그림자 코어가 리플레이를 시작한 칸 (남은 기록의 첫 위치) */
+  let replayCoreX = 0
+  let replayCoreY = 0
   const Desync = () => n.X !== drone.X || n.Y !== drone.Y
   const bug = (text: string) => {
     events.push(text)
@@ -561,6 +597,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
 
       const moved = n.X !== x0 || n.Y !== y0
       const now = P(n.X, n.Y)
+      if (!replaying0 && name !== 'replay') showReplayFrom = false
       if (replaying0) {
         events.push(`리플레이 중 무시 (${Label(name)})`)
         note = `리플레이 중이라 ${Label(name)} 를 받지 않았다`
@@ -590,6 +627,10 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         else {
           replayFromX = x0
           replayFromY = y0
+          replayCoreX = drone.X
+          replayCoreY = drone.Y
+          showReplayFrom = true
+          glide.snap(n.X, n.Y) // 시작 자리까지 미끄러지지 않게 바로 놓는다
           events.push(`리플레이 시작: 시작 자리 ${P(n.startX, n.startY)} 로 옮기고 ${moves0}개 다시 누른다`)
         }
         note = moves0 === 0 ? '리플레이할 방향이 없다' : `게임 시작 자리 ${P(n.startX, n.startY)} 로 옮겼다`
@@ -618,7 +659,11 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           note = `리플레이 끝 ${P(n.X, n.Y)}`
           if (n.X !== replayFromX || n.Y !== replayFromY) {
             bug(`!리플레이가 다른 곳에서 끝난다 (리플레이 전 ${P(replayFromX, replayFromY)}, 끝 ${P(n.X, n.Y)})`)
-            note = `리플레이 전 ${P(replayFromX, replayFromY)} 과 다른 칸에서 끝났다`
+            // 원인 둘을 나눠 적는다: 시작 자리가 기록의 첫 위치가 아님(X = startX) / 누른 방향이 실제 길과 다름(moves)
+            note =
+              n.startX !== replayCoreX || n.startY !== replayCoreY
+                ? `시작 자리 ${P(n.startX, n.startY)} 는 기록의 첫 위치 ${P(replayCoreX, replayCoreY)} 가 아니다`
+                : `누른 방향을 다시 눌러 리플레이 전 ${P(replayFromX, replayFromY)} 과 다른 칸`
           }
         }
       }
@@ -632,16 +677,23 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       const world: WorldItem[] = [...GRID]
       const desync = Desync()
       const p = center(glide.x, glide.y)
+      // 리플레이 전 위치: 리플레이 중이거나, 끝났는데 그 칸과 다를 때 남긴다
+      const fromShown = showReplayFrom && (n.isReplaying || n.X !== replayFromX || n.Y !== replayFromY)
+      const sameCell = fromShown && desync && replayFromX === drone.X && replayFromY === drone.Y
+      if (fromShown) {
+        const r = center(replayFromX, replayFromY)
+        world.push({ kind: 'box', x: GX + replayFromX + 0.16, y: GY + replayFromY + 0.16, w: 0.68, h: 0.68, stroke: C.warn, dashed: true })
+        world.push({ kind: 'text', x: r.x, y: r.y - 0.74, text: sameCell ? '리플레이 전 · 있어야 할 곳' : '리플레이 전', size: 15, color: C.warn })
+        if (!n.isReplaying) world.push({ kind: 'arrow', x1: p.x, y1: p.y, x2: r.x, y2: r.y, color: C.warn, dashed: true })
+      }
       if (desync) {
         const e = center(drone.X, drone.Y)
-        world.push(
-          { kind: 'box', x: GX + drone.X + 0.08, y: GY + drone.Y + 0.08, w: 0.84, h: 0.84, stroke: C.ok, dashed: true },
-          { kind: 'text', x: e.x, y: e.y - 0.74, text: '있어야 할 곳', size: 15, color: C.ok },
-          { kind: 'arrow', x1: p.x, y1: p.y, x2: e.x, y2: e.y, color: C.bug, dashed: true },
-        )
+        world.push({ kind: 'box', x: GX + drone.X + 0.06, y: GY + drone.Y + 0.06, w: 0.88, h: 0.88, stroke: C.ok, dashed: true })
+        if (!sameCell) world.push({ kind: 'text', x: e.x, y: e.y - 0.74, text: '있어야 할 곳', size: 15, color: C.ok })
+        if (!(sameCell && !n.isReplaying)) world.push({ kind: 'arrow', x1: p.x, y1: p.y, x2: e.x, y2: e.y, color: C.bug, dashed: true })
       }
       if (clock - at.bump < 0.3) world.push({ kind: 'ring', x: p.x, y: p.y, r: 0.42, color: C.bump }, bumpMark(n.X, n.Y, bumpDir))
-      world.push({ kind: 'actor', x: p.x, y: p.y - 0.38, role: 'neutral', label: desync ? '정비 드론 · 어긋남' : '정비 드론' })
+      world.push(droneActor(p.x, p.y), legend(`◆ 정비 드론 ${P(n.X, n.Y)}${desync ? ' 어긋남' : ''}   초록 점선: 있어야 할 곳   주황 점선: 리플레이 전`))
       const hot = clock - at.bug < 0.8
       world.push(
         { kind: 'text', x: 0.4, y: 8.3, text: `moves = ${arrows(n.moves.map(Directions.Arrow), 14)}  (방향만)`, align: 'left', size: 24, color: hot ? C.bug : C.warn },

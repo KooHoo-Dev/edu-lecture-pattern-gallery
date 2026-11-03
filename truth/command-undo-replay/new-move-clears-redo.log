@@ -1,4 +1,4 @@
-# src 697b99bddf9c
+# src a84161dc996f
 # command-undo-replay new-move-clears-redo naive=0
 0.30 in right
 0.30 ev 실행 → (1,1) → (2,1) · 기록 1개

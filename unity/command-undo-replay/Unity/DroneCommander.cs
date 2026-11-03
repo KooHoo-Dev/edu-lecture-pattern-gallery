@@ -135,6 +135,7 @@ namespace PatternGallery.CommandUndoReplay
             History.ReplayStepped += OnReplayStepped;
             History.ReplayFinished += OnReplayFinished;
             History.InputIgnored += OnInputIgnored;
+            History.NothingToDo += OnNothingToDo;
             upAction.performed += OnUp;
             downAction.performed += OnDown;
             leftAction.performed += OnLeft;
@@ -164,6 +165,7 @@ namespace PatternGallery.CommandUndoReplay
             History.ReplayStepped -= OnReplayStepped;
             History.ReplayFinished -= OnReplayFinished;
             History.InputIgnored -= OnInputIgnored;
+            History.NothingToDo -= OnNothingToDo;
             upAction.performed -= OnUp;
             downAction.performed -= OnDown;
             leftAction.performed -= OnLeft;
@@ -186,6 +188,7 @@ namespace PatternGallery.CommandUndoReplay
             if (history == null) return;
             history.HistoryLimit = historyLimit;
             history.ReplayInterval = replayInterval;
+            RefreshText(); // 화면의 '기록 n/상한' 도 바로 바꾼다
         }
 
         void OnUp(InputAction.CallbackContext _) => Move(Direction.Up);
@@ -240,6 +243,9 @@ namespace PatternGallery.CommandUndoReplay
 
         void OnReplayStarted(int count)
         {
+            // 처음 칸까지 미끄러져 가면 리플레이가 그 길을 걷는 것처럼 보인다. 처음 칸에 바로 놓는다
+            targetPosition = CellToWorld(Drone.X, Drone.Y);
+            transform.position = targetPosition;
             Log($"리플레이 시작: 처음 위치 ({Drone.X},{Drone.Y}) 에서 {count}개");
             RefreshText();
         }
@@ -252,7 +258,18 @@ namespace PatternGallery.CommandUndoReplay
             RefreshText();
         }
 
-        void OnInputIgnored(string input) => Log($"리플레이 중 무시 ({input})");
+        void OnInputIgnored(string input) => Log($"리플레이 중 무시 ({Label(input)})");
+
+        void OnNothingToDo(string input) => Log(input == "undo" ? "되돌릴 기록이 없다" : input == "redo" ? "다시 할 기록이 없다" : "리플레이할 기록이 없다");
+
+        /// <summary>코어가 알리는 입력 이름을 웹 갤러리의 사건 기록과 같은 말로 (이동은 이미 화살표다)</summary>
+        static string Label(string input) => input switch
+        {
+            "undo" => "되돌리기",
+            "redo" => "다시 하기",
+            "replay" => "리플레이",
+            _ => input,
+        };
 
         void Log(string message)
         {

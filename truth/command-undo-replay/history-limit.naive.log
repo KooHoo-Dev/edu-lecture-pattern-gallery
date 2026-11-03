@@ -1,4 +1,4 @@
-# src 697b99bddf9c
+# src a84161dc996f
 # command-undo-replay history-limit naive=1
 0.30 in right
 0.30 ev → (1,1) → (2,1) · moves 에 → 추가
