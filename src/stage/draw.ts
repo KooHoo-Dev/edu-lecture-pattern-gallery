@@ -345,7 +345,10 @@ export function drawCode(g: CanvasRenderingContext2D, lines: CodeLine[], r: Rect
     g.fillText(String(l.no), r.x + 62, y)
     g.fillStyle = tone
     g.textAlign = 'left'
+    // 코드 글꼴의 합자(!= → ≠, => → ⇒)를 막는다. 캔버스에는 합자 끄기가 없고, 글자 간격이 0 이 아니면 브라우저가 합자를 쓰지 않는다
+    g.letterSpacing = '0.01px'
     g.fillText(l.text, r.x + 74, y, r.w - 90)
+    g.letterSpacing = '0px'
     y += 28
   }
 }
