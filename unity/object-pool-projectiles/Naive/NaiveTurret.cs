@@ -43,8 +43,8 @@ namespace PatternGallery.ObjectPoolProjectiles.Naive
 
         void Start()
         {
-            Speed = turret.SpeedOf(Kind); // [!] Start 는 처음 켜질 때 한 번만 불린다. 다시 빌리면 이전 종류의 속도가 남는다
-            Lifetime = turret.LifeOf(Kind); // [!] 수명도 처음 쓴 종류의 것 그대로
+            Speed = turret.SpeedOf(Kind); // [!] Start 는 처음 켜질 때만 돈다. 다시 빌리면 이전 속도가 남는다
+            Lifetime = turret.LifeOf(Kind); // [!] 수명도 처음 쓴 종류의 값 그대로
         }
 
         void OnEnable()
@@ -56,12 +56,12 @@ namespace PatternGallery.ObjectPoolProjectiles.Naive
         {
             X += Speed * dt;
             Age += dt;
-            if (X >= turret.TargetFrontX)
+            if (X >= turret.TargetX)
             {
                 turret.hits++; // 명중 처리: 표적에 맞히고 돌려준다
                 turret.pool.Release(this);
             }
-            if (X >= turret.ScreenRightX || Age >= Lifetime) turret.pool.Release(this); // [!] 위에서 이미 돌려줬어도 return 이 없어 또 돌려준다
+            if (X >= turret.ScreenRightX || Age >= Lifetime) turret.pool.Release(this); // [!] 명중으로 돌려줬어도 return 이 없어 또 Release
         }
     }
 
@@ -95,7 +95,7 @@ namespace PatternGallery.ObjectPoolProjectiles.Naive
         public void Release(NaiveProjectile p)
         {
             p.SetActive(false);
-            idle.Add(p); // [!] 이미 대기 줄에 있는지 보지 않는다. 같은 탄이 두 칸 들어간다
+            idle.Add(p); // [!] 이미 대기 중인지 안 본다 → 같은 탄이 두 칸
         }
 
         NaiveProjectile Create()
@@ -116,7 +116,8 @@ namespace PatternGallery.ObjectPoolProjectiles.Naive
         public int burstCount = 5;
         public float burstInterval = 0.1f;
         public float MuzzleX = 2f;
-        public float TargetFrontX = 15f;
+        /// <summary>표적 가운데. 표적이 화면 끝에 걸쳐 있어 화면 끝과 같은 자리다 (명중과 화면 밖이 늘 같은 프레임에 참)</summary>
+        public float TargetX = 15f;
         public float ScreenRightX = 15f;
 
         public readonly NaivePool pool;

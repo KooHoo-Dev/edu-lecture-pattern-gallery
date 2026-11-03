@@ -17,9 +17,12 @@ namespace PatternGallery.ObjectPoolProjectiles
         public float BurstInterval = 0.1f;
         /// <summary>포구의 가로 위치 (탄이 나오는 곳)</summary>
         public float MuzzleX = 2f;
-        /// <summary>잔해 드론 표적의 앞면. 탄이 여기를 넘으면 명중</summary>
-        public float TargetFrontX = 15f;
-        /// <summary>화면 오른쪽 끝. 표적이 화면 끝에 걸쳐 있어 앞면과 같은 자리다 (명중과 화면 밖이 같은 프레임에 참이 된다)</summary>
+        /// <summary>잔해 드론 표적의 가운데. 탄이 여기를 넘으면 명중</summary>
+        public float TargetX = 15f;
+        /// <summary>
+        /// 화면 오른쪽 끝. 교육용 배치: 표적을 화면 끝에 걸쳐 두어 표적 가운데와 같은 자리다 (명중과 화면 밖이 늘 같은 프레임에 참이 된다).
+        /// 그래서 이 배치에서는 명중이 먼저라 Expired 의 화면 밖 갈래는 돌지 않는다
+        /// </summary>
         public float ScreenRightX = 15f;
 
         public float SpeedOf(ProjectileKind kind) => kind == ProjectileKind.Fast ? FastSpeed : SlowSpeed;
@@ -56,6 +59,7 @@ namespace PatternGallery.ObjectPoolProjectiles
         public Projectile Fire(ProjectileKind kind)
         {
             Projectile p = Pool.Get(); // [1]
+            // Get 이 돌려준 뒤에 호출자가 이번 발사의 값을 넣는다 (ObjectPool<T> 의 actionOnGet 은 객체 하나만 받아 종류·속도를 넣을 수 없다)
             p.Launch(kind, Settings.MuzzleX, Settings.SpeedOf(kind), Settings.LifeOf(kind)); // [2] 빌린 탄의 모든 상태를 지금 종류에 맞게 새로 넣는다
             flying.Add(p);
             Fired?.Invoke(p);
@@ -88,7 +92,7 @@ namespace PatternGallery.ObjectPoolProjectiles
             {
                 Projectile p = flying[i];
                 p.Move(dt);
-                bool hit = p.X >= Settings.TargetFrontX;
+                bool hit = p.X >= Settings.TargetX;
                 bool outside = p.X >= Settings.ScreenRightX;
                 bool expired = p.Life <= 0f;
                 if (!hit && !outside && !expired) continue;

@@ -130,7 +130,7 @@ class TurretSettings {
   BurstCount = 5
   BurstInterval = f(0.1)
   MuzzleX = f(2)
-  TargetFrontX = f(15)
+  TargetX = f(15)
   ScreenRightX = f(15)
 
   SpeedOf(kind: ProjectileKind) {
@@ -192,7 +192,7 @@ class Turret {
     for (let i = 0; i < this.flying.length; i++) {
       const p = this.flying[i]
       p.Move(dt)
-      const hit = p.X >= this.Settings.TargetFrontX
+      const hit = p.X >= this.Settings.TargetX
       const outside = p.X >= this.Settings.ScreenRightX
       const expired = p.Life <= 0
       if (!hit && !outside && !expired) continue
@@ -249,7 +249,7 @@ class NaiveProjectile {
   Update(dt: number) {
     this.X = f(this.X + f(this.Speed * dt))
     this.Age = f(this.Age + dt)
-    if (this.X >= this.turret.TargetFrontX) {
+    if (this.X >= this.turret.TargetX) {
       this.turret.hits++
       this.turret.pool.Release(this)
     }
@@ -299,7 +299,7 @@ class NaiveTurret {
   burstCount = 5
   burstInterval = f(0.1)
   MuzzleX = f(2)
-  TargetFrontX = f(15)
+  TargetX = f(15)
   ScreenRightX = f(15)
 
   pool: NaivePool
@@ -385,7 +385,8 @@ const C = {
 const LANE_Y = 2.2
 const SHELF_Y = 5.75
 const QUEUE_Y = 4.15
-const TARGET_X = 15.5
+/** 표적 그림의 가운데. 코어의 명중 위치(TargetX 15)이자 화면 끝이라 표적이 화면 끝 선에 반쯤 걸친다 (Unity 의 Target 이 x 7.5 에 있는 것과 같다) */
+const TARGET_X = 15
 const kindColor = (k: ProjectileKind) => (k === 'Fast' ? C.fast : C.slow)
 const kindShort = (k: ProjectileKind) => (k === 'Fast' ? '빠름' : '냉각')
 
@@ -394,14 +395,15 @@ function fieldItems(muzzleX: number, screenRightX: number, hitRecently: boolean)
   return [
     { kind: 'box', x: screenRightX, y: 1, w: 16 - screenRightX + 0.2, h: 3.1, fill: C.offscreen },
     { kind: 'box', x: 0, y: 0, w: 16, h: 1, fill: C.ground },
-    { kind: 'box', x: screenRightX - 0.02, y: 1, w: 0.04, h: 3.1, fill: C.dim },
-    { kind: 'text', x: screenRightX - 0.1, y: 3.75, text: '화면 끝', align: 'right', size: 15, color: C.dim },
     { kind: 'box', x: 0.15, y: 1, w: 1.05, h: 2.5, fill: C.base, stroke: C.baseLine },
     { kind: 'text', x: 0.68, y: 0.38, text: '정비 기지', size: 15, color: C.dim },
     { kind: 'box', x: 1.0, y: LANE_Y - 0.3, w: muzzleX - 1.0, h: 0.6, fill: C.turret, stroke: C.turretLine },
     { kind: 'text', x: 1.5, y: LANE_Y + 0.55, text: '포탑', size: 15, color: C.dim },
     { kind: 'actor', x: TARGET_X, y: LANE_Y - 0.6, role: 'enemy', scale: 0.85, pose: hitRecently ? 'hurt' : 'idle', facing: -1 },
-    { kind: 'text', x: screenRightX - 0.1, y: LANE_Y + 1.0, text: '잔해 드론 (표적)', align: 'right', size: 15, color: '#ff9b8a' },
+    // 화면 끝 선은 표적 위에 그려 표적이 선에 걸친 것이 보이게 한다
+    { kind: 'box', x: screenRightX - 0.02, y: 1, w: 0.04, h: 3.1, fill: C.dim },
+    { kind: 'text', x: screenRightX - 0.1, y: 3.75, text: '화면 끝', align: 'right', size: 15, color: C.dim },
+    { kind: 'text', x: screenRightX - 0.45, y: LANE_Y + 1.0, text: '잔해 드론 (표적)', align: 'right', size: 15, color: '#ff9b8a' },
   ]
 }
 
@@ -538,9 +540,12 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   let naiveReuse = 0
   const naiveUsed: boolean[] = []
   const doubled: boolean[] = []
-  /** 무대 표시용: 마지막 버그 글, 날던 중에 다시 빌려 사라진 한 발의 자리 */
+  const idleCount: number[] = []
+  const staleShown: boolean[] = []
+  /** 무대 표시용: 마지막 버그 글, 날던 중에 다시 빌려 사라진 한 발의 자리, 탄마다 마지막으로 빌린 시각 */
   let lastBug = ''
   let lost: { id: number; x: number; t: number } | null = null
+  const firedAt: number[] = []
 
   const activeFlags = () => n.pool.all.map(p => p.Active)
 
@@ -557,6 +562,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     if (reused) naiveReuse++
     events.push(`${K(p.Kind)} #${p.Id} 발사 (${Source(created, reused)}) · 속도 ${F2(p.Speed)} 수명 ${F2(p.Lifetime)}`)
     at.fire = clock
+    firedAt[p.Id - 1] = clock
     const bugs: string[] = []
     if (!created && wasActive[p.Id - 1]) {
       events.push(`!같은 탄을 또 빌려 줌: 날던 #${p.Id} 이 포구로 돌아간다 (한 발이 사라졌다)`)
@@ -565,11 +571,15 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     }
     const speed = n.SpeedOf(p.Kind)
     const life = n.LifeOf(p.Kind)
-    if (p.Speed !== speed || p.Lifetime !== life) {
+    const stale = p.Speed !== speed || p.Lifetime !== life
+    while (staleShown.length < p.Id) staleShown.push(false)
+    // 이미 알린 채 날던 같은 객체를 또 빌렸다면 (SetActive(true) 가 아무것도 하지 않아 값이 그대로) 같은 버그라 다시 쓰지 않는다
+    if (stale && !staleShown[p.Id - 1]) {
       events.push(`!이전 상태 재사용: ${K(p.Kind)} #${p.Id} 속도 ${F2(p.Speed)} (있어야 할 ${F2(speed)}) · 수명 ${F2(p.Lifetime)} (${F2(life)})`)
-      bugs.push(`${K(p.Kind)}${bugs.length ? '' : ` #${p.Id}:`} 속도 ${p.Speed} 수명 ${F2(p.Lifetime)} (있어야 할 ${speed}, ${F2(life)})${bugs.length ? '' : ' · 이전 종류의 값'}`)
+      bugs.push(`${K(p.Kind)} #${p.Id}: 속도 ${p.Speed} 수명 ${F2(p.Lifetime)} (있어야 할 ${speed}, ${F2(life)}) · 이전 종류의 값`)
       at.stale = clock
     }
+    staleShown[p.Id - 1] = stale
     if (bugs.length) {
       lastBug = `✖ ${bugs.join(' · ')}`
       at.bug = clock
@@ -603,7 +613,8 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       for (let i = 0; i < wasActive.length; i++) {
         const p = n.pool.all[i]
         if (!wasActive[i] || p.Active) continue
-        if (p.X >= n.TargetFrontX) {
+        if (i < staleShown.length) staleShown[i] = false
+        if (p.X >= n.TargetX) {
           events.push(p.X >= n.ScreenRightX ? `${K(p.Kind)} #${p.Id} 명중 · 같은 프레임에 화면 밖도 참` : `${K(p.Kind)} #${p.Id} 명중`)
           at.hit = clock
         } else events.push(`${K(p.Kind)} #${p.Id} ${p.X >= n.ScreenRightX ? '화면 밖' : '수명 끝'}`)
@@ -619,13 +630,19 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         let count = 0
         for (const q of idle) if (q === p) count++
         while (doubled.length <= i) doubled.push(false)
+        while (idleCount.length <= i) idleCount.push(0)
         if (count > 1 && !doubled[i]) {
           events.push(`!이중 반납: #${p.Id} 이 대기 줄에 ${count}칸 (명중 처리와 화면 밖 처리가 각자 Release)`)
           lastBug = `✖ #${p.Id} 이중 반납: 명중 처리와 화면 밖 처리가 각자 Release → 대기 줄에 ${count}칸`
           at.bug = clock
           at.dup = clock
+        } else if (count > 1 && count > idleCount[i]) {
+          events.push(`#${p.Id} 이 대기 줄에 ${count}칸 (같은 탄이 또 이중 반납, 앞서 알린 버그)`)
+          lastBug = `#${p.Id} 이 또 이중 반납 → 대기 줄에 ${count}칸 (앞서 알린 버그)`
+          at.dup = clock
         }
-        doubled[i] = count > 1
+        doubled[i] = count > 1 || (p.Active && count > 0)
+        idleCount[i] = count
       }
       clock += dt
     },
@@ -653,17 +670,20 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       })
       world.push(...shelfItems(slots, [...idle].reverse().map(p => p.Id), dupIds))
       if (lost && clock - lost.t < 1.5) {
-        // 날던 중에 같은 객체를 또 빌려 줘서 사라진 한 발: 사라진 자리에 점선 상자를 남긴다 (그 탄이 반납될 때까지 글은 남는다)
+        // 날던 중에 같은 객체를 또 빌려 줘서 사라진 한 발: 사라진 자리에 점선 상자를 남긴다.
+        // 글은 바닥 띠에 둔다 (탄 줄 바로 아래는 포구에서 다시 나온 그 탄의 종류 라벨이 지나간다)
         world.push({ kind: 'box', x: lost.x - 0.42, y: LANE_Y - 0.3, w: 0.84, h: 0.6, stroke: C.bug, dashed: true })
-        world.push({ kind: 'text', x: lost.x, y: LANE_Y - 1.0, text: `#${lost.id} 이 사라진 자리`, size: 15, color: C.bug })
+        world.push({ kind: 'text', x: lost.x - 0.15, y: 0.45, text: `↑ #${lost.id} 이 사라진 자리`, align: 'left', size: 15, color: C.bug })
       }
       for (const p of all) {
         if (!p.Active) continue
         const stale = p.Speed !== n.SpeedOf(p.Kind) || p.Lifetime !== n.LifeOf(p.Kind)
         if (stale) {
-          // 있어야 할 자리: 같은 종류의 속도로 났다면 지금 있을 곳 (흐린 점선)
-          const ex = n.MuzzleX + n.SpeedOf(p.Kind) * p.Age
-          if (p.Age < n.LifeOf(p.Kind) && ex < n.ScreenRightX) world.push({ kind: 'box', x: ex - 0.3, y: LANE_Y - 0.18, w: 0.6, h: 0.36, stroke: kindColor(p.Kind), dashed: true })
+          // 있어야 할 자리: 마지막으로 빌린 순간부터 제 종류의 속도로 났다면 지금 있을 곳 (흐린 점선).
+          // Age 는 쓰지 않는다: 날던 탄을 또 빌리면 SetActive(true) 가 아무것도 하지 않아 Age 가 0 으로 돌아가지 않는다
+          const age = clock - (firedAt[p.Id - 1] ?? clock)
+          const ex = n.MuzzleX + n.SpeedOf(p.Kind) * age
+          if (age < n.LifeOf(p.Kind) && ex < n.ScreenRightX) world.push({ kind: 'box', x: ex - 0.3, y: LANE_Y - 0.18, w: 0.6, h: 0.36, stroke: kindColor(p.Kind), dashed: true })
           world.push({ kind: 'text', x: p.X, y: LANE_Y + 0.85, text: `속도 ${p.Speed} ≠ ${n.SpeedOf(p.Kind)}`, size: 16, color: C.bug })
         }
         world.push(...bulletItems(p.Id, p.Kind, p.X, stale || dupIds.has(p.Id) ? C.bug : null))
