@@ -48,7 +48,7 @@ namespace PatternGallery.PrototypeDroneClone
             }
             ScoutDrone drone = Template.Clone(); // [2] 생성자 인자를 다시 늘어놓지 않고 견본에게 복제를 맡긴다
             clones.Add(drone);
-            drone.Name = "#" + clones.Count;
+            drone.Name = "#" + clones.Count; // 필드에 새 string 을 대입하므로 이 복제본의 이름만 바뀐다 (견본 이름은 그대로)
             Cloned?.Invoke(drone);
             return drone;
         }

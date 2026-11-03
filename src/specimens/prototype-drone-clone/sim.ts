@@ -362,6 +362,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         if (Mods(d.Modules) !== expected) {
           events.push(`${d.Name} 가 ${n.moduleName} 모듈을 달고 나왔다 (있어야 할 모듈 ${expected})`)
           note = `${d.Name} 가 견본의 목록을 함께 가리켜 ${n.moduleName} 모듈을 달고 나왔다`
+          at.bug = clock // 화면만: 오염된 견본에서 나온 복제본에도 링을 켠다 (기록 글은 그대로)
         }
       }
     } else if (name === 'module') {
@@ -455,10 +456,14 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
           { d: tmpl, x: TX, expected: hangar.Template.Modules },
           ...list.map((d, i) => ({ d, x: CX(i), expected: hangar.Clones[i]?.Modules ?? [] })),
         ]
+        // 화살표 색: 목록을 함께 쓰면 주황(내용이 아직 맞아도 공유 자체가 문제), 내용까지 '있어야 할 것' 과 다르면 빨강
+        const sharing = drones.filter(x => x.d.Modules === mods).length > 1
         for (const { d, x, expected } of drones) {
           if (d.Modules !== mods) continue
           const wrong = Mods(d.Modules) !== Mods(expected)
-          world.push({ kind: 'arrow', x1: x, y1: fromY(x), x2: cx + (x - cx) * 0.3, y2: top + 0.03, color: wrong ? C.bug : C.dim })
+          world.push({ kind: 'arrow', x1: x, y1: fromY(x), x2: cx + (x - cx) * 0.3, y2: top + 0.03, color: wrong ? C.bug : sharing ? C.warn : C.dim })
+          // 색만으로 전하지 않게, 모듈이 틀린 복제본 옆에 ✖ 를 남긴다 (견본은 '오염' 글이 있다)
+          if (wrong && x !== TX) world.push({ kind: 'text', x: x + 0.42, y: BASE - 0.32, text: '✖', align: 'left', size: 16, color: C.bug })
         }
         world.push({ kind: 'box', x: left, y: top - 0.58, w: W, h: 0.58, stroke: templateBug ? C.bug : C.warn, dashed: true })
         for (let i = 0; i < shown; i++) {
