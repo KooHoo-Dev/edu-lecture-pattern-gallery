@@ -1,0 +1,23 @@
+# src caac516e2ec3
+# decorator-stat-buffs purge-two-buffs naive=0
+0.30 in cell
+0.30 ev 냉각 셀 받음 → 목록에 넣음 (3.00초)
+0.30 ev 사슬 다시 감싸기: 냉각 셀 +5 [기본 10]
+0.30 ev 출력 10.00 → 15.00
+0.50 st power=15.00 layers=1 cell=2.80 overload=0.00
+0.80 in overload
+0.80 ev 과부하 받음 → 목록에 넣음 (2.50초)
+0.80 ev 사슬 다시 감싸기: 과부하 ×2 [냉각 셀 +5 [기본 10]]
+0.80 ev 출력 15.00 → 30.00
+1.00 st power=30.00 layers=2 cell=2.30 overload=2.30
+1.50 st power=30.00 layers=2 cell=1.80 overload=1.80
+1.80 in purge
+1.80 ev 정화 → 버프 2개를 목록에서 뺌
+1.80 ev 사슬 다시 감싸기: 기본 10
+1.80 ev 출력 30.00 → 10.00
+2.00 st power=10.00 layers=0 cell=0.00 overload=0.00
+2.40 in purge
+2.40 ev 정화할 버프가 없다
+2.50 st power=10.00 layers=0 cell=0.00 overload=0.00
+3.00 st power=10.00 layers=0 cell=0.00 overload=0.00
+end st power=10.00 layers=0 cell=0.00 overload=0.00
