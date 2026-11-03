@@ -55,7 +55,8 @@ export interface PatternSpecimen extends BaseSpecimen<PatternMeta> {
 
 /** 미니 월드의 그림 하나. 좌표는 가로 16, 세로 9 단위 (왼쪽 아래가 0, 0) */
 export type WorldItem =
-  | { kind: 'actor'; x: number; y: number; role: 'ally' | 'enemy' | 'neutral'; label?: string; pose?: 'idle' | 'run' | 'jump' | 'attack' | 'hurt' | 'down'; facing?: 1 | -1; alpha?: number }
+  /** 인물. 기본 크기는 폭 0.7, 높이 1.4 단위. scale 로 줄이거나 키운다 (격자 한 칸에 넣을 때 0.6 안팎) */
+  | { kind: 'actor'; x: number; y: number; role: 'ally' | 'enemy' | 'neutral'; label?: string; pose?: 'idle' | 'run' | 'jump' | 'attack' | 'hurt' | 'down'; facing?: 1 | -1; alpha?: number; scale?: number }
   | { kind: 'box'; x: number; y: number; w: number; h: number; fill?: string; stroke?: string; label?: string; dashed?: boolean }
   | { kind: 'bar'; x: number; y: number; w: number; value: number; fill?: string; label?: string }
   | { kind: 'text'; x: number; y: number; text: string; color?: string; size?: number; align?: 'left' | 'center' | 'right' }

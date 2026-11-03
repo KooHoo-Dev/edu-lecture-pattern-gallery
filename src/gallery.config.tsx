@@ -6,6 +6,8 @@ import type { PatternSpecimen } from './stage/types'
 
 const SERIALIZE = /\[SerializeField\][^;\n]*?\b(\w+)\s*(=|;)/g
 const STEP = /\/\/ \[(\d+)\]/g
+/** 갤러리 단축키 (kit 의 SpecimenPage, App). 무대 키로 쓰면 포커스에 따라 같은 키가 다르게 동작한다 */
+const RESERVED = /^(Space|Digit[1-9]|Numpad[1-9]|KeyJ|KeyS|KeyA|KeyP|ArrowLeft|ArrowRight|Escape)$/
 
 /** 도메인 검사 (브라우저에서 돈다): 조절 값과 Inspector 필드, 단계 표시, 시나리오 */
 function lint(s: PatternSpecimen): string[] {
@@ -20,7 +22,10 @@ function lint(s: PatternSpecimen): string[] {
   if (!m.scenarios.length) out.push('scenarios 가 없다 (첫 번째가 자동 데모)')
   const eventIds = new Set(m.events.map(e => e.id))
   for (const sc of m.scenarios) for (const [, name] of sc.inputs) if (!eventIds.has(name)) out.push(`시나리오 ${sc.id}: 없는 입력 ${name}`)
-  for (const [code, name] of Object.entries(m.keys ?? {})) if (!eventIds.has(name)) out.push(`keys.${code}: 없는 입력 ${name}`)
+  for (const [code, name] of Object.entries(m.keys ?? {})) {
+    if (!eventIds.has(name)) out.push(`keys.${code}: 없는 입력 ${name}`)
+    if (RESERVED.test(code)) out.push(`keys.${code}: 갤러리 단축키와 겹친다 (Space, 1~9, J, S, A, P, ←/→, Esc 는 쓰지 않는다)`)
+  }
   const nodes = new Set(m.diagram.nodes.map(n => n.id))
   const edges = new Set(m.diagram.edges.map(e => e.id))
   for (const e of m.diagram.edges) if (!nodes.has(e.from) || !nodes.has(e.to)) out.push(`구조 그림 화살표 ${e.id}: 없는 노드`)

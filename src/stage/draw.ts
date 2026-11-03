@@ -158,8 +158,9 @@ function drawActor(g: CanvasRenderingContext2D, a: Extract<WorldItem, { kind: 'a
   g.translate(cx, base)
   if (a.pose === 'down') g.rotate((Math.PI / 2) * -face)
   if (a.pose === 'run') g.rotate(0.12 * face)
-  const w = 0.7 * u
-  const h = 1.4 * u
+  const s = a.scale ?? 1
+  const w = 0.7 * u * s
+  const h = 1.4 * u * s
   g.fillStyle = a.pose === 'hurt' ? '#ffffff' : color
   if (a.role === 'ally') {
     roundRect(g, -w / 2, -h, w, h, w / 2)
@@ -213,7 +214,8 @@ export function drawDiagram(g: CanvasRenderingContext2D, d: Diagram, r: Rect, ac
     const b = box.get(e.to)
     if (!a || !b) continue
     const on = active.has(e.id) || focus.has(e.id)
-    const color = active.has(e.id) ? C.accent : focus.has(e.id) ? C.warn : C.faint
+    // 단계 강조(주황)가 지금 일하는 표시(초록)에 묻히지 않게 단계를 앞세운다
+    const color = focus.has(e.id) ? C.warn : active.has(e.id) ? C.accent : C.faint
     const [x1, y1] = edgePoint(a, b, NW, NH)
     const [x2, y2] = edgePoint(b, a, NW, NH)
     g.strokeStyle = color
@@ -249,6 +251,13 @@ export function drawDiagram(g: CanvasRenderingContext2D, d: Diagram, r: Rect, ac
     g.setLineDash(n.kind === 'interface' ? [8, 6] : [])
     g.stroke()
     g.setLineDash([])
+    if (focused && on) {
+      // 지금 일하면서 단계 대상이기도 하면 바깥에 주황 테두리를 하나 더 두른다
+      roundRect(g, x - NW / 2 - 6, y - NH / 2 - 6, NW + 12, NH + 12, n.kind === 'object' ? 30 : 14)
+      g.strokeStyle = C.warn
+      g.lineWidth = 3
+      g.stroke()
+    }
     g.textAlign = 'center'
     g.fillStyle = on ? C.accent : C.text
     g.font = font(21, 700, true)

@@ -42,6 +42,11 @@ export function ScenarioStage({ ref, specimen, values, step, off, playing, speed
   live.current = { step, playing, speed, off }
 
   const labels = useMemo(() => Object.fromEntries(m.events.map(e => [e.id, e.label])), [m.events])
+  /** 무대 키 안내 (meta.keys): '↑ 점프 · X 공격' */
+  const keyHelp = useMemo(() => {
+    const name = (code: string) => ({ ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Space: 'Space', Enter: 'Enter' })[code] ?? code.replace(/^Key|^Digit/, '')
+    return Object.entries(m.keys ?? {}).map(([code, id]) => `${name(code)} ${labels[id] ?? id}`).join(' · ')
+  }, [m.keys, labels])
   const code = useMemo(() => {
     const stepLines = new Map(m.steps.map(s => [s.n, markedLines(specimen, String(s.n), p => !p.includes('/Naive/'))]))
     return { stepLines, bugLines: markedLines(specimen, '!', p => p.includes('/Naive/')) }
@@ -159,7 +164,8 @@ export function ScenarioStage({ ref, specimen, values, step, off, playing, speed
       drawCode(g, code.stepLines.get(stepN) ?? [], CODE, '이 단계에 // [n] 표시 줄이 없다.', C.warn)
     } else {
       panel(g, CODE, '코드 줄')
-      drawCode(g, [], CODE, '단계 보기(← →)를 누르면 그 단계에서 일하는 코드 줄이 여기에 나온다. 효과 끄기(J)는 나쁜 예의 문제 줄을 보여 준다.', C.text)
+      const keys = keyHelp ? ` 무대를 클릭하면 키보드로도 입력한다: ${keyHelp}.` : ''
+      drawCode(g, [], CODE, `단계 보기(← →)를 누르면 그 단계에서 일하는 코드 줄이 여기에 나온다. 효과 끄기(J)는 나쁜 예의 문제 줄을 보여 준다.${keys}`, C.text)
     }
   }
 
