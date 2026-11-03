@@ -1,0 +1,76 @@
+# src f7112174ac79
+# facade-hit-resolution gun-only naive=1
+0.30 in shot
+0.30 ev Gun 코드 → D1 (다섯 단계를 직접)
+0.30 ev 표시 D1 -4
+0.30 ev 적용 D1 HP 10 → 6
+0.30 ev 알림 D1 피격 (Gun)
+0.50 st credits=0 D1=6 D2=10 D3=10 ecredits=0 eD1=6 eD2=10 eD3=10
+0.70 in shot
+0.70 ev Gun 코드 → D1 (다섯 단계를 직접)
+0.70 ev 표시 D1 -4
+0.70 ev 적용 D1 HP 6 → 2
+0.70 ev 알림 D1 피격 (Gun)
+1.00 st credits=0 D1=2 D2=10 D3=10 ecredits=0 eD1=2 eD2=10 eD3=10
+1.10 in shot
+1.10 ev Gun 코드 → D1 (다섯 단계를 직접)
+1.10 ev 표시 D1 -4
+1.10 ev 적용 D1 HP 2 → 0
+1.10 ev 알림 D1 피격 (Gun)
+1.10 ev 파괴 D1 (화면에서 뺀다)
+1.10 ev 보상 +10 크레딧 (합 10)
+1.50 st credits=10 D1=gone D2=10 D3=10 ecredits=10 eD1=gone eD2=10 eD3=10
+1.50 in shot
+1.50 ev Gun 코드 → D2 (다섯 단계를 직접)
+1.50 ev 표시 D2 -4
+1.50 ev 적용 D2 HP 10 → 6
+1.50 ev 알림 D2 피격 (Gun)
+1.90 in shot
+1.90 ev Gun 코드 → D2 (다섯 단계를 직접)
+1.90 ev 표시 D2 -4
+1.90 ev 적용 D2 HP 6 → 2
+1.90 ev 알림 D2 피격 (Gun)
+2.00 st credits=10 D1=gone D2=2 D3=10 ecredits=10 eD1=gone eD2=2 eD3=10
+2.30 in shot
+2.30 ev Gun 코드 → D2 (다섯 단계를 직접)
+2.30 ev 표시 D2 -4
+2.30 ev 적용 D2 HP 2 → 0
+2.30 ev 알림 D2 피격 (Gun)
+2.30 ev 파괴 D2 (화면에서 뺀다)
+2.30 ev 보상 +10 크레딧 (합 20)
+2.50 st credits=20 D1=gone D2=gone D3=10 ecredits=20 eD1=gone eD2=gone eD3=10
+2.70 in shot
+2.70 ev Gun 코드 → D3 (다섯 단계를 직접)
+2.70 ev 표시 D3 -2
+2.70 ev 적용 D3 HP 10 → 8
+2.70 ev 알림 D3 피격 (Gun)
+3.00 st credits=20 D1=gone D2=gone D3=8 ecredits=20 eD1=gone eD2=gone eD3=8
+3.10 in shot
+3.10 ev Gun 코드 → D3 (다섯 단계를 직접)
+3.10 ev 표시 D3 -2
+3.10 ev 적용 D3 HP 8 → 6
+3.10 ev 알림 D3 피격 (Gun)
+3.50 st credits=20 D1=gone D2=gone D3=6 ecredits=20 eD1=gone eD2=gone eD3=6
+3.50 in shot
+3.50 ev Gun 코드 → D3 (다섯 단계를 직접)
+3.50 ev 표시 D3 -2
+3.50 ev 적용 D3 HP 6 → 4
+3.50 ev 알림 D3 피격 (Gun)
+3.90 in shot
+3.90 ev Gun 코드 → D3 (다섯 단계를 직접)
+3.90 ev 표시 D3 -2
+3.90 ev 적용 D3 HP 4 → 2
+3.90 ev 알림 D3 피격 (Gun)
+4.00 st credits=20 D1=gone D2=gone D3=2 ecredits=20 eD1=gone eD2=gone eD3=2
+4.30 in shot
+4.30 ev Gun 코드 → D3 (다섯 단계를 직접)
+4.30 ev 표시 D3 -2
+4.30 ev 적용 D3 HP 2 → 0
+4.30 ev 알림 D3 피격 (Gun)
+4.30 ev 파괴 D3 (화면에서 뺀다)
+4.30 ev 보상 +20 크레딧 (합 40)
+4.50 st credits=40 D1=gone D2=gone D3=gone ecredits=40 eD1=gone eD2=gone eD3=gone
+4.80 in shock
+4.80 ev ShockDrone 코드: D3 없음 (target == null 이면 return)
+5.00 st credits=40 D1=gone D2=gone D3=gone ecredits=40 eD1=gone eD2=gone eD3=gone
+end st credits=40 D1=gone D2=gone D3=gone ecredits=40 eD1=gone eD2=gone eD3=gone
