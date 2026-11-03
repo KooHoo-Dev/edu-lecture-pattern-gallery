@@ -1,0 +1,47 @@
+# src f7112174ac79
+# facade-hit-resolution trap-finish-and-shock naive=0
+0.40 in shot
+0.40 ev Gun → 창구 Hit(D1, 기본 4)
+0.40 ev 계산 4 - 방어 0 = 4
+0.40 ev 표시 D1 -4
+0.40 ev 적용 D1 HP 10 → 6
+0.40 ev 알림 D1 피격 (Gun)
+0.50 st credits=0 D1=6 D2=10 D3=10
+1.00 st credits=0 D1=6 D2=10 D3=10
+1.10 in shot
+1.10 ev Gun → 창구 Hit(D1, 기본 4)
+1.10 ev 계산 4 - 방어 0 = 4
+1.10 ev 표시 D1 -4
+1.10 ev 적용 D1 HP 6 → 2
+1.10 ev 알림 D1 피격 (Gun)
+1.50 st credits=0 D1=2 D2=10 D3=10
+1.90 in trap
+1.90 ev Trap → 창구 Hit(D1, 기본 5)
+1.90 ev 계산 5 - 방어 0 = 5
+1.90 ev 표시 D1 -5
+1.90 ev 적용 D1 HP 2 → 0
+1.90 ev 알림 D1 피격 (Trap)
+1.90 ev 파괴 D1 (화면에서 뺀다)
+1.90 ev 보상 +10 크레딧 (합 10)
+2.00 st credits=10 D1=gone D2=10 D3=10
+2.50 st credits=10 D1=gone D2=10 D3=10
+3.00 st credits=10 D1=gone D2=10 D3=10
+3.00 in shock
+3.00 ev ShockDrone → 창구 Hit(D3, 기본 6)
+3.00 ev 계산 6 - 방어 2 = 4
+3.00 ev 표시 D3 -4
+3.00 ev 적용 D3 HP 10 → 6
+3.00 ev 알림 D3 피격 (ShockDrone)
+3.50 st credits=10 D1=gone D2=10 D3=6
+4.00 st credits=10 D1=gone D2=10 D3=6
+4.20 in shot
+4.20 ev Gun → 창구 Hit(D2, 기본 4)
+4.20 ev 계산 4 - 방어 0 = 4
+4.20 ev 표시 D2 -4
+4.20 ev 적용 D2 HP 10 → 6
+4.20 ev 알림 D2 피격 (Gun)
+4.50 st credits=10 D1=gone D2=6 D3=6
+5.00 st credits=10 D1=gone D2=6 D3=6
+5.50 st credits=10 D1=gone D2=6 D3=6
+6.00 st credits=10 D1=gone D2=6 D3=6
+end st credits=10 D1=gone D2=6 D3=6

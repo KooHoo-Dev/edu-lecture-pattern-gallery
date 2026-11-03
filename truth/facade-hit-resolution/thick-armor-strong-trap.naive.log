@@ -1,0 +1,41 @@
+# src f7112174ac79
+# facade-hit-resolution thick-armor-strong-trap naive=1
+0.40 in shock
+0.40 ev ShockDrone 코드 → D3 (다섯 단계를 직접)
+0.40 ev 표시 D3 -6
+0.40 ev 적용 D3 HP 10 → 4
+0.40 ev 알림 D3 피격 (ShockDrone)
+0.40 ev !방어력 무시: D3 에 피해 6 그대로 (방어력 5 를 빼면 1)
+0.50 st credits=0 D1=10 D2=10 D3=4 ecredits=0 eD1=10 eD2=10 eD3=9
+1.00 st credits=0 D1=10 D2=10 D3=4 ecredits=0 eD1=10 eD2=10 eD3=9
+1.20 in trap
+1.20 ev Trap 코드 → D1 (다섯 단계를 직접)
+1.20 ev 표시 D1 -10
+1.20 ev 적용 D1 HP 10 → 0
+1.20 ev 알림 D1 피격 (Trap)
+1.20 ev !파괴 누락: D1 HP 0 인데 그대로 서 있다 (보상 +10 도 없다)
+1.50 st credits=0 D1=0 D2=10 D3=4 ecredits=10 eD1=gone eD2=10 eD3=9
+2.00 st credits=0 D1=0 D2=10 D3=4 ecredits=10 eD1=gone eD2=10 eD3=9
+2.00 in shot
+2.00 ev Gun 코드 → D2 (다섯 단계를 직접)
+2.00 ev 표시 D2 -4
+2.00 ev 적용 D2 HP 10 → 6
+2.00 ev 알림 D2 피격 (Gun)
+2.50 st credits=0 D1=0 D2=6 D3=4 ecredits=10 eD1=gone eD2=6 eD3=9
+2.80 in shock
+2.80 ev ShockDrone 코드 → D3 (다섯 단계를 직접)
+2.80 ev 표시 D3 -6
+2.80 ev 적용 D3 HP 4 → 0
+2.80 ev 알림 D3 피격 (ShockDrone)
+2.80 ev 파괴 D3 (화면에서 뺀다)
+2.80 ev 보상 +20 크레딧 (합 20)
+2.80 ev !방어력 무시: D3 에 피해 6 그대로 (방어력 5 를 빼면 1)
+3.00 st credits=20 D1=0 D2=6 D3=gone ecredits=10 eD1=gone eD2=6 eD3=8
+3.50 st credits=20 D1=0 D2=6 D3=gone ecredits=10 eD1=gone eD2=6 eD3=8
+3.60 in trap
+3.60 ev Trap 코드 → D1 (다섯 단계를 직접)
+3.60 ev 표시 D1 -10
+3.60 ev 적용 D1 HP 0 → 0
+3.60 ev 알림 D1 피격 (Trap)
+4.00 st credits=20 D1=0 D2=6 D3=gone ecredits=10 eD1=gone eD2=6 eD3=8
+end st credits=20 D1=0 D2=6 D3=gone ecredits=10 eD1=gone eD2=6 eD3=8
