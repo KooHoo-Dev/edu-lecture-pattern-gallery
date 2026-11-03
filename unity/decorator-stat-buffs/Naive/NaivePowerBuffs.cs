@@ -4,6 +4,8 @@
 //   public void OnCell() { if (cellRoutine != null) StopCoroutine(cellRoutine); cellRoutine = StartCoroutine(CellBuff()); }
 // Unity 없이 돌리려고 코루틴을 순수 C# 타이머(WaitTimer)로 흉내 낸다. StartCoroutine 은 yield 앞 줄(시작)을 바로 하고 타이머를 건다.
 // 시간이 다 되면 yield 뒤 줄(끝)을 부른다. StopCoroutine 으로 멈춘 코루틴은 yield 뒤 줄이 영영 돌지 않는다 (Unity 와 같다).
+// 어긋남의 뿌리는 둘이다: 다시 받을 때 멈춘 코루틴의 끝 처리가 빠지는 것, 그리고 더하기와 곱하기를 건 순서의 반대로 풀지 못하는 것
+// (버프는 제각각 끝나므로, 먼저 건 버프가 먼저 끝나면 다시 받지 않아도 어긋난다).
 // 갤러리의 '효과 끄기' 가 이 코드를 같은 입력으로 돌린다. 프로젝트에 넣지 않는다.
 using System;
 using System.Collections.Generic;
@@ -41,8 +43,8 @@ namespace PatternGallery.DecoratorStatBuffs.Naive
         public float basePower = 10f;
         public float cellBonus = 5f;
         public float overloadMultiplier = 2f;
-        public float cellDuration = 3f;
-        public float overloadDuration = 2.5f;
+        public float cellDuration = 4f;
+        public float overloadDuration = 2f;
 
         /// <summary>무기 출력. 버프마다 이 값을 직접 고친다</summary>
         public float power = 10f;
@@ -80,7 +82,7 @@ namespace PatternGallery.DecoratorStatBuffs.Naive
 
         void CellEnd()
         {
-            power -= cellBonus;
+            power -= cellBonus; // [!] 냉각 셀보다 먼저 건 과부하가 아직 걸려 있으면, 배율로 함께 커진 몫은 모른 채 더한 양만 뺀다
             cellRoutine = null;
         }
 
@@ -93,7 +95,7 @@ namespace PatternGallery.DecoratorStatBuffs.Naive
 
         void OverloadEnd()
         {
-            power /= overloadMultiplier; // [!] 과부하가 걸린 뒤에 더한 몫까지 함께 나눈다 (더하기와 곱하기를 건 순서와 다른 순서로 푼다)
+            power /= overloadMultiplier; // [!] 과부하가 걸린 뒤에 더한 몫까지 함께 나눈다 (그 몫이 아직 남아 있으면 건 순서의 반대로 풀지 못한다)
             overloadRoutine = null;
         }
 

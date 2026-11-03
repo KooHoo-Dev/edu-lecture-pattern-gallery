@@ -12,9 +12,9 @@ namespace PatternGallery.DecoratorStatBuffs
         [Header("조절 값 (웹 갤러리와 같은 이름. Play 중에 바꿔도 반영된다)")]
         [SerializeField] float cellBonus = 5f;
         [SerializeField] float overloadMultiplier = 2f;
-        [SerializeField] float cellDuration = 3f;
-        [SerializeField] float overloadDuration = 2.5f;
-        [Tooltip("버프가 없을 때의 무기 출력. 웹 갤러리에서는 10 으로 고정이다")]
+        [SerializeField] float cellDuration = 4f;
+        [SerializeField] float overloadDuration = 2f;
+        [Tooltip("버프가 없을 때의 무기 출력. 웹 갤러리에는 없는 칸이다 (웹은 10 고정)")]
         [SerializeField] float basePower = 10f;
 
         [Header("입력 (컴포넌트를 붙일 때 Reset 이 기본 키를 넣는다)")]
@@ -50,8 +50,11 @@ namespace PatternGallery.DecoratorStatBuffs
             OverloadDuration = overloadDuration,
         };
 
-        /// <summary>막대가 가득 차는 출력 (웹 무대와 같다)</summary>
-        float FullScale => (basePower + cellBonus) * overloadMultiplier * 1.4f;
+        /// <summary>
+        /// 막대가 가득 차는 출력. 조절 값 범위의 최대값 (10 + 15) × 3 = 75 로 고정한다 (웹 무대와 같다).
+        /// 조절 값으로 계산하면 값을 바꿔도 막대 길이가 같아 보인다
+        /// </summary>
+        const float FullScale = 75f;
 
         void Reset()
         {
@@ -121,34 +124,36 @@ namespace PatternGallery.DecoratorStatBuffs
         void OnPowerChanged(float previous, float now)
         {
             ShowPower(now);
-            if (logEvents) Debug.Log($"[PowerBuffs] 출력 {BuffSet.Num(previous)} → {BuffSet.Num(now)}", this);
+            if (logEvents) Debug.Log($"[PowerBuffs] 출력 {StatText.Num(previous)} → {StatText.Num(now)}", this);
         }
 
         void OnChainRebuilt(IPowerStat chain)
         {
             ShowChain(chain);
-            if (logEvents) Debug.Log($"[PowerBuffs] 사슬 다시 감싸기: {BuffSet.Describe(chain)}", this);
+            // Inspector 값을 바꿔 사슬만 다시 만들어진 경우에도 막대와 숫자를 맞춘다 (출력이 같으면 PowerChanged 는 오지 않는다)
+            ShowPower(Buffs.Value);
+            if (logEvents) Debug.Log($"[PowerBuffs] 사슬 다시 감싸기: {StatText.Describe(chain)}", this);
         }
 
         void OnBuffRefreshed(BuffKind kind, float remaining)
         {
-            if (logEvents) Debug.Log($"[PowerBuffs] {kind} 다시 받음 → 남은 시간만 {remaining:0.00}초로", this);
+            if (logEvents) Debug.Log($"[PowerBuffs] {BuffSet.NameOf(kind)} 다시 받음 → 남은 시간만 {remaining:0.00}초로", this);
         }
 
         void OnBuffExpired(BuffKind kind)
         {
-            if (logEvents) Debug.Log($"[PowerBuffs] {kind} 끝 → 목록에서 뺌", this);
+            if (logEvents) Debug.Log($"[PowerBuffs] {BuffSet.NameOf(kind)} 끝 → 목록에서 뺌", this);
         }
 
         void ShowPower(float value)
         {
             if (powerFill != null) powerFill.fillAmount = Mathf.Clamp01(value / FullScale);
-            if (powerText != null) powerText.text = $"무기 출력 {BuffSet.Num(value)}";
+            if (powerText != null) powerText.text = $"무기 출력 {StatText.Num(value)}";
         }
 
         void ShowChain(IPowerStat chain)
         {
-            if (chainText != null) chainText.text = BuffSet.Describe(chain);
+            if (chainText != null) chainText.text = StatText.Describe(chain);
         }
     }
 }

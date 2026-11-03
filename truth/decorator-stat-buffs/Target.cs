@@ -42,11 +42,11 @@ namespace PatternGallery.DecoratorStatBuffs
             buffs.BuffExpired += k => events.Add($"{Name(k)} 끝 → 목록에서 뺌");
             buffs.BuffsPurged += n => events.Add($"정화 → 버프 {n}개를 목록에서 뺌");
             buffs.NothingToPurge += () => events.Add("정화할 버프가 없다");
-            buffs.ChainRebuilt += p => events.Add($"사슬 다시 감싸기: {BuffSet.Describe(p)}");
+            buffs.ChainRebuilt += p => events.Add($"사슬 다시 감싸기: {StatText.Describe(p)}");
             buffs.PowerChanged += (from, to) => events.Add($"출력 {Fmt.F(from)} → {Fmt.F(to)}");
         }
 
-        static string Name(BuffKind k) => k == BuffKind.Cell ? "냉각 셀" : "과부하";
+        static string Name(BuffKind k) => BuffSet.NameOf(k);
 
         public void Input(string name)
         {
@@ -56,8 +56,8 @@ namespace PatternGallery.DecoratorStatBuffs
             if (naive == null) return;
 
             float p0 = naive.power;
-            string bonus = BuffSet.Num(naive.cellBonus);
-            string factor = BuffSet.Num(naive.overloadMultiplier);
+            string bonus = StatText.Num(naive.cellBonus);
+            string factor = StatText.Num(naive.overloadMultiplier);
             if (name == "cell")
             {
                 WaitTimer before = naive.cellRoutine;
@@ -96,8 +96,8 @@ namespace PatternGallery.DecoratorStatBuffs
             float p0 = naive.power;
             naive.Update(dt);
             var parts = new List<string>();
-            if (cell0 != null && naive.cellRoutine == null) parts.Add($"냉각 셀 끝 power -= {BuffSet.Num(naive.cellBonus)}");
-            if (overload0 != null && naive.overloadRoutine == null) parts.Add($"과부하 끝 power /= {BuffSet.Num(naive.overloadMultiplier)}");
+            if (cell0 != null && naive.cellRoutine == null) parts.Add($"냉각 셀 끝 power -= {StatText.Num(naive.cellBonus)}");
+            if (overload0 != null && naive.overloadRoutine == null) parts.Add($"과부하 끝 power /= {StatText.Num(naive.overloadMultiplier)}");
             if (parts.Count > 0) events.Add($"{string.Join(", ", parts)} : {Fmt.F(p0)} → {Fmt.F(naive.power)} (있어야 할 값 {Fmt.F(buffs.Value)})");
             CheckDrift();
         }
