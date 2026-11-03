@@ -1,0 +1,30 @@
+# src d63874a1c3e8
+# prototype-drone-clone clone-module-damage naive=1
+0.40 in clone
+0.40 ev 복제 #1 · HP 100 속도 4.00 · 모듈 [카메라] (견본과 같은 목록)
+0.50 st clones=1 tspeed=4.00 tmods=1 hp=100 speed=4.00 mods=1 shared=2 emods=1
+1.00 st clones=1 tspeed=4.00 tmods=1 hp=100 speed=4.00 mods=1 shared=2 emods=1
+1.00 in clone
+1.00 ev 복제 #2 · HP 100 속도 4.00 · 모듈 [카메라] (견본과 같은 목록)
+1.50 st clones=2 tspeed=4.00 tmods=1 hp=100,100 speed=4.00,4.00 mods=1,1 shared=3 emods=1,1
+1.60 in clone
+1.60 ev 복제 #3 · HP 100 속도 4.00 · 모듈 [카메라] (견본과 같은 목록)
+2.00 st clones=3 tspeed=4.00 tmods=1 hp=100,100,100 speed=4.00,4.00,4.00 mods=1,1,1 shared=4 emods=1,1,1
+2.40 in module
+2.40 ev #3 에 냉각 장착 → #3 모듈 [카메라 냉각]
+2.40 ev !모듈 공유: #1 #2 에도 냉각 모듈이 보인다 (단 것은 #3 하나)
+2.40 ev !견본 오염: 견본 목록에도 냉각 모듈이 생겼다 (다음 복제본이 달고 나온다)
+2.50 st clones=3 tspeed=4.00 tmods=2 hp=100,100,100 speed=4.00,4.00,4.00 mods=2,2,2 shared=4 emods=1,1,2
+3.00 st clones=3 tspeed=4.00 tmods=2 hp=100,100,100 speed=4.00,4.00,4.00 mods=2,2,2 shared=4 emods=1,1,2
+3.30 in damage
+3.30 ev #1 피해 40 → HP 60
+3.50 st clones=3 tspeed=4.00 tmods=2 hp=60,100,100 speed=4.00,4.00,4.00 mods=2,2,2 shared=4 emods=1,1,2
+4.00 st clones=3 tspeed=4.00 tmods=2 hp=60,100,100 speed=4.00,4.00,4.00 mods=2,2,2 shared=4 emods=1,1,2
+4.30 in clone
+4.30 ev 복제 #4 · HP 100 속도 4.00 · 모듈 [카메라 냉각] (견본과 같은 목록)
+4.30 ev #4 가 냉각 모듈을 달고 나왔다 (있어야 할 모듈 [카메라])
+4.50 st clones=4 tspeed=4.00 tmods=2 hp=60,100,100,100 speed=4.00,4.00,4.00,4.00 mods=2,2,2,2 shared=5 emods=1,1,2,1
+5.00 st clones=4 tspeed=4.00 tmods=2 hp=60,100,100,100 speed=4.00,4.00,4.00,4.00 mods=2,2,2,2 shared=5 emods=1,1,2,1
+5.50 st clones=4 tspeed=4.00 tmods=2 hp=60,100,100,100 speed=4.00,4.00,4.00,4.00 mods=2,2,2,2 shared=5 emods=1,1,2,1
+6.00 st clones=4 tspeed=4.00 tmods=2 hp=60,100,100,100 speed=4.00,4.00,4.00,4.00 mods=2,2,2,2 shared=5 emods=1,1,2,1
+end st clones=4 tspeed=4.00 tmods=2 hp=60,100,100,100 speed=4.00,4.00,4.00,4.00 mods=2,2,2,2 shared=5 emods=1,1,2,1
