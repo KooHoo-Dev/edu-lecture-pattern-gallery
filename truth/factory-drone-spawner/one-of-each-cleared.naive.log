@@ -1,0 +1,41 @@
+# src 2b4fcbf1e2ae
+# factory-drone-spawner one-of-each-cleared naive=1
+0.30 in scout
+0.30 ev 정찰 #1 → 출구 앞 자리 0
+0.30 ev 레이더 등록 정찰 #1 → 살아 있는 드론 1
+0.30 ev 출격 알림: 정찰 #1 HP 1
+0.50 st radar=1 field=1 cleared=0 count=0 drones=정찰1:1
+0.80 in heavy
+0.80 ev 중장갑 #2 → 출구 앞 자리 1
+0.80 ev 레이더 등록 중장갑 #2 → 살아 있는 드론 2
+0.80 ev 출격 알림: 중장갑 #2 HP 3
+1.00 st radar=2 field=2 cleared=0 count=0 drones=정찰1:1,중장갑2:3
+1.30 in shield
+1.30 ev 방패 #3 → 출구 앞 자리 2
+1.30 ev 출격 알림: 방패 #3 HP 2
+1.30 ev !레이더 누락: 레이더에 없는 드론 방패 #3 (레이더 2, 출구 앞 3)
+1.50 st radar=2 field=3 cleared=0 count=0 drones=정찰1:1,중장갑2:3,방패3:2
+2.00 st radar=2 field=3 cleared=0 count=0 drones=정찰1:1,중장갑2:3,방패3:2
+2.00 in volley
+2.00 ev 일제 사격: 3대에 피해 1
+2.00 ev 정찰 #1 피해 1 → HP 0
+2.00 ev 정찰 #1 파괴
+2.00 ev 레이더 해제 정찰 #1 → 살아 있는 드론 1
+2.00 ev 중장갑 #2 피해 1 → HP 2
+2.00 ev 방패 #3 피해 1 → HP 1
+2.50 st radar=1 field=2 cleared=0 count=0 drones=중장갑2:2,방패3:1
+2.60 in volley
+2.60 ev 일제 사격: 2대에 피해 1
+2.60 ev 중장갑 #2 피해 1 → HP 1
+2.60 ev 방패 #3 피해 1 → HP 0
+2.60 ev 방패 #3 파괴
+3.00 st radar=1 field=1 cleared=0 count=0 drones=중장갑2:1
+3.20 in volley
+3.20 ev 일제 사격: 1대에 피해 1
+3.20 ev 중장갑 #2 피해 1 → HP 0
+3.20 ev 중장갑 #2 파괴
+3.20 ev 레이더 해제 중장갑 #2 → 살아 있는 드론 0
+3.20 ev 웨이브 끝
+3.50 st radar=0 field=0 cleared=1 count=0 drones=-
+4.00 st radar=0 field=0 cleared=1 count=0 drones=-
+end st radar=0 field=0 cleared=1 count=0 drones=-
