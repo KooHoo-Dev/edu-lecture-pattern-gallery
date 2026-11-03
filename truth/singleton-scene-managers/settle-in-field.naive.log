@@ -1,0 +1,46 @@
+# src 0086612b1582
+# singleton-scene-managers settle-in-field naive=1
+0.00 ev 씬 로드: 정비 기지
+0.00 ev SoundManager#1 Awake: Instance = this
+0.00 ev SoundManager#1 → DontDestroyOnLoad
+0.00 ev BGM 재생 (1겹)
+0.00 ev CreditBank#1 Awake: Instance = this
+0.00 ev CreditBank#1 → DontDestroyOnLoad
+0.30 in toField
+0.30 ev 씬 언로드: 정비 기지
+0.30 ev 씬 로드: 지표 탐사 구역 (DontDestroyOnLoad 2개는 그대로)
+0.30 ev ExpeditionManager#1 Awake: Instance = this
+0.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=100 fragments=0 expRef=alive
+0.80 in pickup
+0.80 ev ExpeditionManager#1 회로 조각 1
+1.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=100 fragments=1 expRef=alive
+1.20 in pickup
+1.20 ev ExpeditionManager#1 회로 조각 2
+1.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=100 fragments=2 expRef=alive
+1.60 in pickup
+1.60 ev ExpeditionManager#1 회로 조각 3
+2.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=100 fragments=3 expRef=alive
+2.20 in settle
+2.20 ev ExpeditionManager#1 회로 조각 0
+2.20 ev CreditBank#1 크레딧 100 → 250
+2.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=250 fragments=0 expRef=alive
+2.90 in toBase
+2.90 ev 씬 언로드: 지표 탐사 구역
+2.90 ev ExpeditionManager#1 OnDisable → OnDestroy
+2.90 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+2.90 ev SoundManager#2 Awake: Instance = this
+2.90 ev SoundManager#2 → DontDestroyOnLoad
+2.90 ev BGM 재생 (2겹)
+2.90 ev CreditBank#2 Awake: Instance = this
+2.90 ev CreditBank#2 → DontDestroyOnLoad
+2.90 ev !중복 매니저: SoundManager 2개 (BGM 2겹)
+2.90 ev !중복 매니저: CreditBank 2개 (Instance 는 새 은행 CreditBank#2, 크레딧 100)
+3.00 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=100 fragments=0 expRef=destroyed
+3.50 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=100 fragments=0 expRef=destroyed
+3.50 in settle
+3.50 ev !파괴된 매니저 호출: MissingReferenceException: 파괴된 ExpeditionManager 의 Text 를 건드렸다 → 아래 줄(입금)이 실행되지 않았다
+4.00 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=100 fragments=0 expRef=destroyed
+4.10 in pickup
+4.10 ev 줍기 무시 (기지에는 회로 조각이 없다)
+4.50 st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=100 fragments=0 expRef=destroyed
+end st scene=base sound=2 bank=2 expedition=0 bgm=2 credits=100 fragments=0 expRef=destroyed

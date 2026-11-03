@@ -1,0 +1,63 @@
+# src 0086612b1582
+# singleton-scene-managers round-trip naive=0
+0.00 ev 씬 로드: 정비 기지
+0.00 ev SoundManager#1 Awake: TryClaim → 자리 차지
+0.00 ev SoundManager#1 → DontDestroyOnLoad
+0.00 ev BGM 재생 (1겹)
+0.00 ev CreditBank#1 Awake: TryClaim → 자리 차지
+0.00 ev CreditBank#1 → DontDestroyOnLoad
+0.40 in toField
+0.40 ev 씬 언로드: 정비 기지
+0.40 ev 씬 로드: 지표 탐사 구역 (DontDestroyOnLoad 2개는 그대로)
+0.40 ev ExpeditionManager#1 Awake: TryClaim → 자리 차지
+0.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=0 expRef=alive
+1.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=0 expRef=alive
+1.00 in pickup
+1.00 ev ExpeditionManager 회로 조각 1
+1.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=1 expRef=alive
+1.50 in pickup
+1.50 ev ExpeditionManager 회로 조각 2
+2.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=0 fragments=2 expRef=alive
+2.10 in settle
+2.10 ev ExpeditionManager 회로 조각 0
+2.10 ev CreditBank 크레딧 0 → 60
+2.10 ev 정산: 회로 조각 2개 → 60 크레딧
+2.50 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=60 fragments=0 expRef=alive
+2.70 in pickup
+2.70 ev ExpeditionManager 회로 조각 1
+3.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=60 fragments=1 expRef=alive
+3.30 in toBase
+3.30 ev 씬 언로드: 지표 탐사 구역
+3.30 ev ExpeditionManager#1 OnDisable → OnDestroy
+3.30 ev ExpeditionManager 자리 비움
+3.30 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+3.30 ev SoundManager#2 Awake: TryClaim 실패 (주인 SoundManager#1) → Destroy 후 return
+3.30 ev SoundManager#2 OnEnable (파괴 예약 중에도 불린다)
+3.30 ev CreditBank#2 Awake: TryClaim 실패 (주인 CreditBank#1) → Destroy 후 return
+3.30 ev CreditBank#2 OnEnable (파괴 예약 중에도 불린다)
+3.30 ev 프레임 끝: SoundManager#2 OnDisable → OnDestroy
+3.30 ev 프레임 끝: CreditBank#2 OnDisable → OnDestroy
+3.50 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=60 fragments=- expRef=none
+4.00 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=60 fragments=- expRef=none
+4.00 in settle
+4.00 ev 정산 받지 않음: 탐사 구역에서만 정산
+4.50 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=60 fragments=- expRef=none
+4.70 in toField
+4.70 ev 씬 언로드: 정비 기지
+4.70 ev 씬 로드: 지표 탐사 구역 (DontDestroyOnLoad 2개는 그대로)
+4.70 ev ExpeditionManager#2 Awake: TryClaim → 자리 차지
+5.00 st scene=field sound=1 bank=1 expedition=1 bgm=1 credits=60 fragments=0 expRef=alive
+5.30 in toBase
+5.30 ev 씬 언로드: 지표 탐사 구역
+5.30 ev ExpeditionManager#2 OnDisable → OnDestroy
+5.30 ev ExpeditionManager 자리 비움
+5.30 ev 씬 로드: 정비 기지 (DontDestroyOnLoad 2개는 그대로)
+5.30 ev SoundManager#3 Awake: TryClaim 실패 (주인 SoundManager#1) → Destroy 후 return
+5.30 ev SoundManager#3 OnEnable (파괴 예약 중에도 불린다)
+5.30 ev CreditBank#3 Awake: TryClaim 실패 (주인 CreditBank#1) → Destroy 후 return
+5.30 ev CreditBank#3 OnEnable (파괴 예약 중에도 불린다)
+5.30 ev 프레임 끝: SoundManager#3 OnDisable → OnDestroy
+5.30 ev 프레임 끝: CreditBank#3 OnDisable → OnDestroy
+5.50 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=60 fragments=- expRef=none
+6.00 st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=60 fragments=- expRef=none
+end st scene=base sound=1 bank=1 expedition=0 bgm=1 credits=60 fragments=- expRef=none
