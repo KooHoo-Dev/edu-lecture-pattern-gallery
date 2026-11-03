@@ -56,8 +56,11 @@ export const config = defineGallery<PatternSpecimen>({
     label: '패턴',
     options: [
       { value: '싱글턴 패턴', label: '싱글턴' },
+      { value: '팩토리 메서드', label: '팩토리' },
       { value: '프로토타입 패턴', label: '프로토타입' },
+      { value: '오브젝트 풀', label: '오브젝트 풀' },
       { value: '데코레이터 패턴', label: '데코레이터' },
+      { value: '퍼사드 패턴', label: '퍼사드' },
       { value: '상태 패턴', label: '상태' },
       { value: '전략 패턴', label: '전략' },
       { value: '관찰자 패턴', label: '관찰자' },

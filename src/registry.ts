@@ -44,4 +44,8 @@ export const PLANNED: PlannedSpecimen[] = [
   { id: 'prototype-drone-clone', title: '프로토타입 패턴: 견본 드론 복제', group: 'E', order: 1, oneLiner: '견본을 복제하되 참조 필드는 새로 만들어 복제본끼리 섞이지 않게 한다' },
   { id: 'singleton-scene-managers', title: '싱글턴 패턴: 씬을 넘는 매니저', group: 'E', order: 2, oneLiner: '씬을 넘는 매니저와 씬과 함께 사라질 매니저를 나누고 둘 다 하나만 둔다' },
   { id: 'decorator-stat-buffs', title: '데코레이터 패턴: 버프 겹치기와 풀기', group: 'F', order: 1, oneLiner: '버프를 감싸는 층으로 겹치고, 층을 빼면 원래 값으로 돌아온다' },
+  { id: 'state-drone-ai', title: '상태 패턴: 잔해 드론 AI', group: 'A', order: 3, oneLiner: '적 AI 의 순찰·추격·공격·파괴를 상태 객체로 나누고, 들어갈 때 바꾼 것을 나올 때 되돌린다' },
+  { id: 'object-pool-projectiles', title: '오브젝트 풀: 포탑 탄 재사용', group: 'D', order: 1, oneLiner: '탄을 만들고 지우는 대신 빌려 쓰고 돌려주되, 빌릴 때 상태를 새로 맞춘다' },
+  { id: 'factory-drone-spawner', title: '팩토리 메서드: 드론 스포너', group: 'E', order: 3, oneLiner: '무엇을 만들지는 스포너 자식이, 만드는 절차는 부모가 한 곳에서 정한다' },
+  { id: 'facade-hit-resolution', title: '퍼사드 패턴: 명중 처리 창구', group: 'F', order: 2, oneLiner: '명중 처리 다섯 단계를 창구 하나가 맡고, 공격하는 곳은 창구만 부른다' },
 ]

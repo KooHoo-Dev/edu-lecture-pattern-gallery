@@ -1,7 +1,7 @@
 # 표본 선정 (패턴 갤러리)
 
 - 작성: 2026-11-03. 개정: 2026-11-03 (Jay 교안 기준, 묶음 2 확정).
-- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03).** 묶음 3 은 후보.
+- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 확정 (Jay, 2026-11-03).**
 - 형식은 kit `design.md` 6절 (Shader Gallery 의 `docs/shader-selection.md` 형식). 공통 규칙은 kit-guide.
 - 교안 분석: [`research/lecture-analysis.md`](research/lecture-analysis.md). 교안 = `3000-Unity-3D/Assets/19. Legacy/2. OOP And Design Pattern/` (OOP 기초 3편 + 생성 5, 구조 5, 행동 5). 표본은 교안을 그대로 옮기지 않는다 (Jay 확인). 교안의 강조점과 함정은 가져오고, 상황은 외곽 탐사대로, 글은 증상에서 시작한다.
 
@@ -16,6 +16,10 @@
 | E 생성 (새) | `prototype-drone-clone` 프로토타입 패턴: 견본 드론 복제 | 프로토타입 (생성 05), 00 객체와 메모리 | ★★ | **묶음 2** |
 | E 생성 (새) | `singleton-scene-managers` 싱글턴 패턴: 씬을 넘는 매니저 | 싱글턴 (생성 01) | ★★ | **묶음 2** |
 | F 조립 (새) | `decorator-stat-buffs` 데코레이터 패턴: 버프 겹치기와 풀기 | 데코레이터 (구조 04) | ★★ | **묶음 2** |
+| A 행동 | `state-drone-ai` 상태 패턴: 잔해 드론 AI | 상태 (행동 01, 슬라임 AI) | ★★ | **묶음 3** |
+| D 최적화 | `object-pool-projectiles` 오브젝트 풀: 포탑 탄 재사용 | 오브젝트 풀 (교안 밖) | ★★ | **묶음 3** |
+| E 생성 | `factory-drone-spawner` 팩토리 메서드: 드론 스포너 | 팩토리 메서드 (생성 02) + 템플릿 메서드 | ★★ | **묶음 3** |
+| F 조립 | `facade-hit-resolution` 퍼사드 패턴: 명중 처리 창구 | 퍼사드 (구조 05) | ★ | **묶음 3** |
 
 묶음 2 를 마치면 교안의 생성·구조·행동 세 묶음에 모두 표본이 생긴다 (생성 2, 구조 1, 행동 4).
 
@@ -52,6 +56,17 @@
 - 확인된 대표작: 없음 (범용 기법). 출처: 교안 `3. Behavioral/02. Strategy/Strategy.md`, GoF 'Strategy', Unity 전자책 (Strategy 장 수록 여부 미확인, 6절).
 - 겹치는 표본: `state-player-actions` (상태와 전략의 차이). 같은 무대 상황을 묶음 3 `facade-hit-resolution`, `factory-drone-spawner` 가 이어 쓸 수 있다 (정비 기지 방어).
 
+**`state-drone-ai` 상태 패턴: 잔해 드론 AI** ★★ — 묶음 3
+
+- ID `state-drone-ai`, 그룹 A, 순서 3, 난이도 2.
+- 한 줄: 적 AI 의 순찰·추격·공격·파괴를 상태 객체로 나누고, 들어갈 때 바꾼 것을 나올 때 되돌린다.
+- 수업에서 왜 필요한가: 교안 State.md 의 주 예제(슬라임 AI 를 enum + 거대 switch 로)와 같은 모양이다. 수강생이 가장 많이 짜는 적 AI 가 이 모양이고, 교안이 강조한 "진입·이탈 1회 처리" (공격에 들어가면 멈추고, 나오면 다시 움직임)가 switch 에서 가장 자주 빠진다. 플레이어 입력으로 전이하는 `state-player-actions` 와 달리 **거리와 체력으로 스스로 전이**하는 적을 보인다.
+- 무대와 시나리오: 땅 위 잔해 드론 하나와 하린. 하린이 다가가면(입력) 드론이 감지 거리 안에서 추격, 공격 거리 안에서 멈추고 충전 뒤 사격, 하린이 물러나면 다시 추격·순찰, 피해가 쌓이면 파괴. 자동 데모: 다가감 → 공격 → 물러남(추격으로 돌아감) → 다시 다가감 → 파괴.
+- 효과 끄기: `enum DroneState` + `Update` 의 switch. 공격에 들어갈 때 `speed = 0` 을 하지만 나올 때 되돌리는 곳이 없어 ✖ `이동 멈춤` (추격 상태인데 제자리). 진입 처리를 case 안에서 매 프레임 해 충전이 계속 처음부터 시작되거나, 파괴 뒤에도 사격 case 가 도는 것 중 하나를 둘째 ✖ 로.
+- 교안 연계: `ChangeState` 한 곳에서만 Exit → Enter, 같은 상태 클래스를 다른 드론이 재사용, 상태 상속으로 확장(글).
+- 출처: Nystrom 'State', Unity 전자책 (상태 장).
+- 겹치는 표본: `state-player-actions` (같은 패턴, 입력 대 거리 전이, bool 대 enum 나쁜 예).
+
 ### B 연결
 
 **`observer-health-events` 관찰자 패턴: 체력 알림** ★
@@ -76,7 +91,15 @@
 
 ### D 최적화
 
-비어 있다. 묶음 3 후보 `object-pool-projectiles`.
+**`object-pool-projectiles` 오브젝트 풀: 포탑 탄 재사용** ★★ — 묶음 3
+
+- ID `object-pool-projectiles`, 그룹 D, 순서 1, 난이도 2.
+- 한 줄: 탄을 만들고 지우는 대신 빌려 쓰고 돌려주되, 빌릴 때 상태를 새로 맞춘다.
+- 수업에서 왜 필요한가: 교안에는 없지만 Prototype md 가 "자주 생성되는 객체" 를 언급하고, 슈팅·디펜스 수업에서 `Instantiate`/`Destroy` 반복의 GC 멈춤 다음에 바로 만나는 버그가 "재사용한 총알이 이전 속도로 날아감" 이다. Unity 에 `UnityEngine.Pool.ObjectPool<T>` 가 있다는 것도 함께 가르친다.
+- 무대와 시나리오: 정비 기지 포탑이 빠른 탄과 느린 냉각탄을 섞어 쏜다. 화면에 풀 상태(만든 수, 쓰는 중, 대기) 를 보인다. 자동 데모: 빠른 탄 여럿 → 냉각탄 (재사용된 탄) → 연사로 풀이 비어 새로 만듦.
+- 효과 끄기: 풀은 있지만 빌릴 때 위치만 맞추고 속도·종류·수명을 다시 맞추지 않는 흔한 코드 ✖ `이전 상태 재사용` (냉각탄이 빠른 탄 속도로 날아감), 명중과 화면 밖에서 두 번 반납해 같은 탄이 둘로 쓰이는 ✖ `이중 반납`.
+- 출처: Nystrom 'Object Pool', Unity 스크립트 레퍼런스 `ObjectPool<T>`, Unity 전자책 (오브젝트 풀 장).
+- 겹치는 표본: `prototype-drone-clone` (복제와 재사용, 상태 초기화).
 
 ### E 생성 (새 그룹)
 
@@ -104,6 +127,16 @@
 - 확인된 대표작: 없음 (범용 기법). 출처: 교안 `1. Creational/01. Singleton/`, Nystrom 'Singleton' (https://gameprogrammingpatterns.com/singleton.html), Unity 스크립트 레퍼런스 `Object.DontDestroyOnLoad`, Unity 매뉴얼 'Domain Reloading', Unity 전자책.
 - 겹치는 표본: `observer-health-events` (파괴된 객체 호출을 흉내 내는 방식).
 
+**`factory-drone-spawner` 팩토리 메서드: 드론 스포너** ★★ — 묶음 3
+
+- ID `factory-drone-spawner`, 그룹 E, 순서 3, 난이도 2.
+- 한 줄: 무엇을 만들지는 스포너 자식이, 만드는 절차(생성 → 배치 → 레이더 등록)는 부모가 한 곳에서 정한다.
+- 수업에서 왜 필요한가: 교안 Factory Method 의 웨이브 스포너 상황이다. 교안 데모의 `Random.Range(0, 2)` 처럼 종류를 더해도 고르는 쪽 숫자를 안 고쳐 새 종류가 안 나오고, 종류마다 초기화를 복붙하다 한 곳에서 단계를 빠뜨린다. 교안 템플릿 메서드(적과 보스의 `Setup` 복붙)는 `Spawn` 이 절차, `CreateDrone` 이 훅이라는 것으로 녹인다.
+- 무대와 시나리오: 정비 기지 앞 출구에서 정찰·중장갑·방패 드론이 나오고, 레이더가 살아 있는 드론 수를 센다. 포탑 일제 사격으로 드론을 줄여 웨이브가 끝나는지 본다. 자동 데모: 섞인 순서로 셋 → 방패 드론 → 일제 사격 → 웨이브 끝 판정.
+- 효과 끄기: 문자열 분기로 만들고 분기마다 초기화를 복붙한 흔한 코드. 섞인 순서가 종류 수를 숫자 2 로 박아 둬 ✖ `종류 누락` (방패 차례에 정찰이 나옴), 나중에 더한 방패 분기가 레이더 등록을 빠뜨려 ✖ `레이더 누락` (방패 드론이 남았는데 웨이브 끝).
+- 출처: Refactoring Guru 'Factory Method', 'Template Method', Unity 전자책 (팩토리 장).
+- 겹치는 표본: `prototype-drone-clone` (만드는 두 방법: 복제와 팩토리), `object-pool-projectiles`.
+
 ### F 조립 (새 그룹)
 
 **`decorator-stat-buffs` 데코레이터 패턴: 버프 겹치기와 풀기** ★★ — 묶음 2
@@ -117,6 +150,16 @@
 - `mistakes` 후보: 코루틴을 멈춰 빼기를 건너뜀, 배율을 바로 곱해 두어 풀 때 나누기 오차, 최대 체력 버프가 끝날 때 현재 체력을 깎지 않아 상한을 넘음, 같은 종류 버프 갱신과 중첩을 구분하지 않음, 데코레이터 사슬 중간 층을 직접 떼려다 참조가 끊김.
 - 확인된 대표작: 없음 (범용 기법). 출처: 교안 `2. Structural/04. Decorator/`, GoF 'Decorator'.
 - 겹치는 표본: `prototype-drone-clone` (같은 '참조와 값' 주제), `observer-health-events` (출력이 바뀌면 알림).
+
+**`facade-hit-resolution` 퍼사드 패턴: 명중 처리 창구** ★ — 묶음 3
+
+- ID `facade-hit-resolution`, 그룹 F, 순서 2, 난이도 1.
+- 한 줄: 피해 계산·숫자 표시·적용·알림·파괴 다섯 단계를 창구 하나가 맡고, 공격하는 곳은 창구만 부른다.
+- 수업에서 왜 필요한가: 교안 Facade.md 의 명중 처리 5단계 그대로다. 공격이 일어나는 곳(총, 함정, 전기 충격)마다 다섯 줄을 복사하면, 한 곳이 단계를 빠뜨리거나 나중에 바뀐 규칙(방어력)을 한 곳만 못 받는다. 수업 프로젝트의 `CombatSystem` 과 이어진다.
+- 무대와 시나리오: 하린 앞 잔해 드론 셋 (하나는 중장갑). 총, 함정, 전기 충격 세 입력. 자동 데모: 총 → 함정으로 마무리 → 중장갑에 전기 충격.
+- 효과 끄기: 세 공격 코드가 다섯 단계를 각자 복사한 흔한 코드. 함정이 사망 처리를 빠뜨려 ✖ `파괴 누락` (HP 0 인데 남아 있음), 나중에 더한 방어력 계산을 전기 충격만 못 받아 ✖ `방어력 무시`.
+- 출처: Refactoring Guru 'Facade'.
+- 겹치는 표본: `observer-health-events` (4단계 알림을 관찰자로), `decorator-stat-buffs`.
 
 ## 3. 우선순위 (교안 기준 후보 목록)
 
@@ -148,7 +191,7 @@
 |---|---|---|
 | 1 | `state-player-actions`, `observer-health-events`, `command-undo-replay` | 끝남, 배포 |
 | 2 | `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` | 끝남, 배포 (2026-11-03) |
-| 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | 후보. 묶음 2 실측 비용을 보고 11-19 전에 돌릴지 정한다 |
+| 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | **확정 (Jay, 2026-11-03)** |
 
 묶음 2 를 이 넷으로 고른 이유: 넷 다 무대에서 버그가 바로 보이고, 교안의 생성·구조·행동을 고루 덮고, 교안 예제가 이미 게임 상황(타워 조준, 스탯 버프, 적 복제, 매니저)이라 수업 흐름에 바로 붙는다. 싱글턴만 코어가 얇은 위험이 있어 맨 뒤에 돌린다.
 
