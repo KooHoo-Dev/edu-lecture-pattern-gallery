@@ -48,4 +48,9 @@ export const PLANNED: PlannedSpecimen[] = [
   { id: 'object-pool-projectiles', title: '오브젝트 풀: 포탑 탄 재사용', group: 'D', order: 1, oneLiner: '탄을 만들고 지우는 대신 빌려 쓰고 돌려주되, 빌릴 때 상태를 새로 맞춘다' },
   { id: 'factory-drone-spawner', title: '팩토리 메서드: 드론 스포너', group: 'E', order: 3, oneLiner: '무엇을 만들지는 스포너 자식이, 만드는 절차는 부모가 한 곳에서 정한다' },
   { id: 'facade-hit-resolution', title: '퍼사드 패턴: 명중 처리 창구', group: 'F', order: 2, oneLiner: '명중 처리 다섯 단계를 창구 하나가 맡고, 공격하는 곳은 창구만 부른다' },
+  { id: 'composite-drone-squads', title: '컴포지트 패턴: 드론 편대 명령', group: 'F', order: 3, oneLiner: '드론 하나와 편대를 같은 인터페이스로 다뤄, 편대 안 편대까지 명령 한 번이 끝까지 닿는다' },
+  { id: 'abstract-factory-zone-themes', title: '추상 팩토리: 구역 테마 세트', group: 'E', order: 4, oneLiner: '구역마다 드론·투사체·바닥을 한 공장이 세트로 만들어, 다른 구역 것이 섞이지 않는다' },
+  { id: 'event-queue-sound', title: '이벤트 큐: 효과음 요청 모으기', group: 'B', order: 2, oneLiner: '효과음을 바로 틀지 않고 큐에 모아, 같은 프레임의 같은 소리는 합치고 빈 채널이 나면 차례로 튼다' },
+  { id: 'adapter-sensor-units', title: '어댑터 패턴: 센서 장비 단위 맞추기', group: 'F', order: 4, oneLiner: '장비마다 다른 API 와 단위를 어댑터 한 곳에서 우리 모양으로 바꿔, 화면과 경보는 한 모양만 안다' },
+  { id: 'hierarchical-state-enemy', title: '상태 패턴: 계층 상태 기계', group: 'A', order: 4, oneLiner: '여러 상태에 공통인 규칙(EMP, 경계등)을 부모 상태 한 곳에 두고, 자식 상태는 자기 일만 한다' },
 ]

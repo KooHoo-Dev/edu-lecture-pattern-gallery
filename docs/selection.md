@@ -1,7 +1,7 @@
 # 표본 선정 (패턴 갤러리)
 
-- 작성: 2026-11-03. 개정: 2026-11-03 (Jay 교안 기준, 묶음 2 확정).
-- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03).**
+- 작성: 2026-11-03. 개정: 2026-11-05 (묶음 4 구성).
+- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 진행 (2026-11-05, 3절 후보 다섯 모두).**
 - 형식은 kit `design.md` 6절 (Shader Gallery 의 `docs/shader-selection.md` 형식). 공통 규칙은 kit-guide.
 - 교안 분석: [`research/lecture-analysis.md`](research/lecture-analysis.md). 교안 = `3000-Unity-3D/Assets/19. Legacy/2. OOP And Design Pattern/` (OOP 기초 3편 + 생성 5, 구조 5, 행동 5). 표본은 교안을 그대로 옮기지 않는다 (Jay 확인). 교안의 강조점과 함정은 가져오고, 상황은 외곽 탐사대로, 글은 증상에서 시작한다.
 
@@ -20,6 +20,11 @@
 | D 최적화 | `object-pool-projectiles` 오브젝트 풀: 포탑 탄 재사용 | 오브젝트 풀 (교안 밖) | ★★ | **묶음 3 (배포)** |
 | E 생성 | `factory-drone-spawner` 팩토리 메서드: 드론 스포너 | 팩토리 메서드 (생성 02) + 템플릿 메서드 | ★★ | **묶음 3 (배포)** |
 | F 조립 | `facade-hit-resolution` 퍼사드 패턴: 명중 처리 창구 | 퍼사드 (구조 05) | ★ | **묶음 3 (배포)** |
+| F 조립 | `composite-drone-squads` 컴포지트 패턴: 드론 편대 명령 | 컴포지트 (구조 03) | ★★ | 묶음 4 |
+| E 생성 | `abstract-factory-zone-themes` 추상 팩토리: 구역 테마 세트 | 추상 팩토리 (생성 03) | ★★ | 묶음 4 |
+| B 연결 | `event-queue-sound` 이벤트 큐: 효과음 요청 모으기 | 이벤트 큐 (교안 밖) | ★★ | 묶음 4 |
+| F 조립 | `adapter-sensor-units` 어댑터 패턴: 센서 장비 단위 맞추기 | 어댑터 (구조 01) | ★ | 묶음 4 |
+| A 행동 | `hierarchical-state-enemy` 상태 패턴: 계층 상태 기계 | 계층 상태 기계 (교안 밖, 상태의 다음 편) | ★★★ | 묶음 4 |
 
 묶음 2 를 마치면 교안의 생성·구조·행동 세 묶음에 모두 표본이 생긴다 (생성 2, 구조 1, 행동 4).
 
@@ -67,6 +72,16 @@
 - 출처: Nystrom 'State', Unity 전자책 (상태 장).
 - 겹치는 표본: `state-player-actions` (같은 패턴, 입력 대 거리 전이, bool 대 enum 나쁜 예).
 
+**`hierarchical-state-enemy` 상태 패턴: 계층 상태 기계** ★★★ — 묶음 4
+
+- ID `hierarchical-state-enemy`, 그룹 A, 순서 4, 난이도 3.
+- 한 줄: 여러 상태에 공통인 규칙(EMP, 경계등)을 부모 상태 한 곳에 두고, 자식 상태는 자기 일만 한다.
+- 수업에서 왜 필요한가: `state-drone-ai` 처럼 상태를 클래스로 나눠도 상태가 늘면 공통 규칙("EMP 맞으면 기절", "전투 중엔 경계등")을 상태마다 복사한다. 나중에 더한 상태가 복사를 빠뜨리고, 전투 안에서 추격 → 공격으로 옮길 때 추격의 Exit 가 경계등을 끈다. 부모 상태가 공통 규칙을 맡고, 전이는 공통 조상까지만 나갔다 들어온다 (Nystrom 'State' 의 계층 상태 기계 절).
+- 무대와 시나리오: `state-drone-ai` 와 같은 땅, 드론, 하린. 상태 트리 Active{순찰, 수색(나중에 더함), 전투{추격, 공격}}, 기절. 입력: 다가감, 물러남, EMP. 자동 데모: 다가감 (순찰 → 추격 → 공격) → 물러남 (공격 → 추격 → 수색) → 수색 중 EMP.
+- 효과 끄기: `state-drone-ai` 의 평평한 상태 클래스 구조. 수색 상태가 EMP 규칙을 복사하지 않아 ✖ `EMP 무시`, 추격 Exit 가 끈 경계등을 공격 Enter 가 켜지 않아 ✖ `경계등 꺼짐`.
+- 출처: Nystrom 'State' (계층 상태 기계 절).
+- 겹치는 표본: `state-drone-ai` (앞 편. 이 표본의 나쁜 예가 그 구조), `state-player-actions`.
+
 ### B 연결
 
 **`observer-health-events` 관찰자 패턴: 체력 알림** ★
@@ -77,6 +92,16 @@
 - 확인된 대표작: 없음 (범용 기법). 출처: Nystrom 'Observer', Microsoft C# 이벤트 문서, Unity 전자책.
 - 겹치는 표본: UI 갤러리 `health-bar-trail` (체력 바 연출).
 - 교안과의 차이: 교안의 주 구현은 `IHpObserver` 인터페이스 + 목록 (중복 구독 방지, 같은 값이면 알리지 않기)이다. 표본은 C# `event`. 글 보강 후보는 분석 문서 3절.
+
+**`event-queue-sound` 이벤트 큐: 효과음 요청 모으기** ★★ — 묶음 4
+
+- ID `event-queue-sound`, 그룹 B, 순서 2, 난이도 2.
+- 한 줄: 효과음을 바로 틀지 않고 큐에 모아, 같은 프레임의 같은 소리는 합치고 빈 채널이 나면 차례로 튼다.
+- 수업에서 왜 필요한가: 교안에 없지만 Nystrom 'Event Queue' 의 예제가 바로 오디오다. 수강생 사운드 매니저의 흔한 모양(AudioSource 몇 개를 돌려 쓰며 바로 재생)은 일제 사격처럼 한 프레임에 요청이 몰리면 같은 소리가 겹쳐 터지고, 채널이 차면 중요한 알림음이 잘린다. 관찰자(바로 부름)의 다음 편으로 '시간을 떼어 놓기' 를 보인다.
+- 무대와 시나리오: 정비 기지 앞 잔해 드론 여럿, 포탑 단발·일제 사격, 마지막 드론이 파괴되면 웨이브 끝 알림음. 스피커 채널 `maxVoices` 개와 대기 큐를 무대 위쪽에 보인다. 자동 데모: 단발 → 일제 사격 (폭발음 여럿 + 알림음이 한 프레임에).
+- 효과 끄기: 요청 즉시 빈 AudioSource 를 찾아 재생하는 사운드 매니저. 같은 프레임에 폭발음이 채널을 모두 채워 ✖ `소리 겹침` (합친 음량이 기준을 넘음), 빈 채널이 없어 웨이브 끝 알림이 버려져 ✖ `알림 잘림`.
+- 출처: Nystrom 'Event Queue', Unity `AudioSource.PlayOneShot`, Unity Audio 프로젝트 설정 (Max Real Voices).
+- 겹치는 표본: `observer-health-events` (바로 부르기와 나중에 처리하기), `object-pool-projectiles` (AudioSource 풀).
 
 ### C 데이터
 
@@ -137,6 +162,16 @@
 - 출처: Refactoring Guru 'Factory Method', 'Template Method', Unity 전자책 (팩토리 장).
 - 겹치는 표본: `prototype-drone-clone` (만드는 두 방법: 복제와 팩토리), `object-pool-projectiles`.
 
+**`abstract-factory-zone-themes` 추상 팩토리: 구역 테마 세트** ★★ — 묶음 4
+
+- ID `abstract-factory-zone-themes`, 그룹 E, 순서 4, 난이도 2.
+- 한 줄: 구역마다 드론·투사체·바닥을 한 공장이 세트로 만들어, 다른 구역 것이 섞이지 않는다.
+- 수업에서 왜 필요한가: 교안 Abstract Factory 의 웨이브 테마(숲/용암: 적·투사체·배경) 그대로다. 테마를 쓰는 곳마다 `switch (zone)` 을 두면 새 구역을 더할 때 한 곳을 빠뜨리고, 쏘는 순간 '지금 구역' 을 다시 읽으면 앞 구역에서 나온 적이 새 구역 투사체를 쏜다. 교안 예제 코드(`ForestDungeon.CreateProjectile` 이 `FireBall` 을 만든다)도 같은 실수를 한다 (분석 문서 5절).
+- 무대와 시나리오: 숲·용암·빙하(나중에 더한 구역) 세 구역. 오른쪽 출구에서 구역 테마의 드론(덩굴·화염·서리)이 나오고, 각자 자기 세트의 투사체(가시·화염탄·얼음 조각)를 하린 쪽으로 쏜다. 자동 데모: 숲에서 하나 → 용암으로 옮겨 하나 → 사격 (남은 숲 드론) → 빙하로 옮겨 하나 → 사격.
+- 효과 끄기: 쓰는 곳마다 `switch (zone)`. 사격이 지금 구역을 다시 읽어 ✖ `구역 섞임` (숲 드론이 화염탄), 빙하를 더할 때 투사체 switch 만 빠뜨려 `default` 로 ✖ `분기 누락` (서리 드론이 화염탄).
+- 출처: Refactoring Guru 'Abstract Factory', Unity 매뉴얼 ScriptableObject.
+- 겹치는 표본: `factory-drone-spawner` (팩토리 메서드는 제품 하나를 자식이 고르고, 추상 팩토리는 제품 세트를 공장 객체째 갈아 끼운다).
+
 ### F 조립 (새 그룹)
 
 **`decorator-stat-buffs` 데코레이터 패턴: 버프 겹치기와 풀기** ★★ — 묶음 2
@@ -161,6 +196,26 @@
 - 출처: Refactoring Guru 'Facade'.
 - 겹치는 표본: `observer-health-events` (4단계 알림을 관찰자로), `decorator-stat-buffs`.
 
+**`composite-drone-squads` 컴포지트 패턴: 드론 편대 명령** ★★ — 묶음 4
+
+- ID `composite-drone-squads`, 그룹 F, 순서 3, 난이도 2.
+- 한 줄: 드론 하나와 편대를 같은 인터페이스로 다뤄, 편대 안 편대까지 명령 한 번이 끝까지 닿는다.
+- 수업에서 왜 필요한가: 교안 Composite 의 함정 "개별과 묶음을 다르게 처리하면 중첩될수록 분기가 감당 안 된다" 를 실행 중 버그로 보인다. 두 단계까지만 도는 `foreach` 는 편대 안에 편대를 넣는 순간 아래 드론에 명령이 닿지 않는다. Unity 의 Hierarchy 자체가 컴포지트라는 것과도 잇는다.
+- 무대와 시나리오: 정비 기지의 아군 정찰 드론. 본대 = D1 + 편대 B (D2, D3). 멀리 정찰 중인 지원 편대 C (D4, D5) 가 합류하면 편대 B 의 하위 편대가 된다. 입력: 출격, 귀환, 합류. 자동 데모: 출격 → 합류 → 귀환.
+- 효과 끄기: 드론 목록과 편대 목록을 따로 두고 두 단계까지만 도는 흔한 코드. 합류 뒤 귀환하면 편대 C 가 남아 ✖ `귀환 누락`, 편대 드론 수가 하위 편대를 세지 않아 ✖ `수 오산`.
+- 출처: Refactoring Guru 'Composite', Unity `Component.GetComponentsInChildren`.
+- 겹치는 표본: `decorator-stat-buffs` (같은 인터페이스로 하나를 감싸기와 여럿을 묶기), `command-undo-replay` (편대 명령을 명령 객체로).
+
+**`adapter-sensor-units` 어댑터 패턴: 센서 장비 단위 맞추기** ★ — 묶음 4
+
+- ID `adapter-sensor-units`, 그룹 F, 순서 4, 난이도 1.
+- 한 줄: 장비마다 다른 API 와 단위를 어댑터 한 곳에서 우리 모양으로 바꿔, 화면과 경보는 한 모양만 안다.
+- 수업에서 왜 필요한가: 교안 Adapter 의 결제·로그 어댑터(API 마다 절차와 매개변수가 다름)를 게임 안 장비로 옮겼다. 외부 SDK 를 쓰는 곳마다 직접 부르면 단위 변환을 곳곳에서 따로 하다 한 곳은 빠뜨리고 한 곳은 정수 나눗셈을 한다.
+- 무대와 시나리오: 북쪽 A, 남쪽 B 두 구역의 방사선 센서. 실제 방사선은 같고 HUD 는 구역마다 막대(0~1)와 경보등. 도윤이 B 구역 장비를 외부 업체 신형(`ReadPercent()` 0~100 정수)으로 바꾼다. 자동 데모: 오름 → 교체 → 오름 (경보 수준).
+- 효과 끄기: HUD 가 장비마다 직접 부른다. 막대 그리기는 변환을 빠뜨려 ✖ `막대 넘침`, 경보 판단은 `/ 100` 정수 나눗셈이라 ✖ `경보 누락`.
+- 출처: Refactoring Guru 'Adapter', Microsoft Learn 산술 연산자 (정수 나눗셈).
+- 겹치는 표본: `facade-hit-resolution` (퍼사드는 여럿을 단순한 창구로, 어댑터는 다른 모양 하나를 우리 모양으로), `decorator-stat-buffs`.
+
 ## 3. 우선순위 (교안 기준 후보 목록)
 
 교안 15개 패턴과 교안 밖 후보를 함께 놓고, 무대에 버그가 보이는지 · 순수 C# 코어로 대조되는지 · 수강생이 실제로 겪는지로 고른 순서다. 근거는 분석 문서 4절.
@@ -175,11 +230,11 @@
 | 6 | `facade-hit-resolution` | 퍼사드 (구조 05) | F | ★ | 함정으로 쓰러뜨린 드론이 HP 0 인데 남아 있음 (호출부 한 곳이 사망 처리 단계를 빠뜨림) | 3 |
 | 7 | `state-drone-ai` | 상태 (행동 01, 교안의 슬라임 AI) | A | ★★ | enum + switch 에서 공격을 떠나도 이동이 멈춘 채 (Exit 복구 없음) | 3 |
 | 8 | `object-pool-projectiles` | 오브젝트 풀 (교안 밖) | D | ★★ | 재사용한 탄이 이전 속도·방향으로 날아감 | 3 |
-| 9 | `composite-drone-squads` | 컴포지트 (구조 03) | F | ★★ | 편대 안 편대가 귀환 명령을 못 받음 | 3 다음 |
-| 10 | `abstract-factory-zone-themes` | 추상 팩토리 (생성 03) | E | ★★ | 숲 구역에 용암 투사체 (세트 어긋남. 교안 코드도 이 실수를 한다) | 3 다음 |
-| 11 | `adapter-sensor-units` | 어댑터 (구조 01) | F | ★ | 두 센서 API 의 단위(0~1, 0~100)가 섞여 막대가 넘침 | 보류 |
-| 12 | `event-queue-sound` | 이벤트 큐 (교안 밖) | B | ★★ | 한 프레임에 같은 소리가 겹쳐 터짐 | 보류 |
-| 13 | `hierarchical-state-enemy` | 계층 상태 기계 (교안 밖) | A | ★★★ | 상태 클래스가 조합마다 늘어남 | 보류 (`state-drone-ai` 다음 편) |
+| 9 | `composite-drone-squads` | 컴포지트 (구조 03) | F | ★★ | 편대 안 편대가 귀환 명령을 못 받음 | 4 |
+| 10 | `abstract-factory-zone-themes` | 추상 팩토리 (생성 03) | E | ★★ | 숲 구역에 용암 투사체 (세트 어긋남. 교안 코드도 이 실수를 한다) | 4 |
+| 11 | `adapter-sensor-units` | 어댑터 (구조 01) | F | ★ | 두 센서 API 의 단위(0~1, 0~100)가 섞여 막대가 넘침 | 4 |
+| 12 | `event-queue-sound` | 이벤트 큐 (교안 밖) | B | ★★ | 한 프레임에 같은 소리가 겹쳐 터짐 | 4 |
+| 13 | `hierarchical-state-enemy` | 계층 상태 기계 (교안 밖) | A | ★★★ | 상태마다 복사한 공통 규칙이 새 상태에서 빠짐 (EMP 무시, 경계등 꺼짐) | 4 (`state-drone-ai` 다음 편) |
 
 교안의 브리지·템플릿 메서드·빌더는 단독 표본으로 만들지 않고 각각 전략·팩토리·프로토타입 표본의 글에 녹인다 (5절).
 
@@ -192,6 +247,7 @@
 | 1 | `state-player-actions`, `observer-health-events`, `command-undo-replay` | 끝남, 배포 |
 | 2 | `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` | 끝남, 배포 (2026-11-03) |
 | 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | 끝남, 배포 (2026-11-03) |
+| 4 | `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy` | 진행 (2026-11-05). 회사 크레딧 남은 추정 $52.87 을 이 묶음에 쓴다 (Jay 결정, UI 갤러리는 더 쓰지 않음) |
 
 묶음 2 를 이 넷으로 고른 이유: 넷 다 무대에서 버그가 바로 보이고, 교안의 생성·구조·행동을 고루 덮고, 교안 예제가 이미 게임 상황(타워 조준, 스탯 버프, 적 복제, 매니저)이라 수업 흐름에 바로 붙는다. 싱글턴만 코어가 얇은 위험이 있어 맨 뒤에 돌린다.
 

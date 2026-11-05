@@ -9,7 +9,8 @@ const REPO = path.resolve(fileURLToPath(import.meta.url), '../../..')
 
 function job(spec) {
   const id = spec.id
-  const allowed = ['Read', 'Edit', 'Write', 'Glob', 'Grep', '"Bash(node tools/truth.mjs *)"', '"Bash(node tools/gallery.mjs *)"', '"Bash(git status*)"', '"Bash(git diff*)"', '"Bash(ls *)"']
+  // 읽기 명령(grep, cat, head)도 연다: 지난 잡들이 이것을 찾다 거부당했다 (UI 갤러리 교훈: 확인 명령은 허용 목록에)
+  const allowed = ['Read', 'Edit', 'Write', 'Glob', 'Grep', '"Bash(node tools/truth.mjs *)"', '"Bash(node tools/gallery.mjs *)"', '"Bash(git status*)"', '"Bash(git diff*)"', '"Bash(ls *)"', '"Bash(grep *)"', '"Bash(cat *)"', '"Bash(head *)"']
   const writePaths = [`unity/${id}/**`, `truth/${id}/**`, `src/specimens/${id}/**`, `src/shots/${id}/**`]
   const head = `---
 # ${spec.fix ? '표본 수정' : '표본 구현'} 잡. tools/workflow/make-jobs.mjs 로 만들었다.
@@ -66,7 +67,7 @@ Pattern Gallery 에 표본 하나를 새로 만든다. 이 리포는 웹 앱(루
 ## 먼저 읽을 것
 
 1. \`docs/specimen-guide.md\` 전체. 규격과 절차는 이 문서를 따른다.
-2. \`node_modules/@koohoo/gallery-kit/docs/kit-guide.md\` 의 2절(meta 글쓰기), 3절(콘텐츠 정책), 5절(안전).
+2. \`node_modules/@koohoo/gallery-kit/docs/kit-guide.md\` 의 2절(meta 글쓰기), 3절(콘텐츠 정책), 5절(안전). 작업 트리에는 처음에 \`node_modules\` 가 없다. \`node tools/gallery.mjs\` 를 인자 없이 한 번 부르면 메인 폴더의 것이 정션으로 이어지니, 그 뒤 Read 도구로 연다 (셸로 상위 폴더를 뒤지지 않는다. 막혀 있다).
 3. 기준 샘플 \`${spec.sample}\` 의 파일 전부 (\`unity/${spec.sample}/\`, \`truth/${spec.sample}/Target.cs\`, \`src/specimens/${spec.sample}/\`). ${spec.sampleNote ?? ''}
 4. \`docs/selection.md\` 의 \`${id}\` 카드.
 
