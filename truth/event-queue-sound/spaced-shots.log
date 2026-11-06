@@ -1,0 +1,43 @@
+# src d8b9089686d8
+# event-queue-sound spaced-shots naive=0
+0.30 in shot
+0.30 ev 드론 1 파괴
+0.30 ev 요청 폭발 0.50 → 대기 1
+0.30 ev 채널 1 재생 폭발 0.50 · 대기 0
+0.50 st alive=4 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.62 t2=0.00 t3=0.00 t4=0.00
+1.00 st alive=4 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.12 t2=0.00 t3=0.00 t4=0.00
+1.12 ev 채널 1 끝 · 폭발
+1.30 in shot
+1.30 ev 드론 2 파괴
+1.30 ev 요청 폭발 0.50 → 대기 1
+1.30 ev 채널 1 재생 폭발 0.50 · 대기 0
+1.50 st alive=3 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.62 t2=0.00 t3=0.00 t4=0.00
+2.00 st alive=3 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.12 t2=0.00 t3=0.00 t4=0.00
+2.12 ev 채널 1 끝 · 폭발
+2.30 in shot
+2.30 ev 드론 3 파괴
+2.30 ev 요청 폭발 0.50 → 대기 1
+2.30 ev 채널 1 재생 폭발 0.50 · 대기 0
+2.50 st alive=2 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.62 t2=0.00 t3=0.00 t4=0.00
+3.00 st alive=2 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.12 t2=0.00 t3=0.00 t4=0.00
+3.12 ev 채널 1 끝 · 폭발
+3.30 in shot
+3.30 ev 드론 4 파괴
+3.30 ev 요청 폭발 0.50 → 대기 1
+3.30 ev 채널 1 재생 폭발 0.50 · 대기 0
+3.50 st alive=1 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.62 t2=0.00 t3=0.00 t4=0.00
+4.00 st alive=1 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,-,-,- t1=0.12 t2=0.00 t3=0.00 t4=0.00
+4.12 ev 채널 1 끝 · 폭발
+4.30 in shot
+4.30 ev 드론 5 파괴
+4.30 ev 요청 폭발 0.50 → 대기 1
+4.30 ev 웨이브 1 끝
+4.30 ev 요청 웨이브 끝 알림 0.40 → 대기 2
+4.30 ev 채널 1 재생 폭발 0.50 · 대기 1
+4.30 ev 채널 2 재생 웨이브 끝 알림 0.40 · 대기 0
+4.50 st alive=0 pending=0 merged=0 dropped=0 loud=0.90 ch=폭발,알림,-,- t1=0.62 t2=0.62 t3=0.00 t4=0.00
+5.00 st alive=0 pending=0 merged=0 dropped=0 loud=0.90 ch=폭발,알림,-,- t1=0.12 t2=0.12 t3=0.00 t4=0.00
+5.12 ev 채널 1 끝 · 폭발
+5.12 ev 채널 2 끝 · 웨이브 끝 알림
+5.50 st alive=0 pending=0 merged=0 dropped=0 loud=0.00 ch=-,-,-,- t1=0.00 t2=0.00 t3=0.00 t4=0.00
+end st alive=0 pending=0 merged=0 dropped=0 loud=0.00 ch=-,-,-,- t1=0.00 t2=0.00 t3=0.00 t4=0.00
