@@ -95,6 +95,8 @@ namespace PatternGallery.HierarchicalStateEnemy
         public override void Enter(StateMachine m)
         {
             m.Drone.SetAlert(true); // [3] 추격으로 들어오든 수색에서 다시 들어오든 여기서 한 번 켠다
+            // 들어오는 순간의 자리도 적는다. Tick 만 적으면 들어온 바로 다음 프레임에 놓쳤을 때(순간이동, 대상 파괴) 이전 전투의 자리로 수색하러 간다
+            m.Drone.LastSeenX = m.Drone.TargetX;
         }
 
         public override void Exit(StateMachine m)

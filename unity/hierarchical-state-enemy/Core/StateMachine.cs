@@ -12,22 +12,27 @@ namespace PatternGallery.HierarchicalStateEnemy
 
         /// <summary>이번 Tick 에서 전이가 일어났는가</summary>
         bool changed;
+        /// <summary>지금 Exit·Enter 를 부르는 중인가 (그 이벤트 구독자 안도 포함)</summary>
+        bool transitioning;
 
         /// <summary>상태 하나의 Enter 를 부른 뒤 (부모부터 차례로 한 층씩)</summary>
         public event Action<HState> Entered;
         /// <summary>상태 하나의 Exit 를 부른 뒤 (잎부터 차례로 한 층씩)</summary>
         public event Action<HState> Exited;
-        /// <summary>입력을 처리한 층 (그 층, 입력)</summary>
-        public event Action<HState, string> Handled;
+        /// <summary>입력을 처리한 층 (입력을 받은 잎, 처리한 층, 입력)</summary>
+        public event Action<HState, HState, string> Handled;
         /// <summary>잎부터 맨 바깥까지 아무 층도 받지 않은 입력 (그때의 잎, 입력)</summary>
         public event Action<HState, string> Ignored;
 
         /// <summary>start 는 잎 상태. 바깥 부모부터 Enter 한다 (아직 구독자가 없어 이벤트는 들리지 않는다)</summary>
         public StateMachine(Drone drone, HState start)
         {
+            RequireLeaf(start);
             Drone = drone;
             Current = start;
-            EnterDown(start, null);
+            transitioning = true;
+            try { EnterDown(start, null); }
+            finally { transitioning = false; }
         }
 
         /// <summary>
@@ -40,7 +45,7 @@ namespace PatternGallery.HierarchicalStateEnemy
             for (HState s = leaf; s != null; s = s.Parent)
             {
                 if (!s.Handle(this, evt)) continue; // [1] 이 층이 받지 않으면 부모에게 올린다
-                Handled?.Invoke(s, evt);
+                Handled?.Invoke(leaf, s, evt);
                 return true;
             }
             Ignored?.Invoke(leaf, evt);
@@ -65,20 +70,40 @@ namespace PatternGallery.HierarchicalStateEnemy
         /// <summary>
         /// 잎 target 으로 바꾼다. 지금 잎과 target 의 공통 조상을 찾아,
         /// 지금 잎부터 공통 조상 바로 아래까지 안쪽부터 Exit, 공통 조상 아래에서 target 까지 바깥부터 Enter.
-        /// Chase → Attack 은 공통 조상이 Combat 이라 Combat 을 나가지도 다시 들어오지도 않는다
+        /// Chase → Attack 은 공통 조상이 Combat 이라 Combat 을 나가지도 다시 들어오지도 않는다.
+        /// Exit·Enter(와 그 이벤트 구독자) 안에서 다시 부르거나, 자식이 있는 상태(Active, Combat)를 target 으로 주면 InvalidOperationException
         /// </summary>
         public void ChangeState(HState target)
         {
+            if (transitioning)
+                throw new InvalidOperationException($"{target.Name} 로 바꾸려 했지만 지금 {Current.Name} 로 전이하는 중이다. Enter·Exit 와 Entered·Exited 구독자 안에서는 ChangeState 를 부르지 말고, 다음 Tick 에서 바꾼다");
+            RequireLeaf(target);
             if (target == Current) return;
             HState common = CommonAncestor(Current, target);
-            for (HState s = Current; s != common; s = s.Parent)
+            transitioning = true;
+            try
             {
-                s.Exit(this); // [2] 안쪽(잎)부터 공통 조상 바로 아래까지 나간다
-                Exited?.Invoke(s);
+                for (HState s = Current; s != common; s = s.Parent)
+                {
+                    s.Exit(this); // [2] 안쪽(잎)부터 공통 조상 바로 아래까지 나간다
+                    Exited?.Invoke(s);
+                }
+                Current = target;
+                changed = true;
+                EnterDown(target, common);
             }
-            Current = target;
-            changed = true;
-            EnterDown(target, common);
+            finally
+            {
+                transitioning = false;
+            }
+        }
+
+        /// <summary>지금 상태는 늘 잎 하나다. 부모(Active, Combat)로 바꾸면 어느 자식의 Tick 도 돌지 않는다</summary>
+        static void RequireLeaf(HState s)
+        {
+            if (s == null) throw new ArgumentNullException(nameof(s));
+            if (s.HasChildren)
+                throw new InvalidOperationException($"{s.Name} 는 자식이 있는 상태다. ChangeState 에는 잎(자식이 없는 상태)을 준다 (예: Combat 대신 Chase)");
         }
 
         /// <summary>stop 아래에서 s 까지 바깥부터 Enter 한다 (s 의 부모를 먼저)</summary>

@@ -35,7 +35,7 @@ namespace PatternGallery.HierarchicalStateEnemy
         /// <summary>충전한 시간과 충전 중인지 (AttackState 가 Enter 에서 켜고 Exit 에서 끈다)</summary>
         public float ChargeTimer;
         public bool Charging;
-        /// <summary>전투 중 마지막으로 대상을 본 자리. 수색은 여기로 간다 (CombatState.Tick 이 보이는 동안 매 프레임 적는다)</summary>
+        /// <summary>전투 중 마지막으로 대상을 본 자리. 수색은 여기로 간다 (CombatState 가 Enter 에서 한 번, Tick 에서 보이는 동안 매 프레임 적는다)</summary>
         public float LastSeenX;
         /// <summary>마지막으로 본 자리에 닿은 뒤 두리번거린 시간</summary>
         public float SearchTimer;

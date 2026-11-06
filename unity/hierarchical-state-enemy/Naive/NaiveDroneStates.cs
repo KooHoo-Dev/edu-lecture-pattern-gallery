@@ -53,7 +53,8 @@ namespace PatternGallery.HierarchicalStateEnemy.Naive
 
         public bool Handle(NaiveDrone d, string evt)
         {
-            return false; // [!] 나중에 더한 수색 상태: 다른 상태의 if (evt == "emp") 기절 줄을 여기 복사하지 않았다
+            // [!] 여기서 EMP 를 받지 않는다 (나중에 더한 수색 상태: 다른 상태의 if (evt == "emp") 기절 줄을 복사하지 않았다)
+            return false;
         }
 
         public void Tick(NaiveDrone d, float dt)
@@ -78,11 +79,12 @@ namespace PatternGallery.HierarchicalStateEnemy.Naive
         public void Enter(NaiveDrone d)
         {
             d.SetAlert(true); // 전투 상태가 추격 하나였던 시절에 쓴 줄
+            d.LastSeenX = d.TargetX; // 전투에 들어오는 순간의 자리도 적는다 (계층 쪽 CombatState.Enter 와 같다)
         }
 
         public void Exit(NaiveDrone d)
         {
-            d.SetAlert(false); // [!] 전투가 추격 하나였던 시절의 규칙. 추격 → 공격(아직 전투 중)으로 옮겨도 여기서 꺼진다
+            d.SetAlert(false); // [!] ChaseState.Exit 에서 끈다: 전투가 추격 하나였던 시절의 자리라, 추격 → 공격(아직 전투 중)으로 옮겨도 꺼진다
         }
 
         public bool Handle(NaiveDrone d, string evt)
@@ -117,7 +119,8 @@ namespace PatternGallery.HierarchicalStateEnemy.Naive
         {
             d.ChargeTimer = 0f;
             d.Charging = true;
-            d.FaceTarget(); // [!] 나중에 더한 공격 상태: Chase.Enter 의 d.SetAlert(true) 를 여기 복사하지 않았다
+            d.FaceTarget();
+            // [!] 여기서 경계등을 켜지 않는다 (나중에 더한 공격 상태: Chase.Enter 의 d.SetAlert(true) 를 복사하지 않았다)
         }
 
         public void Exit(NaiveDrone d)

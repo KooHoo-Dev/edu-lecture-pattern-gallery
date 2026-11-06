@@ -4,18 +4,21 @@ namespace PatternGallery.HierarchicalStateEnemy
     /// <summary>
     /// 상태 하나. 상태 객체에는 드론별 값을 두지 않는다 (그 값은 Drone 이 든다).
     /// 그래서 DroneStates 의 static 한 벌을 드론 몇 대든 같이 쓴다.
-    /// Enter 와 Exit 안에서는 ChangeState 를 부르지 않는다 (전이 도중에 또 전이하면 나가고 들어가는 순서가 꼬인다).
+    /// Enter 와 Exit 안에서는 ChangeState 를 부르지 않는다 (전이 도중에 또 전이하면 나가고 들어가는 순서가 꼬인다. StateMachine 이 예외로 막는다).
     /// </summary>
     public abstract class HState
     {
         public readonly string Name;
         /// <summary>바로 위 부모. 맨 바깥 상태(Active, Stunned)는 null</summary>
         public readonly HState Parent;
+        /// <summary>자식이 하나라도 있는가 (Active, Combat). 자식이 생성자에서 부모에 표시한다. ChangeState 의 target 은 자식이 없는 잎이어야 한다</summary>
+        public bool HasChildren { get; private set; }
 
         protected HState(string name, HState parent)
         {
             Name = name;
             Parent = parent;
+            if (parent != null) parent.HasChildren = true;
         }
 
         /// <summary>이 상태에 들어올 때 한 번. 부모부터 자식 순서로 불린다</summary>

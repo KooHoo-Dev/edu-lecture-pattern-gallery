@@ -7,7 +7,7 @@ namespace PatternGallery.HierarchicalStateEnemy
 {
     public class DroneBrain : MonoBehaviour
     {
-        [Header("조절 값 (웹 갤러리와 같은 이름. Play 중에 바꿔도 반영된다)")]
+        [Header("조절 값 (웹에 있는 값은 같은 이름. Play 중에 바꿔도 반영된다)")]
         [Tooltip("대상이 가로(x) 거리 이 안에 들어오면 순찰·수색에서 추격으로 (m). 전투에서 수색으로 나가는 것은 이보다 CombatState.LoseMargin(0.5m) 더 멀어졌을 때다")]
         [SerializeField] float detectRange = 5f;
         [Tooltip("대상이 가로(x) 거리 이 안이면 멈춰서 충전하고 쏜다 (m). 다시 쫓는 것은 이보다 AttackState.LeaveMargin(0.5m) 더 멀어졌을 때다")]
@@ -112,7 +112,8 @@ namespace PatternGallery.HierarchicalStateEnemy
 
         void OnValidate()
         {
-            // Play 중 Inspector 값을 바꾸면 코어 설정에도 넣는다
+            // Play 중 Inspector 값을 바꾸면 코어 설정에도 넣는다.
+            // 이 값들로 그리는 화면은 없어(경계등·색·상태 글은 지금 상태로만 정해진다) 여기서 다시 그릴 것은 없다
             if (machine == null) return;
             DroneSettings s = machine.Drone.Settings;
             s.DetectRange = detectRange;
@@ -153,7 +154,7 @@ namespace PatternGallery.HierarchicalStateEnemy
             RefreshText();
         }
 
-        void OnHandled(HState layer, string evt) => Log($"{evt} → {layer.Name} 가 처리");
+        void OnHandled(HState leaf, HState layer, string evt) => Log($"{evt}: {leaf.Name} → {layer.Name} 가 처리");
 
         void OnIgnored(HState leaf, string evt) => Log($"{evt} 받는 층 없음 ({leaf.Name})");
 
