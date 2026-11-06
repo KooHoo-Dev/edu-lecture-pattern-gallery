@@ -1,0 +1,33 @@
+# src e7b9524e688a
+# adapter-sensor-units swap-then-alarm naive=1
+0.40 in rise
+0.40 ev 방사선 0.00 → 0.25
+0.40 ev HUD A 막대 0.25
+0.40 ev HUD B 막대 0.25
+0.50 st level=0.25 b=LegacyProbe barA=0.25 barB=0.25 alarmA=0 alarmB=0
+1.00 st level=0.25 b=LegacyProbe barA=0.25 barB=0.25 alarmA=0 alarmB=0
+1.20 in rise
+1.20 ev 방사선 0.25 → 0.50
+1.20 ev HUD A 막대 0.50
+1.20 ev HUD B 막대 0.50
+1.50 st level=0.50 b=LegacyProbe barA=0.50 barB=0.50 alarmA=0 alarmB=0
+2.00 st level=0.50 b=LegacyProbe barA=0.50 barB=0.50 alarmA=0 alarmB=0
+2.20 in swap
+2.20 ev 도윤: B 구역 장비 → GeigerX (HUD 의 sensors[1] 칸에 장비를 직접 끼움)
+2.20 ev HUD B 막대 50.00
+2.20 ev !막대 넘침: B 막대 50.00 (0~1 막대에 ReadPercent 의 0~100 을 그대로 넣었다)
+2.50 st level=0.50 b=GeigerX barA=0.50 barB=50.00 alarmA=0 alarmB=0
+3.00 st level=0.50 b=GeigerX barA=0.50 barB=50.00 alarmA=0 alarmB=0
+3.50 st level=0.50 b=GeigerX barA=0.50 barB=50.00 alarmA=0 alarmB=0
+3.60 in rise
+3.60 ev 방사선 0.50 → 0.75
+3.60 ev HUD A 막대 0.75
+3.60 ev HUD A 경보 켜짐
+3.60 ev HUD B 막대 75.00
+3.60 ev !경보 누락: B 구역 0.75 ≥ 기준 0.70 인데 경보등 꺼짐 (75 / 100 = 0)
+4.00 st level=0.75 b=GeigerX barA=0.75 barB=75.00 alarmA=1 alarmB=0
+4.50 st level=0.75 b=GeigerX barA=0.75 barB=75.00 alarmA=1 alarmB=0
+5.00 st level=0.75 b=GeigerX barA=0.75 barB=75.00 alarmA=1 alarmB=0
+5.50 st level=0.75 b=GeigerX barA=0.75 barB=75.00 alarmA=1 alarmB=0
+6.00 st level=0.75 b=GeigerX barA=0.75 barB=75.00 alarmA=1 alarmB=0
+end st level=0.75 b=GeigerX barA=0.75 barB=75.00 alarmA=1 alarmB=0
