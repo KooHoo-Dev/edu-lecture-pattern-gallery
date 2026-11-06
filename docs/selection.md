@@ -1,7 +1,7 @@
 # 표본 선정 (패턴 갤러리)
 
 - 작성: 2026-11-03. 개정: 2026-11-05 (묶음 4 구성).
-- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 진행 (2026-11-05, 3절 후보 다섯 모두).**
+- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 끝남, 배포 (2026-11-06, 3절 후보 다섯 모두).**
 - 형식은 kit `design.md` 6절 (Shader Gallery 의 `docs/shader-selection.md` 형식). 공통 규칙은 kit-guide.
 - 교안 분석: [`research/lecture-analysis.md`](research/lecture-analysis.md). 교안 = `3000-Unity-3D/Assets/19. Legacy/2. OOP And Design Pattern/` (OOP 기초 3편 + 생성 5, 구조 5, 행동 5). 표본은 교안을 그대로 옮기지 않는다 (Jay 확인). 교안의 강조점과 함정은 가져오고, 상황은 외곽 탐사대로, 글은 증상에서 시작한다.
 
@@ -20,11 +20,11 @@
 | D 최적화 | `object-pool-projectiles` 오브젝트 풀: 포탑 탄 재사용 | 오브젝트 풀 (교안 밖) | ★★ | **묶음 3 (배포)** |
 | E 생성 | `factory-drone-spawner` 팩토리 메서드: 드론 스포너 | 팩토리 메서드 (생성 02) + 템플릿 메서드 | ★★ | **묶음 3 (배포)** |
 | F 조립 | `facade-hit-resolution` 퍼사드 패턴: 명중 처리 창구 | 퍼사드 (구조 05) | ★ | **묶음 3 (배포)** |
-| F 조립 | `composite-drone-squads` 컴포지트 패턴: 드론 편대 명령 | 컴포지트 (구조 03) | ★★ | 묶음 4 |
-| E 생성 | `abstract-factory-zone-themes` 추상 팩토리: 구역 테마 세트 | 추상 팩토리 (생성 03) | ★★ | 묶음 4 |
-| B 연결 | `event-queue-sound` 이벤트 큐: 효과음 요청 모으기 | 이벤트 큐 (교안 밖) | ★★ | 묶음 4 |
-| F 조립 | `adapter-sensor-units` 어댑터 패턴: 센서 장비 단위 맞추기 | 어댑터 (구조 01) | ★ | 묶음 4 |
-| A 행동 | `hierarchical-state-enemy` 상태 패턴: 계층 상태 기계 | 계층 상태 기계 (교안 밖, 상태의 다음 편) | ★★★ | 묶음 4 |
+| F 조립 | `composite-drone-squads` 컴포지트 패턴: 드론 편대 명령 | 컴포지트 (구조 03) | ★★ | **묶음 4 (배포)** |
+| E 생성 | `abstract-factory-zone-themes` 추상 팩토리: 구역 테마 세트 | 추상 팩토리 (생성 03) | ★★ | **묶음 4 (배포)** |
+| B 연결 | `event-queue-sound` 이벤트 큐: 효과음 요청 모으기 | 이벤트 큐 (교안 밖) | ★★ | **묶음 4 (배포)** |
+| F 조립 | `adapter-sensor-units` 어댑터 패턴: 센서 장비 단위 맞추기 | 어댑터 (구조 01) | ★ | **묶음 4 (배포)** |
+| A 행동 | `hierarchical-state-enemy` 상태 패턴: 계층 상태 기계 | 계층 상태 기계 (교안 밖, 상태의 다음 편) | ★★★ | **묶음 4 (배포)** |
 
 묶음 2 를 마치면 교안의 생성·구조·행동 세 묶음에 모두 표본이 생긴다 (생성 2, 구조 1, 행동 4).
 
@@ -247,7 +247,7 @@
 | 1 | `state-player-actions`, `observer-health-events`, `command-undo-replay` | 끝남, 배포 |
 | 2 | `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` | 끝남, 배포 (2026-11-03) |
 | 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | 끝남, 배포 (2026-11-03) |
-| 4 | `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy` | 진행 (2026-11-05). 회사 크레딧 남은 추정 $52.87 을 이 묶음에 쓴다 (Jay 결정, UI 갤러리는 더 쓰지 않음) |
+| 4 | `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy` | 끝남, 배포 (2026-11-06). 회사 크레딧 남은 추정 $52.87 을 이 묶음에 썼다 (Jay 결정, 기록 약 $37.1) |
 
 묶음 2 를 이 넷으로 고른 이유: 넷 다 무대에서 버그가 바로 보이고, 교안의 생성·구조·행동을 고루 덮고, 교안 예제가 이미 게임 상황(타워 조준, 스탯 버프, 적 복제, 매니저)이라 수업 흐름에 바로 붙는다. 싱글턴만 코어가 얇은 위험이 있어 맨 뒤에 돌린다.
 
