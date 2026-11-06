@@ -295,7 +295,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   const factories: Record<string, IZoneFactory> = { forest: new ForestFactory(), lava: new LavaFactory(), ice: new IceFactory() }
   const events: string[] = []
   let clock = 0
-  const at = { input: -9, spawn: -9, reject: -9, bug: -9 }
+  const at = { input: -9, spawn: -9, reject: -9 }
   let path: string[] = []
   let lastSpawned: Drone | null = null
   const start = String(values.startZone)
@@ -352,7 +352,6 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       if (!now || last) continue
       if (d.Theme !== n.zone) events.push(`!구역 섞임: ${d.Tag} · ${expected} 대신 ${p.Name} (지금 zone "${n.zone}" 로 만들었다)`)
       else events.push(`!분기 누락: ${d.Tag} · ${expected} 대신 ${p.Name} (MakeProjectile 에 case "${n.zone}" 가 없어 default)`)
-      at.bug = clock
     }
   }
 
@@ -433,7 +432,8 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       const world: WorldItem[] = [
         // 바닥: 지금 구역 공장이 만든 Ground (색과 이름)
         { kind: 'box', x: 0, y: 0, w: 16, h: 1, fill: ART[ground.Theme].ground },
-        { kind: 'text', x: 8, y: 0.5, text: ground.Name, size: 18, color: C.exit },
+        // 바닥 이름은 왼쪽 끝에 둔다 (가운데 x 8 은 자리 3 드론의 번호와 겹친다)
+        { kind: 'text', x: 0.4, y: 0.5, text: ground.Name, size: 18, color: C.exit, align: 'left' },
         { kind: 'box', x: 13.7, y: 1, w: 1.5, h: 2.6, fill: C.exit, stroke: full ? C.warn : C.dim, label: '출구' },
         { kind: 'actor', x: HARIN_X, y: 1, role: 'ally', label: '하린', facing: 1 },
         { kind: 'box', x: 3, y: 1, w: 0.06, h: 2, fill: C.dim },
@@ -458,13 +458,15 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         if (wrong) world.push({ kind: 'box', x: p.X - 0.36, y: SHOT_Y - 0.22, w: 0.72, h: 0.44, stroke: C.bug })
         world.push({ kind: 'text', x: p.X, y: SHOT_Y + 0.42, text: p.Name, size: 15, color: wrong ? C.bug : C.text })
       }
-      // 나쁜 예: 세트가 어긋난 드론 위에 남는 글
+      // 나쁜 예: 세트가 어긋난 드론 위에 남는 글. 글이 드론 간격(1.6)보다 넓어, 이웃 드론끼리 겹치지 않게 자리마다 높이를 번갈아 둔다
+      // (자리 0 은 위 줄: 출구 위의 '출격 거절' 글과도 비켜 간다)
       if (naive) {
         for (const d of drones) {
           const note = wrongNote.get(d)
           if (!note) continue
-          world.push({ kind: 'text', x: d.X, y: 4.25, text: '세트 어긋남', size: 15, color: C.bug })
-          world.push({ kind: 'text', x: d.X, y: 3.75, text: note, size: 15, color: C.bug })
+          const lift = d.Slot % 2 === 0 ? 1.2 : 0
+          world.push({ kind: 'text', x: d.X, y: 4.25 + lift, text: '세트 어긋남', size: 15, color: C.bug })
+          world.push({ kind: 'text', x: d.X, y: 3.75 + lift, text: note, size: 15, color: C.bug })
           world.push({ kind: 'box', x: d.X - 0.5, y: 1.05, w: 1, h: 2.35, stroke: C.bug, dashed: true })
         }
       }
