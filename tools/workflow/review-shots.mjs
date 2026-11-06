@@ -49,6 +49,11 @@ for (const id of process.argv.slice(2)) {
       live(id, `auto=1&scenario=${sc.id}&t=${t}&off=1`, `scn-${sc.id}-t${t}-off`)
     }
   }
+  // range 조절 값마다 최소·최대 (자동 데모 끝). 글·그림 겹침은 조절 값 끝에서 잘 생긴다 (묶음 4 리뷰)
+  for (const p of meta.params ?? []) {
+    if (p.type !== 'range') continue
+    for (const [tag, v] of [['min', p.min], ['max', p.max]]) live(id, `auto=1&t=${end}&p.${p.key}=${v}`, `param-${p.key}-${tag}`)
+  }
   // 프리셋마다 끝 화면 (조절 값 끝에서 생기는 겹침, 프리셋 look 대조. 묶음 4 리뷰 요청)
   for (const p of meta.presets ?? []) live(id, `auto=1&t=${end}&preset=${p.id}`, `preset-${p.id}`)
 
