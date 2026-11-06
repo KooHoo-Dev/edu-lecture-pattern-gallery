@@ -1,4 +1,4 @@
-// 본대 지휘 어댑터: Input System 입력을 본대(트리의 뿌리) 하나에 넘긴다. 받는 쪽이 드론인지 편대인지, 트리가 몇 단계인지 모른다.
+// 본대 지휘 연결 컴포넌트: Input System 입력을 본대(트리의 뿌리) 하나에 넘긴다. 본대를 IUnit 으로만 들고 있어, 받는 쪽이 드론인지 편대인지, 트리가 몇 단계인지 모른다.
 // 트리는 처음 읽을 때 Hierarchy 에서 만들고(SquadNode), 매 프레임 본대의 Tick 하나로 트리 안 모든 드론을 움직인다.
 // 화면 글과 Console 기록은 코어 이벤트 핸들러에서 바로 바꾼다. 게임 규칙은 여기 없다 (Core/ 의 Squad, Drone).
 using UnityEngine;
@@ -32,7 +32,7 @@ namespace PatternGallery.CompositeDroneSquads
         [SerializeField] bool logEvents = true;
 
         FlightSettings settings;
-        Squad root;
+        IUnit root; // 지휘 코드는 공통 인터페이스만 안다. 본대가 Squad 라는 것은 트리를 만드는 SquadNode 만 안다
 
         // 확인용 글 (IMGUI). 이벤트 핸들러에서 만들고 OnGUI 는 그리기만 한다
         string countLine = "";
@@ -46,7 +46,7 @@ namespace PatternGallery.CompositeDroneSquads
         /// 처음 읽을 때 Hierarchy 에서 본대 트리를 만든다. 지원 편대도 같은 설정으로 따로 만들어 둔다 (합류 전에는 본대 밖이다).
         /// 다른 오브젝트의 OnEnable 이 이 오브젝트의 Awake 보다 먼저 불려도 null 이 아니게 Awake 에서 만들지 않는다
         /// </summary>
-        public Squad Root
+        public IUnit Root
         {
             get
             {
@@ -112,6 +112,8 @@ namespace PatternGallery.CompositeDroneSquads
             if (settings == null) return;
             settings.FlySpeed = flySpeed;
             settings.PatrolDistance = patrolDistance;
+            // 왼쪽 위 글(드론 수, 기지 도착 수)은 이 두 값을 쓰지 않아 다시 그릴 것이 없다.
+            // 드론 위치는 DroneUnit.Update 가 매 프레임 코어 값으로 옮긴다
         }
 
         void OnSortie(InputAction.CallbackContext _) => Root.Sortie(); // [1] 본대 하나에 보낸다. 트리가 몇 단계인지 모른다
@@ -119,8 +121,13 @@ namespace PatternGallery.CompositeDroneSquads
 
         void OnJoin(InputAction.CallbackContext _)
         {
-            if (joinTarget == null || supportSquad == null) return;
-            joinTarget.Join(supportSquad); // 코어 Add 와 Hierarchy SetParent 를 함께. 결과는 Joined, JoinRejected 로 온다
+            if (joinTarget == null || supportSquad == null)
+            {
+                // 빈 칸은 조용히 넘기지 않는다 (누르는데 아무 일도 없으면 원인을 찾기 어렵다)
+                Debug.LogError($"[Squad] 합류할 수 없다: {(joinTarget == null ? "Join Target" : "Support Squad")} 칸이 비어 있다", this);
+                return;
+            }
+            joinTarget.Join(supportSquad); // 코어 Add 와 Hierarchy SetParent 를 함께. 결과는 Joined, JoinRejected 로 온다 (오브젝트 문제는 Join 이 LogError)
         }
 
         void Update()

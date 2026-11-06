@@ -59,7 +59,7 @@ export const meta: PatternMeta = {
       label: '먼저 합류(두 번) → 출격 → 귀환, 속도 4 · 거리 4',
       duration: 5,
       values: { flySpeed: 4, patrolDistance: 4 },
-      note: '속도 4, 거리 4. 0.30초에 먼저 합류하면 나쁜 예는 바로 드론 수가 3 이다 (✖ 수 오산). 0.80초 출격은 패턴에서 C 와 D4, D5 까지 내려가지만 C 는 이미 정찰 중이라 그대로다. 나쁜 예의 출격은 C 에 닿지 않지만 C 가 이미 나가 있어 화면에 차이가 없다. 1.60초에 합류를 또 누르면 패턴은 B.Add 가 "C 는 이미 B 소속" 으로 거절하고 (JoinRejected), 나쁜 예는 supportJoined 플래그로 무시한다. 2.40초 귀환에서 패턴은 4.43초까지 다섯 대가 모두 돌아오고, 나쁜 예는 D4, D5 가 남는다 (✖ 귀환 누락)',
+      note: '속도 4, 거리 4. 0.30초에 먼저 합류하면 나쁜 예는 바로 드론 수가 3 이다 (✖ 수 오산). 0.80초 출격은 패턴에서 C 와 D4, D5 까지 내려가지만 C 는 이미 정찰 중이라 그대로다. 나쁜 예의 출격은 C 에 닿지 않는다. 드론 위치는 패턴과 같지만 무대는 명령이 닿지 않은 것을 회색 `출격 못 받음` 글과 점선 `D4 –`, `D5 –` 칩으로 표시한다 (이미 나가 있어 결과가 같으므로 ✖ 는 아니다). 1.60초에 합류를 또 누르면 패턴은 B.Add 가 "C 는 이미 B 소속" 으로 거절하고 (JoinRejected), 나쁜 예는 supportJoined 플래그로 무시한다. 2.40초 귀환에서 패턴은 4.43초까지 다섯 대가 모두 돌아오고, 나쁜 예는 D4, D5 가 남는다 (✖ 귀환 누락)',
       inputs: [
         [0.3, 'join'],
         [0.8, 'sortie'],
@@ -70,11 +70,11 @@ export const meta: PatternMeta = {
   ],
   diagram: {
     nodes: [
-      { id: 'input', label: 'SquadCommandInput', sub: '어댑터 · 본대 하나에 명령', x: 50, y: 8 },
+      { id: 'input', label: 'SquadCommandInput', sub: '연결 컴포넌트 · IUnit Root 에 명령', x: 50, y: 8 },
       { id: 'iunit', label: 'IUnit', sub: 'Sortie · Recall · CountDrones', x: 42, y: 38, kind: 'interface' },
       { id: 'drone', label: 'Drone', sub: '잎 · Tick 으로 날고 Arrived', x: 18, y: 88 },
       { id: 'squad', label: 'Squad', sub: '가지 · 자식마다 같은 메서드', x: 56, y: 88 },
-      { id: 'children', label: 'List<IUnit>', sub: '자식들 (드론도 편대도)', x: 82, y: 60, kind: 'object' },
+      { id: 'children', label: 'children', sub: 'List<IUnit> · 드론도 편대도', x: 82, y: 60, kind: 'object' },
     ],
     edges: [
       { id: 'input-iunit', from: 'input', to: 'iunit', label: '본대.Sortie / Recall', kind: 'call' },
@@ -100,17 +100,17 @@ export const meta: PatternMeta = {
     ],
   },
   steps: [
-    { n: 1, label: '명령은 본대 하나에 보낸다', body: '`SquadCommandInput` 은 Q·W 를 받으면 `Root.Sortie()` 나 `Root.Recall()` 한 줄만 부른다. 지휘 코드는 본대 아래가 몇 단계인지, 드론이 몇 대인지 모른다. 본대도 `IUnit` 이라 받는 쪽이 드론 한 대여도 같은 줄이다.', target: 'input,input-iunit,iunit' },
-    { n: 2, label: '편대는 자식마다 같은 메서드를 부른다', body: '`Squad.Recall` 은 받았다고 알리고(`OrderReceived`) `List<IUnit>` 자식마다 `child.Recall()` 을 부른다. 자식이 드론인지 편대인지 묻지 않는다 (`is` 검사가 없다). 사건 기록의 `귀환 → 본대`, `귀환 → 본대/D1`, `귀환 → 본대/B` 순서가 이 호출 순서다.', target: 'squad,squad-children,children' },
-    { n: 3, label: '하위 편대도 같은 일을 되풀이한다', body: '자식이 편대 B 면 `B.Recall` 이 다시 D2, D3, C 마다 부르고, C 가 또 D4, D5 에 부른다. 같은 메서드가 잎까지 스스로 내려가므로 세 단계든 열 단계든 지휘 코드는 그대로다. `CountDrones` 와 `Tick` 도 같은 길로 내려가고, Unity 의 `SquadNode` 도 같은 방식으로 Hierarchy 를 내려가며 트리를 만든다. 합류는 `B.Add(C)` 한 번이고, 자기 자신·조상·이미 소속이 있는 편대는 받지 않는다 (`JoinRejected`).', target: 'children,children-iunit,iunit,squad-iunit' },
+    { n: 1, label: '명령은 본대 하나에 보낸다', body: '`SquadCommandInput` 은 본대를 `IUnit Root` 로만 들고, Q·W 를 받으면 `Root.Sortie()` 나 `Root.Recall()` 한 줄만 부른다. 지휘 코드는 본대 아래가 몇 단계인지, 드론이 몇 대인지 모른다. 본대도 `IUnit` 이라 받는 쪽이 드론 한 대여도 같은 줄이다.', target: 'input,input-iunit,iunit' },
+    { n: 2, label: '편대는 자식마다 같은 메서드를 부른다', body: '`Squad.Recall` 은 받았다고 알리고(`OrderReceived`) 자식 목록 `children`(`List<IUnit>`)의 자식마다 `child.Recall()` 을 부른다. 자식이 드론인지 편대인지 묻지 않는다 (`is` 검사가 없다). 사건 기록의 `귀환 → 본대`, `귀환 → 본대/D1`, `귀환 → 본대/B` 순서가 이 호출 순서다.', target: 'squad,squad-children,children' },
+    { n: 3, label: '하위 편대도 같은 일을 되풀이한다', body: '자식이 편대 B 면 `B.Recall` 이 다시 D2, D3, C 마다 부르고, C 가 또 D4, D5 에 부른다. 같은 메서드가 잎까지 스스로 내려가므로 세 단계든 열 단계든 지휘 코드는 그대로다. `CountDrones` 와 `Tick` 도 같은 길로 내려간다. Unity 쪽도 같은 컴포지트다: `SquadNode` 는 자식 오브젝트가 드론인지 편대인지 `is` 로 묻지 않고 `IUnitNode.Build` 하나만 불러, 자식 편대가 다시 자기 자식을 넣으며 Hierarchy 를 내려가 트리를 만든다. 합류는 `B.Add(C)` 한 번이고, 자기 자신·조상·이미 소속이 있는 편대는 받지 않는다 (`JoinRejected`).', target: 'children,children-iunit,iunit,squad-iunit' },
     { n: 4, label: '잎이 실제로 날고 도착을 알린다', body: '움직이는 것은 `Drone.Tick` 뿐이다. `flySpeed` 로 목적지(정찰 지점이나 기지 자리)를 향해 날고, 닿으면 `Arrived` 를 알린다. 편대가 자식의 이벤트를 위로 올려 본대 구독자 하나가 모두 듣는다. Unity 에서는 `DroneUnit.Update` 가 코어 위치를 transform 에 옮긴다.', target: 'drone,drone-iunit' },
   ],
-  offNote: '지원 편대를 합류시킨 뒤 귀환 명령을 내렸더니 그 편대만 밖에 남는다. 드론 목록(`drones`)과 편대 목록(`squads`)을 따로 들고 지휘 코드가 `foreach` 를 두 단계로 겹쳐 도는 흔한 코드다. 하위 편대가 없던 시절에 쓴 `RecallAll` 은 `root.drones` 와 `root.squads` 의 각 `drones` 까지만 돈다. 합류로 C 가 B 의 `squads` 에 들어가면 귀환 명령이 D4, D5 에 닿지 않고 (✖ 귀환 누락, 빨간 `명령 못 받음`), 같은 두 단계로 세는 `CountDrones` 는 5대를 3대로 센다 (✖ 수 오산, `(실제 5)`). 그래서 D1~D3 이 돌아오면 화면은 `기지 도착 3 / 전체 3` 으로 다 돌아왔다고 보인다. `SortieAll` 도 같은 두 단계지만 C 는 처음부터 나가 있어 출격에서는 티가 안 난다. 어느 순서로 누르든 같다: 합류하지 않으면 나쁜 예도 맞고, 합류하는 순간 수가 틀리고, 합류한 뒤 귀환할 때마다 C 가 남는다. 세 번째 `foreach` 를 덧대면 네 단계가 생길 때 또 빠진다. 개별과 묶음을 다르게 다루면 중첩될수록 분기가 감당이 안 된다.',
+  offNote: '지원 편대를 합류시킨 뒤 귀환 명령을 내렸더니 그 편대만 밖에 남는다. 드론 목록(`drones`)과 편대 목록(`squads`)을 따로 들고 지휘 코드가 `foreach` 를 두 단계로 겹쳐 도는 흔한 코드다. 하위 편대가 없던 시절에 쓴 `RecallAll` 은 `root.drones` 와 `root.squads` 의 각 `drones` 까지만 돈다. 합류로 C 가 B 의 `squads` 에 들어가면 귀환 명령이 D4, D5 에 닿지 않고 (✖ 귀환 누락, 빨간 `명령 못 받음`), 같은 두 단계로 세는 `CountDrones` 는 5대를 3대로 센다 (✖ 수 오산, `(실제 5)`). 그래서 D1~D3 이 돌아오면 화면은 `기지 도착 3 / 전체 3` 으로 다 돌아왔다고 보인다. `SortieAll` 도 같은 두 단계라 합류 뒤 출격도 D4, D5 에 닿지 않지만, C 는 처음부터 나가 있어 위치는 같다 (무대는 회색 `출격 못 받음` 과 점선 `D4 –` 칩으로만 표시하고, 결과가 같아 ✖ 로 세지 않는다). 같은 코드를 Unity 에 두면 합류 뒤 귀환했을 때 IMGUI 화면 왼쪽 위에 `편대 드론 수 3`, `기지 도착 3 / 전체 3` 이 보이고 Game 뷰 오른쪽에 D4, D5 만 떠 있다 (빨간 표시는 없다). 어느 순서로 누르든 같다: 합류하지 않으면 나쁜 예도 맞고, 합류하는 순간 수가 틀리고, 합류한 뒤 귀환할 때마다 C 가 남는다. 세 번째 `foreach` 를 덧대면 네 단계가 생길 때 또 빠진다. 개별과 묶음을 다르게 다루면 중첩될수록 분기가 감당이 안 된다.',
   mistakes: [
-    { title: '지원 편대를 합류시켰더니 귀환 명령이 그 편대에만 닿지 않는다', body: '지휘 코드가 `foreach (d in root.drones)` 와 `foreach (s in root.squads) foreach (d in s.drones)` 처럼 정해진 단계만 돈다. 편대 안에 편대가 생기면 세 번째 단계의 드론은 아무도 부르지 않는다. 드론 수를 세는 코드도 같은 모양이라 함께 틀린다. 편대가 자식마다 같은 메서드를 부르게 하면(`child.Recall()`) 단계 수를 코드에 적을 일이 없다.' },
+    { title: '지원 편대를 합류시켰더니 귀환 명령이 그 편대에만 닿지 않는다', body: '지휘 코드가 `foreach (d in root.drones)` 와 `foreach (s in root.squads) foreach (d in s.drones)` 처럼 정해진 단계만 돈다. 편대 안에 편대가 생기면 세 번째 단계의 드론은 아무도 부르지 않는다. 드론 수를 세는 코드도 같은 모양이라 함께 틀린다. Unity 에서는 왼쪽 위 글이 `편대 드론 수 3`, `기지 도착 3 / 전체 3` 으로 다 돌아온 것처럼 보이고, Game 뷰 오른쪽에 D4, D5 만 떠 있다. 편대가 자식마다 같은 메서드를 부르게 하면(`child.Recall()`) 단계 수를 코드에 적을 일이 없다.' },
     { title: '편대 안 편대를 처리하려고 `is Squad` 분기를 넣었더니 명령마다 if 가 늘어난다', body: '`if (u is Drone d) d.Recall(); else if (u is Squad s) …` 를 출격, 귀환, 수 세기마다 쓰면 새 종류(수송 드론 묶음 등)를 더할 때 모든 곳을 고쳐야 하고, 한 곳을 빠뜨리면 그 명령만 안 닿는다. 공통 명령은 `IUnit` 에 두고 각자 구현한다. 편대에만 있는 `Add` 는 이 표본처럼 `Squad` 에만 두거나(안전성: 드론에 넣는 코드를 컴파일이 막는다), `IUnit` 에 두고 `Drone.Add` 가 예외를 던지게 한다(투명성: 쓰는 쪽이 종류를 몰라도 된다). 어느 쪽이든 `Sortie`, `Recall` 에는 분기가 없어야 한다.' },
     { title: '편대를 넣는 순간 게임이 멈추고 StackOverflowException 이 난다', body: '편대를 자기 자신이나 자기 상위 편대 안에 넣으면 트리가 고리가 되어 `Recall` 이 끝없이 자기를 다시 부른다. `Squad.Add` 는 `Parent` 를 따라 올라가며 넣으려는 것이 자기나 조상인지 보고, 그러면 받지 않고 `JoinRejected` 로 알린다. 이 표본의 입력(E)은 C 를 B 에 넣기만 해서 이 경로를 밟지 않지만, 편대를 자유롭게 옮기는 UI 를 만들면 바로 필요하다.' },
-    { title: '한 드론이 명령을 두 번 받는다', body: '같은 드론을 두 편대에 넣었거나, 합류 버튼을 두 번 눌러 같은 편대가 두 번 들어갔다. 트리에서는 한 유닛의 부모가 하나뿐이어야 한다. `Squad.Add` 는 `Parent` 가 이미 있는 유닛을 "C 는 이미 B 소속" 으로 거절한다. 다른 편대로 옮기려면 원래 편대에서 빼는 `Remove` 를 만들고 그 안에서 `Parent` 를 비운 뒤 `Add` 한다.' },
+    { title: '한 드론이 명령을 두 번 받는다', body: '같은 드론을 두 편대에 넣었거나, 합류 버튼을 두 번 눌러 같은 편대가 두 번 들어갔다. 트리에서는 한 유닛의 부모가 하나뿐이어야 한다. `Squad.Add` 는 `Parent` 가 이미 있는 유닛을 "C 는 이미 B 소속" 으로 거절한다. 다른 편대로 옮기려면 원래 편대에서 빼는 `Remove` 를 만들고, 그 안에서 `children.Remove(unit)`, `Parent` 비우기, 이벤트 해제(`unit.OrderReceived -= ForwardOrder`, `unit.Arrived -= ForwardArrived`)를 모두 한 뒤 새 편대에 `Add` 한다. 이벤트 해제를 빠뜨리면 옛 편대가 옮긴 편대의 명령·도착 이벤트를 계속 위로 올려, 본대 구독자가 같은 사건을 두 번 듣는다.' },
     { title: '명령을 내리는 중에 편대를 바꿨더니 InvalidOperationException 이 난다', body: '`foreach (IUnit child in children)` 로 명령을 돌리는 동안 이벤트 핸들러가 `Add` 나 `Remove` 로 그 목록을 고치면 "Collection was modified" 예외가 난다. 예를 들어 `OrderReceived` 를 받자마자 합류시키는 코드다. 이 표본은 합류를 입력 콜백에서만 해 명령 도중과 겹치지 않는다. 명령 도중에 바꿔야 하면 바꿀 일을 모아 두었다가 명령이 끝난 뒤 적용하거나, 자식 목록을 복사해서 돈다.' },
   ],
   unity: {
@@ -125,7 +125,7 @@ export const meta: PatternMeta = {
     ],
     verify: 'E 로 C 를 합류시킨 뒤 W 를 누르면 D4, D5 까지 다섯 대가 모두 기지 자리로 돌아오고, E 를 한 번 더 누르면 Console 에 `[Squad] 합류 거절: C 는 이미 B 소속 (JoinRejected)` 이 나온다.',
     pitfalls: [
-      '`GetComponentsInChildren<DroneUnit>()` 를 본대에서 부르면 아래의 모든 드론을 한 번에 얻어 명령을 다 보낼 수 있다. 하지만 그러면 "편대 B 에만 귀환" 같은 편대 단위 명령과 편대가 받은 기록이 사라지고, 합류 전의 C 처럼 본대 밖의 드론은 빠진다. 꺼진 오브젝트는 기본으로 빠지고 `includeInactive: true` 를 줘야 들어간다. 이 표본의 `SquadNode` 는 바로 아래 자식만 보고, 꺼 둔(`activeSelf` 가 false 인) 자식은 넣지 않는다.',
+      '`GetComponentsInChildren<DroneUnit>()` 를 본대에서 부르면 아래의 모든 드론을 한 번에 얻어 명령을 다 보낼 수 있다. 하지만 그러면 "편대 B 에만 귀환" 같은 편대 단위 명령과 편대가 받은 기록이 사라지고, 합류 전의 C 처럼 본대 밖의 드론은 빠진다. 꺼진 오브젝트는 기본으로 빠지고 `includeInactive: true` 를 줘야 들어간다. 이 표본의 `SquadNode` 는 바로 아래 자식만 보고, 꺼 둔(`activeSelf` 가 false 인) 자식은 넣지 않는다. 합류(`SquadNode.Join`)도 같아서, `C` 나 `B` 를 꺼 둔 채 E 를 누르면 받지 않고 Console 에 오류를 남긴다 (`Join Target`, `Support Squad` 칸이 비었을 때도). 받아 버리면 코어 드론 수는 5 인데 화면에 드론이 없다.',
       '코어 트리는 `SquadCommandInput` 이 처음 `Root` 를 읽을 때(`OnEnable`) 한 번 만든다. Play 중에 Hierarchy 에서 오브젝트를 끌어 옮기거나 껐다 켜도 코어 트리는 그대로다. 합류처럼 코어 `Add` 와 `SetParent` 를 함께 해야 한다 (`SquadNode.Join`). 드론 위치는 `DroneUnit.Update` 가 매 프레임 코어 값으로 넣으므로 Scene 뷰에서 끌어도 다음 프레임에 돌아간다.',
       '`SetParent(transform, true)` 의 두 번째 값 `worldPositionStays` 가 true 면 C 오브젝트의 월드 위치를 그대로 두고 부모만 바꾼다. false 면 local 위치를 그대로 두어 월드 위치가 B 기준으로 바뀐다. 이 표본은 B 와 C 가 모두 (0, 0, 0) 이라 어느 쪽이든 C 가 움직이지 않고, 드론은 `DroneUnit.Update` 가 월드 위치를 넣어 튀지 않는다. 편대 오브젝트를 다른 자리에 두거나 C 에 깃발 같은 표시물을 달았다면 true 여야 한다.',
       '본대의 `Tick` 하나가 트리 안 드론만 움직인다. 합류 전의 C 는 아무도 Tick 하지 않지만 명령을 받을 길도 없어 정찰 지점에 떠 있기만 한다. 합류 전에도 C 를 따로 움직이려면 C 에 자기 지휘 컴포넌트를 두고, 합류할 때 그쪽 Tick 을 멈춘다 (두 곳에서 Tick 하면 두 배로 빠르다).',
