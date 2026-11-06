@@ -436,6 +436,10 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       const orderText = lastOrder ? orderName(lastOrder) : ''
       /** 마지막 명령이 닿아야 했는데 못 받은 것 (나쁜 예만) */
       const missedOrder = (name: string) => naive !== null && shouldReach.has(name) && !reached.has(name)
+      /** ✖ 귀환 누락과 같은 판정: 그림자 코어는 들어왔는데(오는 중) 나쁜 예 드론은 밖에 있다. 빨간 표시는 이것만 */
+      const missedRecall = (i: number) => naive !== null && !isOut(drones[i]) && isOut(naiveDrones[i])
+      /** 명령이 안 닿았지만 결과는 같은 것 (이미 나가 있는 드론에 출격). ✖ 가 아니라 회색으로 */
+      const missedNoEffect = (i: number) => !missedRecall(i) && missedOrder(Names[i]) && lastOrder === 'Sortie' && isOut(ds[i])
       const got = (name: string) => lastOrder !== null && reached.has(name)
 
       const world: WorldItem[] = [{ kind: 'box', x: 0, y: 0, w: 16, h: 1, fill: '#22314a' }]
@@ -454,51 +458,68 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       })
       if (naive && shown !== real && docked === shown) world.push({ kind: 'text', x: 0.4, y: 6.95, text: `다 돌아왔다고 보이지만 ${ds.filter(d => isOut(d)).map(d => d.Name).join(', ')} 는 밖에 있다`, align: 'left', size: 18, color: COL.bug })
 
-      // 정비 기지와 자리 다섯 칸
-      world.push({ kind: 'box', x: 0.15, y: 1, w: 4.7, h: 2.1, fill: '#131d2d', stroke: COL.line })
-      world.push({ kind: 'text', x: 0.3, y: 2.7, text: '정비 기지', align: 'left', size: 16, color: COL.dim })
+      // 정비 기지와 자리 다섯 칸. 상자 위 끝(2.45)은 정찰 거리 최소(4)에서 D1 이 뜨는 (4.7, 3) 과 그 아래 글보다 낮다. 이름은 땅 띠에
+      world.push({ kind: 'box', x: 0.15, y: 1, w: 4.7, h: 1.45, fill: '#131d2d', stroke: COL.line })
+      world.push({ kind: 'text', x: 0.3, y: 0.15, text: '정비 기지', align: 'left', size: 14, color: COL.dim })
       for (let i = 0; i < 5; i++) world.push({ kind: 'box', x: HomeXs[i] - 0.4, y: 1.02, w: 0.8, h: 1.0, stroke: '#2b3a52', dashed: true })
 
-      // 드론
-      for (const d of ds) {
+      // 오른쪽 위: 편대 트리 (상자 안 상자). 판의 아래 끝(y 5.5)은 정찰 거리 최대(7)에서 가장 높이 뜨는 D3(9.5, 4)의 이름표 위다.
+      // 드론을 이 판 뒤에 그려 판이 드론을 가리지 않게 한다
+      const squadStroke = (name: string) => (got(name) && recent(at.order, 1.2) ? COL.ok : COL.line)
+      const chip = (i: number, x: number, y: number) => {
+        const name = Names[i]
+        const miss = missedRecall(i)
+        const noEffect = missedNoEffect(i)
+        const ok = !miss && !noEffect && got(name)
+        world.push({
+          kind: 'box',
+          x,
+          y,
+          w: 1.2,
+          h: 0.6,
+          fill: COL.chip,
+          stroke: miss ? COL.bug : noEffect ? COL.dim : ok ? COL.ok : '#4a5872',
+          dashed: noEffect,
+          label: miss ? `${name} ✖` : noEffect ? `${name} –` : ok ? `${name} ✓` : name,
+        })
+      }
+      world.push({ kind: 'box', x: 8.2, y: 5.5, w: 5.85, h: 3.35, fill: '#101a2a', stroke: squadStroke('본대') })
+      world.push({ kind: 'text', x: 8.35, y: 8.45, text: '본대', align: 'left', size: 18, color: COL.text })
+      chip(0, 8.35, 7.55)
+      world.push({ kind: 'box', x: 9.65, y: 5.62, w: 4.25, h: 3.1, fill: '#14213a', stroke: squadStroke('B') })
+      world.push({ kind: 'text', x: 9.8, y: 8.3, text: '편대 B', align: 'left', size: 18, color: COL.text })
+      chip(1, 9.8, 7.3)
+      chip(2, 11.1, 7.3)
+      if (isJoined) {
+        // ✖ 수 오산과 같은 판정 (보이는 수가 실제와 다르다)
+        const cMissed = naive !== null && shown !== real
+        world.push({ kind: 'box', x: 9.8, y: 5.75, w: 3.95, h: 1.33, fill: '#182844', stroke: cMissed ? COL.bug : squadStroke('C'), dashed: cMissed })
+        world.push({ kind: 'text', x: 9.95, y: 6.72, text: '편대 C', align: 'left', size: 18, color: COL.text })
+        if (cMissed) world.push({ kind: 'text', x: 11.2, y: 6.72, text: 'foreach 밖', align: 'left', size: 15, color: COL.bug })
+        chip(3, 11.2, 5.88)
+        chip(4, 12.5, 5.88)
+      } else {
+        world.push({ kind: 'box', x: 14.25, y: 5.5, w: 1.6, h: 3.35, fill: '#101a2a', stroke: '#4a5872', dashed: true })
+        world.push({ kind: 'text', x: 15.05, y: 8.45, text: '편대 C', size: 18, color: COL.text })
+        world.push({ kind: 'text', x: 15.05, y: 8.0, text: '합류 전', size: 15, color: COL.dim })
+        chip(3, 14.45, 7.0)
+        chip(4, 14.45, 6.1)
+      }
+      // 합류 직후: 트리 밖에 있던 C 가 B 안으로 들어온 길
+      if (recent(at.join, 0.8)) world.push({ kind: 'arrow', x1: 15.8, y1: 6.2, x2: 13.85, y2: 6.2, color: isJoined ? COL.ok : COL.dim, dashed: true })
+
+      // 드론 (트리 판보다 나중에 그린다). 빨간 `명령 못 받음` 은 ✖ 귀환 누락과 같은 판정에서만,
+      // 이미 나가 있어 결과가 같은 출격 누락은 회색 한 줄로 (정찰 거리 최대에서 D5 글이 D4 이름표에 닿지 않는 길이.
+      // 오른쪽 끝 드론은 글이 잘리지 않게 글만 안쪽으로)
+      ds.forEach((d, i) => {
         const flying = d.IsFlying
         const facing = d.Status === 'Returning' ? -1 : 1
         world.push({ kind: 'actor', x: d.X, y: d.Y, role: 'ally', label: d.Name, pose: flying ? 'run' : 'idle', facing, scale: 0.6 })
         const markY = d.Y - 0.42
-        if (missedOrder(d.Name)) world.push({ kind: 'text', x: d.X, y: markY, text: '명령 못 받음', size: 18, color: COL.bug })
+        if (missedRecall(i)) world.push({ kind: 'text', x: Math.min(d.X, 15), y: markY, text: '명령 못 받음', size: 18, color: COL.bug })
+        else if (missedNoEffect(i)) world.push({ kind: 'text', x: Math.min(d.X, 15.1), y: markY, text: '출격 못 받음', size: 15, color: COL.dim })
         else if (got(d.Name)) world.push({ kind: 'text', x: d.X, y: markY, text: d.Status === 'Docked' ? '✓' : `${orderText} ✓`, size: 16, color: COL.ok })
-      }
-
-      // 오른쪽 위: 편대 트리 (상자 안 상자)
-      const squadStroke = (name: string) => (got(name) && recent(at.order, 1.2) ? COL.ok : COL.line)
-      const chip = (name: string, x: number, y: number) => {
-        const miss = missedOrder(name)
-        const ok = !miss && got(name)
-        world.push({ kind: 'box', x, y, w: 1.2, h: 0.6, fill: COL.chip, stroke: miss ? COL.bug : ok ? COL.ok : '#4a5872', label: miss ? `${name} ✖` : ok ? `${name} ✓` : name })
-      }
-      world.push({ kind: 'box', x: 8.2, y: 4.75, w: 5.85, h: 4.05, fill: '#101a2a', stroke: squadStroke('본대') })
-      world.push({ kind: 'text', x: 8.35, y: 8.4, text: '본대', align: 'left', size: 18, color: COL.text })
-      chip('D1', 8.35, 7.45)
-      world.push({ kind: 'box', x: 9.65, y: 4.9, w: 4.25, h: 3.4, fill: '#14213a', stroke: squadStroke('B') })
-      world.push({ kind: 'text', x: 9.8, y: 7.95, text: '편대 B', align: 'left', size: 18, color: COL.text })
-      chip('D2', 9.8, 6.95)
-      chip('D3', 11.1, 6.95)
-      if (isJoined) {
-        const cMissed = naive !== null
-        world.push({ kind: 'box', x: 9.8, y: 5.05, w: 3.95, h: 1.65, fill: '#182844', stroke: cMissed ? COL.bug : squadStroke('C'), dashed: cMissed })
-        world.push({ kind: 'text', x: 9.95, y: 6.3, text: '편대 C', align: 'left', size: 18, color: COL.text })
-        if (cMissed) world.push({ kind: 'text', x: 9.95, y: 5.3, text: 'foreach 밖', align: 'left', size: 15, color: COL.bug })
-        chip('D4', 11.2, 5.2)
-        chip('D5', 12.5, 5.2)
-      } else {
-        world.push({ kind: 'box', x: 14.25, y: 4.75, w: 1.6, h: 4.05, fill: '#101a2a', stroke: '#4a5872', dashed: true })
-        world.push({ kind: 'text', x: 15.05, y: 8.4, text: '편대 C', size: 18, color: COL.text })
-        world.push({ kind: 'text', x: 15.05, y: 7.95, text: '합류 전', size: 15, color: COL.dim })
-        chip('D4', 14.45, 6.8)
-        chip('D5', 14.45, 5.9)
-      }
-      // 합류 직후: 트리 밖에 있던 C 가 B 안으로 들어온 길
-      if (recent(at.join, 0.8)) world.push({ kind: 'arrow', x1: 15.8, y1: 5.9, x2: 13.85, y2: 5.9, color: isJoined ? COL.ok : COL.dim, dashed: true })
+      })
 
       // 구조 그림: 입력 직후 그 입력이 지나는 노드와 화살표만
       const active: string[] = []

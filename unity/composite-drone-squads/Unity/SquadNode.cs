@@ -26,10 +26,23 @@ namespace PatternGallery.CompositeDroneSquads
 
         IUnit IUnitNode.Build(FlightSettings settings) => BuildSquad(settings);
 
-        /// <summary>다른 편대를 하위 편대로 받는다. 코어가 받아들였을 때만 Hierarchy 에서도 옮긴다</summary>
+        /// <summary>
+        /// 다른 편대를 하위 편대로 받는다. 코어가 받아들였을 때만 Hierarchy 에서도 옮긴다.
+        /// 오브젝트 쪽 문제(꺼져 있음, 트리를 아직 만들지 않음)는 코어에 넣지 않고 LogError 로 알린다 (BuildSquad 가 꺼진 자식을 빼는 것과 맞춘다)
+        /// </summary>
         public bool Join(SquadNode other)
         {
-            if (squad == null || other.Squad == null) return false; // 둘 다 트리를 만든 뒤에만
+            if (!gameObject.activeInHierarchy || !other.gameObject.activeInHierarchy)
+            {
+                // 꺼진 편대를 받으면 코어 드론 수는 늘지만 화면에는 드론이 없다
+                Debug.LogError($"[Squad] 합류할 수 없다: {(gameObject.activeInHierarchy ? other.name : name)} 오브젝트가 꺼져 있다", this);
+                return false;
+            }
+            if (squad == null || other.Squad == null)
+            {
+                Debug.LogError($"[Squad] 합류할 수 없다: {(squad == null ? name : other.name)} 의 코어 트리가 없다 (본대 아래에 없거나 Support Squad 칸에 넣지 않았다)", this);
+                return false;
+            }
             if (!squad.Add(other.Squad)) return false; // 자기 자신, 조상, 이미 소속이 있는 편대는 코어가 거절한다 (JoinRejected)
             // worldPositionStays = true: 지원 편대 오브젝트의 월드 위치를 그대로 두고 부모만 바꾼다
             other.transform.SetParent(transform, true);
