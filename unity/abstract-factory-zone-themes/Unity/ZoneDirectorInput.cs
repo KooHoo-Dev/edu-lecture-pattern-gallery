@@ -1,4 +1,4 @@
-// 구역 지휘 어댑터 (조립하는 곳): Input System 입력을 코어 ZoneDirector 에 넘기고, 코어 이벤트 핸들러에서 바닥 색을 바꾸고 드론·투사체 오브젝트를 만든다.
+// 구역 지휘 연결 컴포넌트 (조립하는 곳): Input System 입력을 코어 ZoneDirector 에 넘기고, 코어 이벤트 핸들러에서 바닥 색을 바꾸고 드론·투사체 오브젝트를 만든다.
 // 이름(Theme) → 공장 객체를 고르는 곳은 FactoryFor 한 곳, 제품의 Theme → 겉모습 에셋(ZoneArtSet)을 찾는 곳은 ArtFor 한 곳이다. 구역마다 따로 쓴 핸들러나 switch 가 없다.
 using System;
 using System.Collections.Generic;
@@ -29,14 +29,14 @@ namespace PatternGallery.AbstractFactoryZoneThemes
         }
 
         [Header("조절 값 (웹 갤러리와 같은 이름)")]
-        [Tooltip("시작 공장의 Theme (forest, lava, ice). 코어를 처음 만들 때(Play 직후) 한 번만 읽는다. Theme 이 맞는 공장이 없으면 경고하고 첫 공장(forest)으로 시작한다")]
+        [Tooltip("시작 공장의 Theme (forest, lava, ice). 코어를 처음 만들 때(Play 직후) 한 번만 읽는다. Theme 이 맞는 공장이 없으면(오타) Console 에 오류를 남기고 첫 공장(forest)으로 시작한다")]
         [SerializeField] string startZone = "forest";
         [Tooltip("투사체가 왼쪽으로 나는 빠르기 (m/s). Play 중에 바꾸면 날고 있는 투사체에도 바로 적용된다")]
         [SerializeField] float projectileSpeed = 6f;
         [Tooltip("출구 앞에 설 수 있는 드론 수. 구역을 옮겨도 이미 나온 드론이 자리를 차지한다. 줄여도 이미 나온 드론은 남고 다음 출격부터 거절된다")]
         [SerializeField] int maxDrones = 4;
 
-        [Header("구역 칸 (구역을 더하면 Zone Art Set 에셋 하나와 칸 하나를 더한다)")]
+        [Header("구역 칸 (구역을 더하면 Zone Art Set 에셋 하나와 칸 하나를 더한다. + 는 마지막 칸을 키째 복사하니 Enter Action 키도 바꾼다)")]
         [SerializeField] List<ZoneSlot> zones = new List<ZoneSlot>();
 
         [Header("입력 (컴포넌트를 붙일 때 Reset 이 기본 키를 넣는다. 구역 키는 Zones 의 각 칸에 있다)")]
@@ -75,7 +75,8 @@ namespace PatternGallery.AbstractFactoryZoneThemes
                 IZoneFactory start = FactoryFor(startZone);
                 if (start == null)
                 {
-                    Debug.LogWarning($"[Zone] Start Zone '{startZone}' 과 Theme 이 같은 공장이 없어 {factories[0].Theme} 로 시작한다", this);
+                    // 코어는 시작 공장 없이 만들 수 없어 첫 공장으로 시작하되, 오타를 경고로 묻히지 않게 오류로 올린다
+                    Debug.LogError($"[Zone] Start Zone '{startZone}' 과 Theme 이 같은 공장이 없다 (forest, lava, ice 중 하나, 대소문자·공백까지 같게). 첫 공장 {factories[0].Theme} 로 시작한다", this);
                     start = factories[0];
                 }
                 director = new ZoneDirector(start, new ZoneSettings { MaxDrones = maxDrones, ProjectileSpeed = projectileSpeed });
@@ -105,11 +106,11 @@ namespace PatternGallery.AbstractFactoryZoneThemes
             director.ProjectileFired += OnProjectileFired;
             director.ProjectileVanished += OnProjectileVanished;
             // 구역 칸마다 같은 일을 하므로 반복문 하나로 붙인다. 어느 공장인지는 칸의 에셋이 정한다 (구역 이름을 묻는 if 가 없다)
+            // foreach 변수는 C# 5 부터 반복마다 새로 만들어져, 람다가 slot 을 그대로 잡아도 칸마다 제 칸을 부른다 (for 의 i 는 복사해야 한다)
             foreach (ZoneSlot slot in zones)
             {
                 if (slot.enterAction == null) continue;
-                ZoneSlot captured = slot; // 람다가 이 칸을 잡게 복사한다
-                var s = new Subscription { action = slot.enterAction, onKey = _ => Enter(captured) };
+                var s = new Subscription { action = slot.enterAction, onKey = _ => Enter(slot) };
                 s.action.performed += s.onKey;
                 s.action.Enable();
                 subscriptions.Add(s);
@@ -168,12 +169,39 @@ namespace PatternGallery.AbstractFactoryZoneThemes
             return null;
         }
 
-        /// <summary>공장마다 같은 Theme 의 겉모습 에셋이 있는지 확인한다 (없으면 그 세트는 화면에 나오지 않는다)</summary>
+        /// <summary>
+        /// 칸과 공장이 하나씩 짝을 이루는지 확인한다. Theme(이름)으로 찾다 실패하면 오류로 알린다 (다른 세트로 조용히 대신하지 않는다).
+        /// Inspector 의 + 는 마지막 칸을 Art 와 키 바인딩째 복사하므로 같은 Theme, 같은 키도 본다
+        /// </summary>
         void CheckArt()
         {
+            var themeOwner = new Dictionary<string, string>();
+            var keyOwner = new Dictionary<string, string>();
+            foreach (ZoneSlot slot in zones)
+            {
+                if (slot.art == null)
+                    Debug.LogError($"[Zone] '{slot.label}' 칸의 Art 가 비었다. 이 칸의 키는 구역을 옮기지 않는다", this);
+                else if (FactoryFor(slot.art.theme) == null)
+                    Debug.LogError($"[Zone] '{slot.label}' 칸의 {slot.art.name} 은 Theme '{slot.art.theme}' 인데 이 Theme 의 공장이 없다 (forest, lava, ice 중 하나로 적는다)", this);
+                else if (themeOwner.TryGetValue(slot.art.theme, out string first))
+                    Debug.LogError($"[Zone] '{first}' 칸과 '{slot.label}' 칸이 같은 Theme '{slot.art.theme}' 이다. 두 키가 같은 구역으로 옮긴다 (에셋을 복사하고 Theme 을 고치지 않았는지 본다)", this);
+                else
+                    themeOwner[slot.art.theme] = slot.label;
+
+                if (slot.enterAction == null) continue;
+                foreach (InputBinding binding in slot.enterAction.bindings)
+                {
+                    string path = binding.effectivePath;
+                    if (string.IsNullOrEmpty(path)) continue;
+                    if (keyOwner.TryGetValue(path, out string other))
+                        Debug.LogError($"[Zone] '{other}' 칸과 '{slot.label}' 칸의 키가 같다 ({path}). 한 번 누르면 두 칸이 모두 불린다. 칸을 더했으면 Enter Action 키도 바꾼다", this);
+                    else
+                        keyOwner[path] = slot.label;
+                }
+            }
             foreach (IZoneFactory f in factories)
                 if (ArtFor(f.Theme) == null)
-                    Debug.LogWarning($"[Zone] {f.GetType().Name}(Theme {f.Theme}) 의 겉모습 에셋이 Zones 에 없다. 이 세트의 바닥 색, 드론, 투사체는 화면에 나오지 않는다", this);
+                    Debug.LogError($"[Zone] {f.GetType().Name}(Theme {f.Theme}) 의 겉모습 에셋이 Zones 에 없다. 이 세트의 바닥 색, 드론, 투사체는 화면에 나오지 않는다", this);
         }
 
         void Enter(ZoneSlot slot)
@@ -181,7 +209,7 @@ namespace PatternGallery.AbstractFactoryZoneThemes
             IZoneFactory next = slot.art != null ? FactoryFor(slot.art.theme) : null;
             if (next == null)
             {
-                Debug.LogWarning($"[Zone] '{slot.label}' 칸의 Art 가 비었거나 Theme 이 같은 공장이 없어 구역을 옮기지 않는다", this);
+                Debug.LogError($"[Zone] '{slot.label}' 칸의 Art 가 비었거나 Theme '{(slot.art != null ? slot.art.theme : "")}' 의 공장이 없어 구역을 옮기지 않는다", this);
                 return;
             }
             Director.Enter(next); // [1] 이름이 아니라 공장 객체를 넘긴다
@@ -259,7 +287,7 @@ namespace PatternGallery.AbstractFactoryZoneThemes
         {
             IZoneFactory f = director.Factory;
             ZoneArtSet art = ArtFor(f.Theme);
-            string zoneName = art != null ? art.displayName : f.Theme;
+            string zoneName = art != null && !string.IsNullOrEmpty(art.displayName) ? art.displayName : f.Theme;
             statusText = $"구역: {zoneName} · 공장: {f.GetType().Name} · 바닥: {director.Ground.Name}\n출구 앞 드론 {director.Drones.Count}/{director.Settings.MaxDrones}";
         }
 

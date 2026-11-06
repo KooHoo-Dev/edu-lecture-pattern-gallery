@@ -28,14 +28,14 @@ namespace PatternGallery.AbstractFactoryZoneThemes
     }
 
     /// <summary>
-    /// 나중에 더한 구역. 이 클래스 하나와 조립하는 곳(어댑터의 공장 표)의 한 줄만 더했다.
+    /// 나중에 더한 구역. 이 클래스 하나와 조립하는 곳(연결 컴포넌트의 공장 표)의 한 줄만 더했다.
     /// ZoneDirector, Drone 처럼 공장을 쓰는 곳은 고치지 않았다
     /// </summary>
     public sealed class IceFactory : IZoneFactory
     {
         public string Theme => "ice";
-        public Ground CreateGround() => new Ground(Theme, "빙판 바닥");
-        public Drone CreateDrone() => new Drone(Theme, "서리 드론", "서리");
-        public Projectile CreateProjectile() => new Projectile(Theme, "얼음 조각"); // [4] 새 세트는 세 제품을 이 공장 안에서 함께 정한다
+        public Ground CreateGround() => new Ground(Theme, "빙판 바닥"); // [4] 새 세트는 세 제품을
+        public Drone CreateDrone() => new Drone(Theme, "서리 드론", "서리"); // [4] 이 공장 안에서
+        public Projectile CreateProjectile() => new Projectile(Theme, "얼음 조각"); // [4] 함께 정한다 (하나라도 빠지면 컴파일 오류)
     }
 }

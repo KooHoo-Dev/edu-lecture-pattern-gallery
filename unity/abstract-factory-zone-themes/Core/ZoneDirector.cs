@@ -45,14 +45,14 @@ namespace PatternGallery.AbstractFactoryZoneThemes
         /// <summary>투사체가 하린 앞에 닿아 사라졌다</summary>
         public event Action<Projectile> ProjectileVanished;
 
-        /// <summary>시작 구역의 공장으로 바로 들어간다 (이때는 구독한 쪽이 없어 ZoneEntered 를 듣지 못한다. 어댑터는 Ground 를 읽어 맞춘다)</summary>
+        /// <summary>시작 구역의 공장으로 바로 들어간다 (이때는 구독한 쪽이 없어 ZoneEntered 를 듣지 못한다. 연결 컴포넌트는 Ground 를 읽어 맞춘다)</summary>
         public ZoneDirector(IZoneFactory start, ZoneSettings settings)
         {
             Settings = settings;
             Enter(start);
         }
 
-        /// <summary>구역을 옮긴다. 어떤 공장을 넘길지는 조립하는 곳(어댑터)이 고른다</summary>
+        /// <summary>구역을 옮긴다. 어떤 공장을 넘길지는 조립하는 곳(연결 컴포넌트)이 고른다</summary>
         public void Enter(IZoneFactory next)
         {
             if (next == null) throw new ArgumentNullException(nameof(next));
