@@ -1,4 +1,4 @@
-// 드론 줄 확인용 어댑터: Input System 입력(단발, 일제 사격, 새 웨이브)을 코어 DroneLine 에 넘기고, 파괴·웨이브 끝 이벤트를 받으면 효과음을 큐에 요청만 한다.
+// 드론 줄 확인용 연결 컴포넌트: Input System 입력(단발, 일제 사격, 새 웨이브)을 코어 DroneLine 에 넘기고, 파괴·웨이브 끝 이벤트를 받으면 효과음을 큐에 요청만 한다.
 // 실제 게임에서는 포탑과 드론의 체력 코드가 DroneLine 자리에 있다. 여기 핸들러는 소리를 틀지 않는다: Request 하고 바로 돌아가며, 소리는 SoundQueuePlayer 의 Tick 에서 난다.
 using UnityEngine;
 using UnityEngine.InputSystem;

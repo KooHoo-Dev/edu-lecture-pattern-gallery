@@ -32,11 +32,11 @@ namespace PatternGallery.EventQueueSound.Naive
         {
             foreach (NaiveSource s in sources)
             {
-                if (!s.isPlaying) // [!] 같은 소리가 이미 울리는지 보지 않는다. 한 프레임에 n 번 부르면 n 칸에 같은 소리가 겹쳐 커진다
+                if (!s.isPlaying)
                 {
                     s.clip = clip;
                     s.volume = volume;
-                    s.Play();
+                    s.Play(); // [!] 모으지 않고 부르는 즉시 튼다: 같은 프레임의 같은 소리를 합칠 곳이 없다. 한 프레임에 n 번 부르면 n 칸에서 같은 소리가 함께 시작돼 커진다
                     return true;
                 }
             }

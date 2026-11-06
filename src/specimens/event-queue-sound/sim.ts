@@ -106,6 +106,7 @@ interface SoundQueueSettings {
 
 class SoundQueue {
   Settings: SoundQueueSettings
+  // 링 버퍼. Nystrom 은 칸 하나를 비워 두고, 여기서는 count 로 꽉 참과 빔을 가른다
   private pending: SoundRequest[]
   private head = 0
   private tail = 0
@@ -294,8 +295,12 @@ class NaiveDroneLine {
 const DRONE_COUNT = 5
 const QUEUE_SIZE = 8
 const ALERT_VOLUME = f(0.4)
-/** 음량 미터의 기준선 (고정) */
+/** 음량 미터의 기준선 (고정). 비교는 1% 단위 정수로 한다 (float 합이 1.00 언저리에서 갈리지 않게) */
 const LIMIT = 1
+const LIMIT_PERCENT = 100
+const Percent = (volume: number) => Math.round(volume * 100)
+/** 화면에만: 방금 꺼낸 요청을 큐 자리에 흐리게 남기는 가장 긴 시간 (그 채널이 그 소리를 울리는 동안만) */
+const POPPED_SHOW = 0.5
 /** 음량 미터의 꽉 찬 값 (고정. 기준선이 가운데) */
 const METER_MAX = 2
 /** 채널 남은 시간 막대의 꽉 찬 값 (소리 길이 조절 값의 최대. 고정) */
@@ -335,7 +340,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   let shotTargets: number[] = []
 
   /** 공통 무대: 땅, 기지, 포탑, 드론, 사격 화살표, 채널 칸, 음량 미터 */
-  const scene = (alive: (i: number) => boolean, channels: ChannelView[], loud: number, overlapIds: Set<string>, status: [string, string, string]): WorldItem[] => {
+  const scene = (alive: (i: number) => boolean, channels: ChannelView[], loud: number, overlapChannels: Set<number>, status: [string, string, string]): WorldItem[] => {
     const world: WorldItem[] = [
       { kind: 'box', x: 0, y: 0, w: 16, h: 1, fill: '#22314a' },
       { kind: 'box', x: 0.2, y: 1, w: 1.25, h: 2.0, fill: '#1b2a40', stroke: '#4a5872', label: '기지' },
@@ -359,14 +364,14 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     channels.forEach((c, i) => {
       const x = CELL.x + i * (CELL.w + CELL.gap)
       if (c.playing) {
-        const bad = overlapIds.has(c.id)
+        const bad = overlapChannels.has(i)
         world.push({ kind: 'box', x, y: CELL.y, w: CELL.w, h: CELL.h, fill: fillOf(c.id), stroke: bad ? '#ff5d6c' : undefined, label: ShortLabel(c.id, c.count) })
         world.push({ kind: 'bar', x, y: CELL.y - 0.45, w: CELL.w, value: c.remaining / LENGTH_MAX, fill: bad ? '#ff5d6c' : '#7ee081' })
       } else {
         world.push({ kind: 'box', x, y: CELL.y, w: CELL.w, h: CELL.h, stroke: '#4a5872', dashed: true, label: '빈 칸' })
       }
     })
-    const over = loud > LIMIT
+    const over = Percent(loud) > LIMIT_PERCENT
     world.push(
       { kind: 'bar', x: METER.x, y: METER.y, w: METER.w, value: loud / METER_MAX, fill: over ? '#ff5d6c' : '#7ee081', label: over ? `음량 합 ${F2(loud)} · 기준 초과` : `음량 합 ${F2(loud)}` },
       { kind: 'box', x: METER.x + METER.w * (LIMIT / METER_MAX) - 0.03, y: METER.y - 0.12, w: 0.06, h: 0.6, fill: '#e6edf7' },
@@ -381,6 +386,10 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     const queuedAt = new Map<string, number>()
     /** 화면에만: 가장 최근 Tick 에 큐에서 꺼낸 요청들 (요청과 꺼냄이 한 프레임 안이라 큐 칸이 비어 보이지 않게 잠시 흐리게 남긴다) */
     let popped: { id: string; count: number; channel: number }[] = []
+    const stillPlaying = (p: { id: string; count: number; channel: number }) => {
+      const c = queue.Channel(p.channel)
+      return c.IsPlaying && c.Id === p.id && c.Count === p.count
+    }
     line.Destroyed.add(i => {
       events.push(`드론 ${i + 1} 파괴`)
       shotTargets.push(i)
@@ -447,7 +456,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           i => line.IsAlive(i),
           channels,
           queue.Loudness,
-          new Set(),
+          new Set<number>(),
           [`대기 ${queue.Count} · 합침 ${queue.MergedTotal} · 버림 ${queue.DroppedTotal}`, `웨이브 ${line.Wave} · 드론 ${line.AliveCount}/${DRONE_COUNT} · 소리 길이 ${F2(soundLength)}초`, '#7ee081'],
         )
         world.push({ kind: 'text', x: QCELL.x, y: 4.85, text: `대기 큐 · 링 버퍼 ${queue.Capacity}칸 (head ${queue.Head} · tail ${queue.Tail})`, align: 'left', size: 20, color: '#8796ae' })
@@ -458,9 +467,11 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         }
         // Tick 은 같은 프레임 안에서 꺼내므로, 프레임이 끝났는데 남아 있다면 빈 채널을 기다리는 중이다
         if (queue.Count > 0) world.push({ kind: 'text', x: QCELL.x + shown * (QCELL.w + QCELL.gap) + 0.1, y: 4.0, text: '← 빈 채널을 기다린다', align: 'left', size: 18, color: '#ffb547' })
-        else if (clock - at.played < 1.2 && popped.length) {
-          popped.forEach((p, i) => world.push({ kind: 'box', x: QCELL.x + i * (QCELL.w + QCELL.gap), y: QCELL.y, w: QCELL.w, h: QCELL.h, stroke: '#4a5872', dashed: true, label: `${ShortLabel(p.id, p.count)} → ${p.channel + 1}` }))
-          world.push({ kind: 'text', x: QCELL.x + popped.length * (QCELL.w + QCELL.gap) + 0.1, y: 4.0, text: '방금 꺼내 채널로 (→ 채널 번호)', align: 'left', size: 18, color: '#8796ae' })
+        else if (clock - at.played < POPPED_SHOW && popped.some(p => stillPlaying(p))) {
+          // 그 채널이 아직 그 소리를 울리는 동안만 (소리가 끝났는데 '방금 꺼냄' 이 남지 않게)
+          const shownPopped = popped.filter(p => stillPlaying(p))
+          shownPopped.forEach((p, i) => world.push({ kind: 'box', x: QCELL.x + i * (QCELL.w + QCELL.gap), y: QCELL.y, w: QCELL.w, h: QCELL.h, stroke: '#4a5872', dashed: true, label: `${ShortLabel(p.id, p.count)} → ${p.channel + 1}` }))
+          world.push({ kind: 'text', x: QCELL.x + shownPopped.length * (QCELL.w + QCELL.gap) + 0.1, y: 4.0, text: '방금 꺼내 채널로 (→ 채널 번호)', align: 'left', size: 18, color: '#8796ae' })
         } else world.push({ kind: 'box', x: QCELL.x, y: QCELL.y, w: QCELL.w, h: QCELL.h, stroke: '#4a5872', dashed: true, label: '비어 있음' })
         const active: string[] = []
         if (clock - at.input < 0.3) active.push('input', 'input-drones', 'drones', 'input-queue', 'queue')
@@ -475,37 +486,31 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   n.explosionVolume = explosionVolume
   n.alertVolume = ALERT_VOLUME
   const sources = n.sound.sources
-  let overlapShown = false
+  /** 소리 겹침으로 표시 중인 채널 (한 입력에서 함께 시작한 같은 소리). 빨간 테두리와 "같은 폭발 n겹" 이 이것만 본다 */
+  let overlapChannels: number[] = []
   let naiveDropped = 0
   let explosionsDropped = 0
   /** 지금 웨이브의 끝 알림이 버려졌다 (새 웨이브까지 화면에 남긴다) */
   let alertLost = 0
 
   const playingFlags = () => sources.map(s => s.isPlaying)
-  const counted = (i: number, playingBefore: boolean[], started: number[] | null, playedSoFar: number) => {
-    const s = sources[i]
-    if (!s.isPlaying) return false
-    if (started === null || playingBefore[i]) return true
-    const k = started.indexOf(i)
-    return k >= 0 && k < playedSoFar
-  }
-  const checkOverlap = (playingBefore: boolean[], started: number[] | null, playedSoFar: number) => {
-    let loud = 0
-    let worst = 0
-    let worstId = ''
-    for (let i = 0; i < sources.length; i++) {
-      if (!counted(i, playingBefore, started, playedSoFar)) continue
-      loud = f(loud + sources[i].volume)
+  /** Target.cs 의 CheckOverlap: 이번 입력에서 함께 시작한 같은 소리가 둘 이상이고 음량 합이 기준을 넘을 때만 (패턴이 합쳐 고치는 경우) */
+  const checkOverlap = (started: number[], playedSoFar: number) => {
+    for (let a = 0; a < playedSoFar; a++) {
+      const clip = sources[started[a]].clip
       let same = 0
-      for (let k = 0; k < sources.length; k++) if (counted(k, playingBefore, started, playedSoFar) && sources[k].clip === sources[i].clip) same++
-      if (same > worst) {
-        worst = same
-        worstId = sources[i].clip
+      let percent = 0
+      for (let b = 0; b < playedSoFar; b++) {
+        const s = sources[started[b]]
+        if (s.clip !== clip) continue
+        same++
+        percent += Percent(s.volume)
       }
+      if (same < 2 || percent <= LIMIT_PERCENT) continue
+      if (overlapChannels.length === 0) events.push(`!소리 겹침: 같은 프레임에 ${Name(clip)} ${same}겹 · 음량 합 ${F2(percent / 100)} (기준 ${F2(LIMIT_PERCENT / 100)})`)
+      for (let b = 0; b < playedSoFar; b++) if (sources[started[b]].clip === clip && !overlapChannels.includes(started[b])) overlapChannels.push(started[b])
+      return
     }
-    const now = worst >= 2 && loud > LIMIT
-    if (now && !overlapShown) events.push(`!소리 겹침: ${Name(worstId)} ${worst}겹 · 음량 합 ${F2(loud)} (기준 ${F2(LIMIT)})`)
-    overlapShown = now
   }
   const loudness = () => {
     let loud = 0
@@ -550,7 +555,8 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           events.push('폭발 버림 · 빈 AudioSource 없음')
         }
       }
-      checkOverlap(playingBefore, started, next)
+      // 알림은 한 입력에 하나뿐이라 겹침은 폭발까지만 보면 된다
+      checkOverlap(started, next)
       if (n.AliveCount() === 0) {
         events.push(`웨이브 ${n.wave} 끝`)
         if (next < started.length) {
@@ -563,13 +569,13 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           events.push(`!알림 잘림: 웨이브 ${n.wave} 끝 알림을 버렸다 (빈 AudioSource 없음, 채널 ${sources.length}개가 모두 울리는 중)`)
         }
       }
-      checkOverlap(playingBefore, started, next)
     },
     tick(dt) {
       const playingBefore = playingFlags()
       n.sound.Update(dt)
       for (let i = 0; i < sources.length; i++) if (playingBefore[i] && !sources[i].isPlaying) events.push(`채널 ${i + 1} 끝 · ${Name(sources[i].clip)}`)
-      checkOverlap(playingBefore, null, 0)
+      // Tick 은 겹침 표시를 끄기만 한다
+      overlapChannels = overlapChannels.filter(i => sources[i].isPlaying)
       clock += dt
     },
     drain: () => events.splice(0),
@@ -581,21 +587,19 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     },
     view(): SimView {
       const channels: ChannelView[] = sources.map(s => ({ id: s.clip, count: 1, remaining: s.remaining, playing: s.isPlaying }))
-      const counts = new Map<string, number>()
-      for (const s of sources) if (s.isPlaying) counts.set(s.clip, (counts.get(s.clip) ?? 0) + 1)
-      const overlapIds = new Set([...counts].filter(([, c]) => c >= 2).map(([id]) => id))
       const world = scene(
         i => n.alive[i],
         channels,
         loudness(),
-        overlapIds,
-        [`바로 재생 · 대기 없음 · 버림 ${naiveDropped}`, `웨이브 ${n.wave} · 드론 ${n.AliveCount()}/${DRONE_COUNT} · 소리 길이 ${F2(soundLength)}초`, naiveDropped > 0 ? '#ff5d6c' : '#ffb547'],
+        new Set(overlapChannels),
+        [`바로 재생 · 대기 없음 · 버림 ${naiveDropped}`, `웨이브 ${n.wave} · 드론 ${n.AliveCount()}/${DRONE_COUNT} · 소리 길이 ${F2(soundLength)}초`, alertLost > 0 ? '#ff5d6c' : '#ffb547'],
       )
       world.push(
         { kind: 'text', x: QCELL.x, y: 4.85, text: '바로 재생 · 큐 없음', align: 'left', size: 20, color: '#8796ae' },
         { kind: 'text', x: QCELL.x, y: 4.1, text: '요청하는 순간 빈 AudioSource 를 찾아 튼다. 없으면 버린다', align: 'left', size: 18, color: '#8796ae' },
       )
-      for (const [id, c] of counts) if (c >= 2) world.push({ kind: 'text', x: METER.x, y: 4.85, text: `같은 ${Short(id)} ${c}겹`, align: 'left', size: 20, color: '#ff5d6c' })
+      // 사건 기록의 ✖ 소리 겹침과 같은 판정 (함께 시작한 같은 소리만)
+      if (overlapChannels.length >= 2) world.push({ kind: 'text', x: METER.x, y: 4.85, text: `같은 ${Short(sources[overlapChannels[0]].clip)} ${overlapChannels.length}겹`, align: 'left', size: 20, color: '#ff5d6c' })
       if (alertLost > 0) world.push({ kind: 'box', x: QCELL.x, y: 3.1, w: 6.4, h: 0.7, fill: 'rgba(120, 20, 30, 0.85)', stroke: '#ff5d6c', label: `웨이브 ${alertLost} 끝 알림 버림` })
       if (explosionsDropped > 0) world.push({ kind: 'text', x: 7.1, y: 3.15, text: `폭발 ${explosionsDropped}번 버림`, align: 'left', size: 18, color: '#c8d0de' })
       const active: string[] = []
