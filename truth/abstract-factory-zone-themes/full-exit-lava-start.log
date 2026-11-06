@@ -1,0 +1,27 @@
+# src 86bdbed6002b
+# abstract-factory-zone-themes full-exit-lava-start naive=0
+0.00 ev 시작 구역 lava · LavaFactory · 현무암 바닥
+0.30 in spawn
+0.30 ev 화염 #1 → 자리 0 (LavaFactory)
+0.50 st zone=lava drones=1 sets=lava flying=- p0=-
+0.70 in spawn
+0.70 ev 화염 #2 → 자리 1 (LavaFactory)
+1.00 st zone=lava drones=2 sets=lava,lava flying=- p0=-
+1.10 in spawn
+1.10 ev 출격 거절: 자리 2개가 모두 찼다
+1.50 st zone=lava drones=2 sets=lava,lava flying=- p0=-
+1.60 in forest
+1.60 ev 구역 → forest · ForestFactory · 이끼 바닥
+2.00 st zone=forest drones=2 sets=lava,lava flying=- p0=-
+2.00 in spawn
+2.00 ev 출격 거절: 자리 2개가 모두 찼다
+2.40 in fire
+2.40 ev 화염 #1 → 화염탄 (LavaFactory.CreateProjectile)
+2.40 ev 화염 #2 → 화염탄 (LavaFactory.CreateProjectile)
+2.50 st zone=forest drones=2 sets=lava,lava flying=lava,lava p0=11.40
+3.00 st zone=forest drones=2 sets=lava,lava flying=lava,lava p0=6.90
+3.25 ev 화염탄 사라짐 (하린 앞)
+3.43 ev 화염탄 사라짐 (하린 앞)
+3.50 st zone=forest drones=2 sets=lava,lava flying=- p0=-
+4.00 st zone=forest drones=2 sets=lava,lava flying=- p0=-
+end st zone=forest drones=2 sets=lava,lava flying=- p0=-
