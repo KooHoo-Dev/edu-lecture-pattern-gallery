@@ -15,8 +15,8 @@ namespace PatternGallery.EventQueueSound
         const int DroneCount = 5;
         const int QueueSize = 8;
         const float AlertVolume = 0.4f;
-        /// <summary>음량 미터의 기준선 (고정. 조절 값으로 계산하지 않는다)</summary>
-        const float Limit = 1f;
+        /// <summary>음량 미터의 기준선 (고정. 조절 값으로 계산하지 않는다). 비교는 1% 단위 정수로 한다 (float 합이 1.00 언저리에서 갈리지 않게)</summary>
+        const int LimitPercent = 100;
 
         readonly List<string> events = new List<string>();
         readonly float explosionVolume;
@@ -30,7 +30,8 @@ namespace PatternGallery.EventQueueSound
 
         // 나쁜 예
         readonly NaiveDroneLine naive;
-        bool overlapShown;
+        /// <summary>소리 겹침으로 표시 중인 채널 (한 입력에서 함께 시작한 같은 소리). 소리가 끝나면 Tick 에서 뺀다. 웹 sim 은 이 칸에 빨간 테두리를 그린다</summary>
+        readonly List<int> overlapChannels = new List<int>();
         int naiveDropped;
 
         public Target(Values v, bool isNaive)
@@ -144,7 +145,8 @@ namespace PatternGallery.EventQueueSound
                     events.Add("폭발 버림 · 빈 AudioSource 없음");
                 }
             }
-            CheckOverlap(playingBefore, started, next);
+            // 알림은 한 입력에 하나뿐이라 겹침은 폭발까지만 보면 된다
+            CheckOverlap(started, next);
             if (naive.AliveCount() == 0)
             {
                 events.Add($"웨이브 {naive.wave} 끝");
@@ -160,44 +162,38 @@ namespace PatternGallery.EventQueueSound
                     events.Add($"!알림 잘림: 웨이브 {naive.wave} 끝 알림을 버렸다 (빈 AudioSource 없음, 채널 {sources.Length}개가 모두 울리는 중)");
                 }
             }
-            CheckOverlap(playingBefore, started, next);
         }
+
+        static int Percent(float volume) => (int)System.Math.Round(volume * 100.0);
 
         /// <summary>
-        /// 나쁜 예: 같은 소리가 두 채널 이상에서 울리고 음량 합이 기준선을 넘으면 소리 겹침. 켜지는 순간 한 번만 쓴다.
-        /// counted 는 지금까지 부른 Play 까지만 센다 (입력 중간에도 순서를 맞추려고). started 가 null 이면 울리는 채널 모두
+        /// 나쁜 예: 이번 입력에서 함께 시작한 같은 소리가 둘 이상이고 그 음량 합이 기준선을 넘으면 소리 겹침.
+        /// 패턴은 같은 프레임의 같은 요청을 큐에서 한 칸으로 합치므로 이 경우만 고친다. 앞서 울리던 소리나 다른 입력(연타)에서
+        /// 시작한 소리와 겹치는 것은 패턴도 같으므로 세지 않는다. started 의 앞 playedSoFar 개가 지금까지 부른 Play 다.
+        /// 켜지는 순간 한 번만 쓴다: 표시 중인 겹침이 다 끝나기 전에는 다시 쓰지 않는다
         /// </summary>
-        void CheckOverlap(bool[] playingBefore, List<int> started, int playedSoFar)
+        void CheckOverlap(List<int> started, int playedSoFar)
         {
             NaiveSource[] sources = naive.sound.sources;
-            float loud = 0f;
-            int worst = 0;
-            string worstId = "";
-            for (int i = 0; i < sources.Length; i++)
+            for (int a = 0; a < playedSoFar; a++)
             {
-                if (!Counted(i, playingBefore, started, playedSoFar)) continue;
-                loud += sources[i].volume;
+                string clip = sources[started[a]].clip;
                 int same = 0;
-                for (int k = 0; k < sources.Length; k++)
-                    if (Counted(k, playingBefore, started, playedSoFar) && sources[k].clip == sources[i].clip) same++;
-                if (same > worst)
+                int percent = 0;
+                for (int b = 0; b < playedSoFar; b++)
                 {
-                    worst = same;
-                    worstId = sources[i].clip;
+                    NaiveSource s = sources[started[b]];
+                    if (s.clip != clip) continue;
+                    same++;
+                    percent += Percent(s.volume);
                 }
+                if (same < 2 || percent <= LimitPercent) continue;
+                if (overlapChannels.Count == 0)
+                    events.Add($"!소리 겹침: 같은 프레임에 {Name(clip)} {same}겹 · 음량 합 {Fmt.F(percent / 100.0)} (기준 {Fmt.F(LimitPercent / 100.0)})");
+                for (int b = 0; b < playedSoFar; b++)
+                    if (sources[started[b]].clip == clip && !overlapChannels.Contains(started[b])) overlapChannels.Add(started[b]);
+                return;
             }
-            bool now = worst >= 2 && loud > Limit;
-            if (now && !overlapShown) events.Add($"!소리 겹침: {Name(worstId)} {worst}겹 · 음량 합 {Fmt.F(loud)} (기준 {Fmt.F(Limit)})");
-            overlapShown = now;
-        }
-
-        bool Counted(int i, bool[] playingBefore, List<int> started, int playedSoFar)
-        {
-            NaiveSource s = naive.sound.sources[i];
-            if (!s.isPlaying) return false;
-            if (started == null || playingBefore[i]) return true;
-            int at = started.IndexOf(i);
-            return at >= 0 && at < playedSoFar;
         }
 
         public void Tick(float dt)
@@ -213,7 +209,8 @@ namespace PatternGallery.EventQueueSound
             naive.sound.Update(dt);
             for (int i = 0; i < sources.Length; i++)
                 if (playingBefore[i] && !sources[i].isPlaying) events.Add($"채널 {i + 1} 끝 · {Name(sources[i].clip)}");
-            CheckOverlap(playingBefore, null, 0);
+            // Tick 은 겹침 표시를 끄기만 한다 (새로 켜는 것은 입력에서 함께 시작한 소리뿐)
+            overlapChannels.RemoveAll(i => !sources[i].isPlaying);
         }
 
         public IEnumerable<string> Drain()

@@ -45,6 +45,7 @@ namespace PatternGallery.EventQueueSound
         public readonly SoundQueueSettings Settings;
 
         // 링 버퍼 (Nystrom 의 head/tail): head 는 다음에 꺼낼 칸, tail 은 다음에 넣을 칸. 배열을 새로 만들지 않고 돌려 쓴다
+        // Nystrom 은 칸 하나를 비워 두고 (head == tail 이면 빔), 여기서는 count 로 꽉 참과 빔을 가른다
         readonly SoundRequest[] pending;
         int head;
         int tail;
@@ -113,7 +114,7 @@ namespace PatternGallery.EventQueueSound
             }
             if (count == pending.Length)
             {
-                // 꽉 찼다. 조용히 버리지 않고 알린다. 같은 소리는 합치므로 소리 종류 수보다 큐가 크면 여기에 오지 않는다
+                // 꽉 찼다. 조용히 버리지 않고 알린다. 같은 소리는 합치므로 큐 칸 수가 소리 종류 수 이상이면 여기에 오지 않는다
                 DroppedTotal++;
                 Dropped?.Invoke(id);
                 return;
