@@ -1,6 +1,6 @@
 ---
 name: game-patterns
-description: "Unity 에 게임 프로그래밍 패턴(상태, 관찰자, 명령 등)을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 어댑터)과 넣는 순서가 들어 있다. 포함된 표본: 상태 패턴: 플레이어 행동(State Pattern: Player Actions), 전략 패턴: 포탑 조준 방식(Strategy Pattern: Turret Targeting), 상태 패턴: 잔해 드론 AI(State Pattern: Debris Drone AI), 관찰자 패턴: 체력 알림(Observer Pattern: Health Events), 명령 패턴: 되돌리기와 리플레이(Command Pattern: Undo and Replay), 오브젝트 풀: 포탑 탄 재사용(Object Pool: Reusing Turret Projectiles), 프로토타입 패턴: 견본 드론 복제(Prototype Pattern: Cloning a Template Drone), 싱글턴 패턴: 씬을 넘는 매니저(Singleton Pattern: Managers Across Scenes), 팩토리 메서드: 드론 스포너(Factory Method: Drone Spawner), 데코레이터 패턴: 버프 겹치기와 풀기(Decorator Pattern: Stacking and Clearing Buffs), 퍼사드 패턴: 명중 처리 창구(Facade Pattern: Hit Resolution). 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다."
+description: "Unity 에 게임 프로그래밍 패턴(상태, 관찰자, 명령 등)을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 연결 컴포넌트)과 넣는 순서가 들어 있다. 포함된 표본: 상태 패턴: 플레이어 행동(State Pattern: Player Actions), 전략 패턴: 포탑 조준 방식(Strategy Pattern: Turret Targeting), 상태 패턴: 잔해 드론 AI(State Pattern: Debris Drone AI), 상태 패턴: 계층 상태 기계(State Pattern: Hierarchical State Machine), 관찰자 패턴: 체력 알림(Observer Pattern: Health Events), 이벤트 큐: 효과음 요청 모으기(Event Queue: Batching Sound Requests), 명령 패턴: 되돌리기와 리플레이(Command Pattern: Undo and Replay), 오브젝트 풀: 포탑 탄 재사용(Object Pool: Reusing Turret Projectiles), 프로토타입 패턴: 견본 드론 복제(Prototype Pattern: Cloning a Template Drone), 싱글턴 패턴: 씬을 넘는 매니저(Singleton Pattern: Managers Across Scenes), 팩토리 메서드: 드론 스포너(Factory Method: Drone Spawner), 추상 팩토리: 구역 테마 세트(Abstract Factory: Zone Theme Sets), 데코레이터 패턴: 버프 겹치기와 풀기(Decorator Pattern: Stacking and Clearing Buffs), 퍼사드 패턴: 명중 처리 창구(Facade Pattern: Hit Resolution), 컴포지트 패턴: 드론 편대 명령(Composite Pattern: Drone Squad Orders), 어댑터 패턴: 센서 장비 단위 맞추기(Adapter Pattern: Sensor Units). 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다."
 license: MIT
 compatibility: Unity 6.3 LTS (6000.3), C# 9, Input System
 metadata:
@@ -19,14 +19,19 @@ metadata:
 | `state-player-actions` | 상태 패턴: 플레이어 행동 | 상태 패턴 | bool 덩어리 대신 지금 상태 객체가 입력과 시간을 처리한다 |
 | `strategy-turret-targeting` | 전략 패턴: 포탑 조준 방식 | 전략 패턴 | 포탑은 조준 방식 객체에게 대상을 묻고, 방식은 실행 중에 갈아 끼운다 |
 | `state-drone-ai` | 상태 패턴: 잔해 드론 AI | 상태 패턴 | 적 AI 의 순찰·추격·공격·파괴를 상태 객체로 나누고, 들어갈 때 바꾼 것을 나올 때 되돌린다 |
+| `hierarchical-state-enemy` | 상태 패턴: 계층 상태 기계 | 상태 패턴 | 여러 상태에 공통인 규칙(EMP, 경계등)을 부모 상태 한 곳에 두고, 자식 상태는 자기 일만 한다 |
 | `observer-health-events` | 관찰자 패턴: 체력 알림 | 관찰자 패턴 | 체력은 바뀌었다고 알리기만 하고, 구독한 쪽이 각자 반응한다 |
+| `event-queue-sound` | 이벤트 큐: 효과음 요청 모으기 | 이벤트 큐 | 효과음을 바로 틀지 않고 큐에 모아, 같은 프레임의 같은 소리는 합치고 빈 채널이 나면 차례로 튼다 |
 | `command-undo-replay` | 명령 패턴: 되돌리기와 리플레이 | 명령 패턴 | 입력을 객체로 만들어 기록하고 되돌리고 다시 재생한다 |
 | `object-pool-projectiles` | 오브젝트 풀: 포탑 탄 재사용 | 오브젝트 풀 | 탄을 만들고 지우는 대신 빌려 쓰고 돌려주되, 빌릴 때 상태를 새로 맞춘다 |
 | `prototype-drone-clone` | 프로토타입 패턴: 견본 드론 복제 | 프로토타입 패턴 | 견본을 복제하되 참조 필드는 새로 만들어 복제본끼리 섞이지 않게 한다 |
 | `singleton-scene-managers` | 싱글턴 패턴: 씬을 넘는 매니저 | 싱글턴 패턴 | 씬을 넘는 매니저와 씬과 함께 사라질 매니저를 나누고 둘 다 하나만 둔다 |
 | `factory-drone-spawner` | 팩토리 메서드: 드론 스포너 | 팩토리 메서드 | 무엇을 만들지는 스포너 자식이, 만드는 절차는 부모가 한 곳에서 정한다 |
+| `abstract-factory-zone-themes` | 추상 팩토리: 구역 테마 세트 | 추상 팩토리 | 구역마다 드론·투사체·바닥을 한 공장이 세트로 만들어, 다른 구역 것이 섞이지 않는다 |
 | `decorator-stat-buffs` | 데코레이터 패턴: 버프 겹치기와 풀기 | 데코레이터 패턴 | 버프를 감싸는 층으로 겹치고, 층을 빼면 원래 값으로 돌아온다 |
 | `facade-hit-resolution` | 퍼사드 패턴: 명중 처리 창구 | 퍼사드 패턴 | 명중 처리 다섯 단계를 창구 하나가 맡고, 공격하는 곳은 창구만 부른다 |
+| `composite-drone-squads` | 컴포지트 패턴: 드론 편대 명령 | 컴포지트 패턴 | 드론 하나와 편대를 같은 인터페이스로 다뤄, 편대 안 편대까지 명령 한 번이 끝까지 닿는다 |
+| `adapter-sensor-units` | 어댑터 패턴: 센서 장비 단위 맞추기 | 어댑터 패턴 | 장비마다 다른 API 와 단위를 어댑터 한 곳에서 우리 모양으로 바꿔, 화면과 경보는 한 모양만 안다 |
 
 ## 진행 순서
 
@@ -48,4 +53,4 @@ metadata:
 ## 파일을 다룰 때
 
 - `Core/` 는 에디터 없이 테스트할 수 있게 `UnityEngine` 을 참조하지 않는다. 이 구분을 유지한다.
-- 표에 없는 패턴은 가장 비슷한 표본의 코어와 어댑터 구조를 틀로 삼아 새로 만든다.
+- 표에 없는 패턴은 가장 비슷한 표본의 코어와 연결 컴포넌트 구조를 틀로 삼아 새로 만든다.
