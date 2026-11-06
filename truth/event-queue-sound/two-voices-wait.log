@@ -1,0 +1,49 @@
+# src d8b9089686d8
+# event-queue-sound two-voices-wait naive=0
+0.30 in shot
+0.30 ev 드론 1 파괴
+0.30 ev 요청 폭발 0.50 → 대기 1
+0.30 ev 채널 1 재생 폭발 0.50 · 대기 0
+0.50 st alive=4 pending=0 merged=0 dropped=0 loud=0.50 ch=폭발,- t1=0.62 t2=0.00
+0.60 in volley
+0.60 ev 드론 2 파괴
+0.60 ev 요청 폭발 0.50 → 대기 1
+0.60 ev 드론 3 파괴
+0.60 ev 합침 폭발 ×2 (음량 0.50)
+0.60 ev 드론 4 파괴
+0.60 ev 합침 폭발 ×3 (음량 0.50)
+0.60 ev 드론 5 파괴
+0.60 ev 합침 폭발 ×4 (음량 0.50)
+0.60 ev 웨이브 1 끝
+0.60 ev 요청 웨이브 끝 알림 0.40 → 대기 2
+0.60 ev 채널 2 재생 폭발 ×4 0.50 · 대기 1
+1.00 st alive=0 pending=1 merged=3 dropped=0 loud=1.00 ch=폭발,폭발×4 t1=0.12 t2=0.42
+1.12 ev 채널 1 끝 · 폭발
+1.12 ev 채널 1 재생 웨이브 끝 알림 0.40 · 대기 0 · 0.52초 기다림
+1.42 ev 채널 2 끝 · 폭발
+1.50 st alive=0 pending=0 merged=3 dropped=0 loud=0.40 ch=알림,- t1=0.43 t2=0.00
+1.80 in wave
+1.80 ev 웨이브 2 시작 · 드론 5대
+1.93 ev 채널 1 끝 · 웨이브 끝 알림
+2.00 st alive=5 pending=0 merged=3 dropped=0 loud=0.00 ch=-,- t1=0.00 t2=0.00
+2.20 in volley
+2.20 ev 드론 1 파괴
+2.20 ev 요청 폭발 0.50 → 대기 1
+2.20 ev 드론 2 파괴
+2.20 ev 합침 폭발 ×2 (음량 0.50)
+2.20 ev 드론 3 파괴
+2.20 ev 합침 폭발 ×3 (음량 0.50)
+2.20 ev 드론 4 파괴
+2.20 ev 합침 폭발 ×4 (음량 0.50)
+2.20 ev 드론 5 파괴
+2.20 ev 합침 폭발 ×5 (음량 0.50)
+2.20 ev 웨이브 2 끝
+2.20 ev 요청 웨이브 끝 알림 0.40 → 대기 2
+2.20 ev 채널 1 재생 폭발 ×5 0.50 · 대기 1
+2.20 ev 채널 2 재생 웨이브 끝 알림 0.40 · 대기 0
+2.50 st alive=0 pending=0 merged=7 dropped=0 loud=0.90 ch=폭발×5,알림 t1=0.52 t2=0.52
+3.00 st alive=0 pending=0 merged=7 dropped=0 loud=0.90 ch=폭발×5,알림 t1=0.02 t2=0.02
+3.02 ev 채널 1 끝 · 폭발
+3.02 ev 채널 2 끝 · 웨이브 끝 알림
+3.50 st alive=0 pending=0 merged=7 dropped=0 loud=0.00 ch=-,- t1=0.00 t2=0.00
+end st alive=0 pending=0 merged=7 dropped=0 loud=0.00 ch=-,- t1=0.00 t2=0.00
