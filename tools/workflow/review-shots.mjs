@@ -42,6 +42,13 @@ for (const id of process.argv.slice(2)) {
     live(id, `auto=1&t=${r2(Number(m[1]) + 0.05)}&off=1`, `bug-${seen.size}`)
   }
   for (const s of meta.steps ?? []) live(id, `auto=1&t=${mid}&step=${s.n}`, `step${s.n}`)
+  // 두 번째 이후 시나리오: 중간과 끝 (효과 켬·끔). 자동 데모에 없는 경로(대기, 거절 등) 확인용
+  for (const sc of meta.scenarios.slice(1)) {
+    for (const t of [r2(sc.duration / 2), r2(sc.duration - 0.3)]) {
+      live(id, `auto=1&scenario=${sc.id}&t=${t}`, `scn-${sc.id}-t${t}`)
+      live(id, `auto=1&scenario=${sc.id}&t=${t}&off=1`, `scn-${sc.id}-t${t}-off`)
+    }
+  }
   // 프리셋마다 끝 화면 (조절 값 끝에서 생기는 겹침, 프리셋 look 대조. 묶음 4 리뷰 요청)
   for (const p of meta.presets ?? []) live(id, `auto=1&t=${end}&preset=${p.id}`, `preset-${p.id}`)
 

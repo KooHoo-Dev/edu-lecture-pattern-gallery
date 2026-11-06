@@ -131,7 +131,7 @@ kit-guide 2절의 공통 필드에 더해:
 4. sim.ts 를 옮기고 `node tools/truth.mjs <id>` 가 "같다" 가 될 때까지 맞춘다.
 5. Unity 어댑터를 쓰고 `node tools/gallery.mjs unity-compile <id>`.
 6. meta.ts 를 쓰고 `node tools/gallery.mjs check <id>`.
-7. `node tools/gallery.mjs live <id> --query="auto=1&t=<초>" wait:600 stage:<이름>` 으로 최종, `&off=1`, `&step=N` 화면을 찍어 Read 로 직접 본다. 사건 기록과 구조 그림이 단계 글과 맞는지 본다.
+7. `node tools/gallery.mjs live <id> --query="auto=1&t=<초>" wait:600 stage:<이름>` 으로 최종, `&off=1`, `&step=N` 화면을 찍어 Read 로 직접 본다. 주소 인자: `auto=1` 자동 재생(기본은 첫 시나리오), `scenario=<시나리오 id>` 다른 시나리오, `t=<초>` 그 시각에 멈춤, `off=1` 효과 끄기, `step=N` 단계 보기, `preset=<id>` 프리셋, `p.<key>=<값>` 조절 값 하나 (예: `auto=1&scenario=two-voices-wait&t=0.9&p.maxVoices=2`). kit 소스는 작업 트리 밖(정션)이라 워커가 읽지 못할 수 있으니 이 목록을 쓴다. 사건 기록과 구조 그림이 단계 글과 맞는지 본다.
 8. `node tools/gallery.mjs thumbs <id>` 로 썸네일을 찍는다.
 
 ## 8. 완료 체크리스트

@@ -2,7 +2,7 @@ import { requestFlash, startLoop, useStageKeys, type StageHandle, type StageProp
 import { useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from 'react'
 import { C, drawCode, drawDiagram, drawLog, drawWorld, panel, type CodeLine, type Rect } from './draw'
 import { Replayer, valuesFor } from './runner'
-import type { PatternSpecimen } from './types'
+import type { PatternMeta, PatternSpecimen, Scenario } from './types'
 
 /* 시나리오 무대: 표본의 sim.ts 를 고정 시간 간격으로 돌려 미니 월드, 구조 그림, 사건 기록, 코드 줄을 그린다.
  * 자동 데모는 첫 시나리오를 반복하고, 사람이 입력(이벤트 버튼, 무대 포커스 때 키)하면 그 주기를 넘겨받는다.
@@ -16,6 +16,12 @@ const LOG: Rect = { x: 16, y: 592, w: 940, h: 292 }
 const CODE: Rect = { x: 972, y: 592, w: 612, h: 292 }
 
 /** `// [n]` (단계) 와 `// [!]` (나쁜 예의 문제 줄) 표시가 있는 줄 */
+/** 자동 재생할 시나리오. 주소의 scenario=<id> 가 있으면 그것 (리뷰·확인용: live --query="auto=1&scenario=<id>"), 없으면 첫 시나리오 */
+function demoScenario(m: PatternMeta): Scenario | null {
+  const id = new URLSearchParams(location.hash.split('?')[1] ?? '').get('scenario')
+  return m.scenarios.find(x => x.id === id) ?? m.scenarios[0] ?? null
+}
+
 function markedLines(specimen: PatternSpecimen, mark: string, folder: (path: string) => boolean): CodeLine[] {
   const out: CodeLine[] = []
   for (const f of specimen.files) {
@@ -92,7 +98,10 @@ export function ScenarioStage({ ref, specimen, values, step, off, playing, speed
     try {
       s.error = null
       setShownError(null)
-      s.rep = new Replayer(specimen.createSim, valuesFor(m.params, values), off, auto ? (m.scenarios[0] ?? null) : null)
+      const sc = auto ? demoScenario(m) : null
+      // 주소로 고른 시나리오는 그 시나리오의 조절 값으로 (기록과 같은 화면). 첫 시나리오는 조절 패널 값을 그대로 쓴다
+      const v = sc && sc !== m.scenarios[0] ? { ...values, ...sc.values } : values
+      s.rep = new Replayer(specimen.createSim, valuesFor(m.params, v), off, sc)
       s.time = startTime ?? 0
       s.rep.advanceTo(s.time)
     } catch (e) {

@@ -20,7 +20,7 @@ You review specimens for the Pattern Gallery: interactive lessons on game progra
 ## Files for you (read only)
 
 - The specimen files listed above for your id.
-- Web stage captures in `_review/<id>/` (made by `node tools/workflow/review-shots.mjs <id>`), all with the auto demo (first scenario) frozen at the given time: `live-t<sec>-*` and `live-t<sec>-off-*` (effect off) at 1.3 s, the middle and the end of the demo; `live-bug-<k>-*` effect off 0.05 s after each ✖ kind first appears; `live-step<N>-*` step N at the middle of the demo (the step text may describe events that happen later; check those in code and logs); `live-preset-<id>-*` each preset at the end of the demo (check overlaps at parameter extremes and that each preset's `look` text matches).
+- Web stage captures in `_review/<id>/` (made by `node tools/workflow/review-shots.mjs <id>`), all with the auto demo (first scenario) frozen at the given time: `live-t<sec>-*` and `live-t<sec>-off-*` (effect off) at 1.3 s, the middle and the end of the demo; `live-bug-<k>-*` effect off 0.05 s after each ✖ kind first appears; `live-step<N>-*` step N at the middle of the demo (the step text may describe events that happen later; check those in code and logs); `live-scn-<scenario>-t<sec>(-off)-*` every later scenario at its middle and end (paths the auto demo does not show); `live-preset-<id>-*` each preset at the end of the demo (check overlaps at parameter extremes and that each preset's `look` text matches).
 - Logs in `truth/<id>/`.
 
 ## What to report
