@@ -17,7 +17,7 @@ export const FIXED_RULES = [
 /** Unity 프로젝트 안 자리에서 표본 폴더 뒤 경로 (Core/X.cs) */
 export const relPath = (s: PatternSpecimen, f: CodeFile) => f.path.slice(`Assets/Patterns/${s.meta.id}/`.length)
 
-/** 넣는 파일: 코어와 어댑터. 나쁜 예(Naive/)는 넣지 않는다 */
+/** 넣는 파일: 코어(Core/)와 MonoBehaviour 연결 컴포넌트(Unity/). 나쁜 예(Naive/)는 넣지 않는다 */
 export const installFiles = (s: PatternSpecimen) => s.files.filter(f => !relPath(s, f).startsWith('Naive/'))
 
 function csLiteral(def: ParamDef, value: unknown, declaration: string): string {
@@ -125,7 +125,7 @@ export const ai: AiConfig<PatternSpecimen> = {
   skill: {
     name: 'game-patterns',
     description: all =>
-      `Unity 에 게임 프로그래밍 패턴(상태, 관찰자, 명령 등)을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 어댑터)과 넣는 순서가 들어 있다. 포함된 표본: ${all.map(s => `${s.meta.title}(${s.meta.titleEn})`).join(', ')}. 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다.`,
+      `Unity 에 게임 프로그래밍 패턴(상태, 관찰자, 명령 등)을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 연결 컴포넌트)과 넣는 순서가 들어 있다. 포함된 표본: ${all.map(s => `${s.meta.title}(${s.meta.titleEn})`).join(', ')}. 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다.`,
     compatibility: 'Unity 6.3 LTS (6000.3), C# 9, Input System',
     title: 'Pattern Gallery',
     intro: '사용자가 Unity 에서 상태 관리, 이벤트 알림, 되돌리기 같은 구조를 요청하면 아래 목록에서 가장 가까운 표본을 고르고, 그 표본의 `references/<id>/guide.md` 만 읽는다. 다른 표본의 자료는 읽지 않는다.',
@@ -138,7 +138,7 @@ export const ai: AiConfig<PatternSpecimen> = {
       'guide 의 확인 방법을 사용자에게 알려 준다.',
     ],
     rules: FIXED_RULES,
-    notes: ['`Core/` 는 에디터 없이 테스트할 수 있게 `UnityEngine` 을 참조하지 않는다. 이 구분을 유지한다.', '표에 없는 패턴은 가장 비슷한 표본의 코어와 어댑터 구조를 틀로 삼아 새로 만든다.'],
+    notes: ['`Core/` 는 에디터 없이 테스트할 수 있게 `UnityEngine` 을 참조하지 않는다. 이 구분을 유지한다.', '표에 없는 패턴은 가장 비슷한 표본의 코어와 연결 컴포넌트 구조를 틀로 삼아 새로 만든다.'],
     guide: s => {
       const m = s.meta
       const list = (lines: string[]) => lines.map(line => `- ${line}`).join('\n')

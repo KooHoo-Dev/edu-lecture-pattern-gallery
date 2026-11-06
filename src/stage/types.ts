@@ -4,7 +4,7 @@ import type { BaseMeta, BaseSpecimen, ParamValues } from '@koohoo/gallery-kit'
  * 패턴 표본 규격 (자세한 규칙은 docs/specimen-guide.md)
  * 표본 1개 = 다음 폴더들.
  *   unity/<id>/Core/      순수 C# 코어. UnityEngine 을 참조하지 않는다. 원본
- *   unity/<id>/Unity/     MonoBehaviour 어댑터 (입력, 화면)
+ *   unity/<id>/Unity/     MonoBehaviour 연결 컴포넌트 (입력, 화면). 문서에서는 'Unity 어댑터' 라고도 부른다
  *   unity/<id>/Naive/     패턴 없이 짠 나쁜 예 (효과 끄기)
  *   truth/<id>/Target.cs  dotnet 하네스가 코어와 나쁜 예를 시나리오로 돌리는 어댑터
  *   truth/<id>/*.log      dotnet 이 남긴 사건 기록 (생성물, 커밋)
