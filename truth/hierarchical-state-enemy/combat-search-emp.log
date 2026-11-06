@@ -1,0 +1,48 @@
+# src a410de7c42ac
+# hierarchical-state-enemy combat-search-emp naive=0
+0.30 in approach
+0.50 st state=Active/Patrol x=9.75 harin=4.00 alert=0 charge=0.00 search=0.00 stun=0.00
+0.60 in approach
+0.60 ev Exit Patrol
+0.60 ev 경계등 켬
+0.60 ev Enter Combat
+0.60 ev Enter Chase
+0.90 in approach
+1.00 st state=Active/Combat/Chase x=8.54 harin=6.00 alert=1 charge=0.00 search=0.00 stun=0.00
+1.02 ev Exit Chase
+1.02 ev Enter Attack
+1.50 st state=Active/Combat/Attack x=8.50 harin=6.00 alert=1 charge=0.47 search=0.00 stun=0.00
+1.62 ev 사격 → 하린 (거리 2.50)
+2.00 st state=Active/Combat/Attack x=8.50 harin=6.00 alert=1 charge=0.37 search=0.00 stun=0.00
+2.22 ev 사격 → 하린 (거리 2.50)
+2.40 in retreat
+2.40 ev Exit Attack
+2.40 ev Enter Chase
+2.50 st state=Active/Combat/Chase x=8.29 harin=5.00 alert=1 charge=0.00 search=0.00 stun=0.00
+2.50 in retreat
+2.60 in retreat
+2.70 in retreat
+2.70 ev Exit Chase
+2.70 ev 경계등 끔
+2.70 ev Exit Combat
+2.70 ev Enter Search
+2.80 in retreat
+2.90 in retreat
+3.00 st state=Active/Search x=7.08 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.00
+3.10 in emp
+3.10 ev Exit Search
+3.10 ev Exit Active
+3.10 ev 기절 2.00초
+3.10 ev Enter Stunned
+3.10 ev emp → Active 가 처리
+3.50 st state=Stunned x=6.83 harin=0.50 alert=0 charge=0.00 search=0.00 stun=1.60
+4.00 st state=Stunned x=6.83 harin=0.50 alert=0 charge=0.00 search=0.00 stun=1.10
+4.50 st state=Stunned x=6.83 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.60
+5.00 st state=Stunned x=6.83 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.10
+5.10 ev Exit Stunned
+5.10 ev Enter Active
+5.10 ev Enter Patrol
+5.50 st state=Active/Patrol x=7.71 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.00
+6.00 st state=Active/Patrol x=8.96 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.00
+6.50 st state=Active/Patrol x=10.21 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.00
+end st state=Active/Patrol x=10.21 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.00
