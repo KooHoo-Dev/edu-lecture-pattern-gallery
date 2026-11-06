@@ -1,0 +1,25 @@
+# src a410de7c42ac
+# hierarchical-state-enemy emp-patrol-chase naive=1
+0.40 in emp
+0.40 ev 기절 1.00초
+0.40 ev Patrol → Stunned
+0.50 st state=Stunned x=10.00 harin=3.00 alert=0 charge=0.00 search=0.00 stun=0.90
+1.00 st state=Stunned x=10.00 harin=3.00 alert=0 charge=0.00 search=0.00 stun=0.40
+1.40 ev Stunned → Patrol
+1.50 st state=Patrol x=9.79 harin=3.00 alert=0 charge=0.00 search=0.00 stun=0.00
+1.70 in approach
+1.82 ev 경계등 켬
+1.82 ev Patrol → Chase
+2.00 st state=Chase x=8.58 harin=4.00 alert=1 charge=0.00 search=0.00 stun=0.00
+2.00 in approach
+2.20 in emp
+2.20 ev 경계등 끔
+2.20 ev 기절 1.00초
+2.20 ev Chase → Stunned
+2.50 st state=Stunned x=8.08 harin=5.00 alert=0 charge=0.00 search=0.00 stun=0.70
+2.60 in emp
+3.00 st state=Stunned x=8.08 harin=5.00 alert=0 charge=0.00 search=0.00 stun=0.20
+3.20 ev Stunned → Patrol
+3.22 ev 경계등 켬
+3.22 ev Patrol → Chase
+end st state=Chase x=7.67 harin=5.00 alert=1 charge=0.00 search=0.00 stun=0.00

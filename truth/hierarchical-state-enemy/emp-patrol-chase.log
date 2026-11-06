@@ -1,0 +1,41 @@
+# src a410de7c42ac
+# hierarchical-state-enemy emp-patrol-chase naive=0
+0.40 in emp
+0.40 ev Exit Patrol
+0.40 ev Exit Active
+0.40 ev 기절 1.00초
+0.40 ev Enter Stunned
+0.40 ev emp → Active 가 처리
+0.50 st state=Stunned x=10.00 harin=3.00 alert=0 charge=0.00 search=0.00 stun=0.90
+1.00 st state=Stunned x=10.00 harin=3.00 alert=0 charge=0.00 search=0.00 stun=0.40
+1.40 ev Exit Stunned
+1.40 ev Enter Active
+1.40 ev Enter Patrol
+1.50 st state=Active/Patrol x=9.79 harin=3.00 alert=0 charge=0.00 search=0.00 stun=0.00
+1.70 in approach
+1.82 ev Exit Patrol
+1.82 ev 경계등 켬
+1.82 ev Enter Combat
+1.82 ev Enter Chase
+2.00 st state=Active/Combat/Chase x=8.58 harin=4.00 alert=1 charge=0.00 search=0.00 stun=0.00
+2.00 in approach
+2.20 in emp
+2.20 ev Exit Chase
+2.20 ev 경계등 끔
+2.20 ev Exit Combat
+2.20 ev Exit Active
+2.20 ev 기절 1.00초
+2.20 ev Enter Stunned
+2.20 ev emp → Active 가 처리
+2.50 st state=Stunned x=8.08 harin=5.00 alert=0 charge=0.00 search=0.00 stun=0.70
+2.60 in emp
+2.60 ev emp 받는 층 없음 (Stunned)
+3.00 st state=Stunned x=8.08 harin=5.00 alert=0 charge=0.00 search=0.00 stun=0.20
+3.20 ev Exit Stunned
+3.20 ev Enter Active
+3.20 ev Enter Patrol
+3.22 ev Exit Patrol
+3.22 ev 경계등 켬
+3.22 ev Enter Combat
+3.22 ev Enter Chase
+end st state=Active/Combat/Chase x=7.67 harin=5.00 alert=1 charge=0.00 search=0.00 stun=0.00
