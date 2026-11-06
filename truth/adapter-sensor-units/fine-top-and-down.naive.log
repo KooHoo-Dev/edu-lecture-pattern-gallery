@@ -1,0 +1,75 @@
+# src ec69138e1ebe
+# adapter-sensor-units fine-top-and-down naive=1
+0.30 in swap
+0.30 ev 도윤: B 구역 장비 → GeigerX (HUD 의 sensors[1] 칸에 장비를 직접 끼움)
+0.50 st level=0.00 b=GeigerX barA=0.00 barB=0.00 alarmA=0 alarmB=0
+0.70 in rise
+0.70 ev 방사선 0.00 → 0.10
+0.70 ev HUD A 막대 0.10
+0.70 ev HUD B 막대 10.00
+0.70 ev !막대 넘침: B 막대 10.00 (0~1 막대에 ReadPercent 의 0~100 을 그대로 넣었다)
+1.00 st level=0.10 b=GeigerX barA=0.10 barB=10.00 alarmA=0 alarmB=0
+1.05 in rise
+1.05 ev 방사선 0.10 → 0.20
+1.05 ev HUD A 막대 0.20
+1.05 ev HUD B 막대 20.00
+1.40 in rise
+1.40 ev 방사선 0.20 → 0.30
+1.40 ev HUD A 막대 0.30
+1.40 ev HUD B 막대 30.00
+1.50 st level=0.30 b=GeigerX barA=0.30 barB=30.00 alarmA=0 alarmB=0
+1.75 in rise
+1.75 ev 방사선 0.30 → 0.40
+1.75 ev HUD A 막대 0.40
+1.75 ev HUD B 막대 40.00
+2.00 st level=0.40 b=GeigerX barA=0.40 barB=40.00 alarmA=0 alarmB=0
+2.10 in rise
+2.10 ev 방사선 0.40 → 0.50
+2.10 ev HUD A 막대 0.50
+2.10 ev HUD B 막대 50.00
+2.45 in rise
+2.45 ev 방사선 0.50 → 0.60
+2.45 ev HUD A 막대 0.60
+2.45 ev HUD B 막대 60.00
+2.50 st level=0.60 b=GeigerX barA=0.60 barB=60.00 alarmA=0 alarmB=0
+2.80 in rise
+2.80 ev 방사선 0.60 → 0.70
+2.80 ev HUD A 막대 0.70
+2.80 ev HUD A 경보 켜짐
+2.80 ev HUD B 막대 70.00
+2.80 ev !경보 누락: B 구역 0.70 ≥ 기준 0.70 인데 경보등 꺼짐 (70 / 100 = 0)
+3.00 st level=0.70 b=GeigerX barA=0.70 barB=70.00 alarmA=1 alarmB=0
+3.15 in rise
+3.15 ev 방사선 0.70 → 0.80
+3.15 ev HUD A 막대 0.80
+3.15 ev HUD B 막대 80.00
+3.50 st level=0.80 b=GeigerX barA=0.80 barB=80.00 alarmA=1 alarmB=0
+3.50 in rise
+3.50 ev 방사선 0.80 → 0.90
+3.50 ev HUD A 막대 0.90
+3.50 ev HUD B 막대 90.00
+3.85 in rise
+3.85 ev 방사선 0.90 → 1.00
+3.85 ev HUD A 막대 1.00
+3.85 ev HUD B 막대 100.00
+3.85 ev HUD B 경보 켜짐
+4.00 st level=1.00 b=GeigerX barA=1.00 barB=100.00 alarmA=1 alarmB=1
+4.50 st level=1.00 b=GeigerX barA=1.00 barB=100.00 alarmA=1 alarmB=1
+4.50 in fall
+4.50 ev 방사선 1.00 → 0.90
+4.50 ev HUD A 막대 0.90
+4.50 ev HUD B 막대 90.00
+4.50 ev HUD B 경보 꺼짐
+4.50 ev B 경보 또 누락 (90 / 100 = 0)
+5.00 st level=0.90 b=GeigerX barA=0.90 barB=90.00 alarmA=1 alarmB=0
+5.10 in fall
+5.10 ev 방사선 0.90 → 0.80
+5.10 ev HUD A 막대 0.80
+5.10 ev HUD B 막대 80.00
+5.50 st level=0.80 b=GeigerX barA=0.80 barB=80.00 alarmA=1 alarmB=0
+5.70 in fall
+5.70 ev 방사선 0.80 → 0.70
+5.70 ev HUD A 막대 0.70
+5.70 ev HUD B 막대 70.00
+6.00 st level=0.70 b=GeigerX barA=0.70 barB=70.00 alarmA=1 alarmB=0
+end st level=0.70 b=GeigerX barA=0.70 barB=70.00 alarmA=1 alarmB=0

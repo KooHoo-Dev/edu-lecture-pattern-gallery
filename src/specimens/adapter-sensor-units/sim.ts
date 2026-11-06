@@ -5,6 +5,8 @@ import type { PatternSim, SimFactory, SimView, WorldItem } from '../../stage/typ
  * truth/adapter-sensor-units/Target.cs 와 같은 글을 만드는 어댑터. C# 의 float 계산은 f() 로 맞춘다. */
 
 const f = Math.fround
+/** Math.Round(x, MidpointRounding.AwayFromZero) (RadiationField.Add, GeigerX.ReadPercent) */
+const roundAway = (x: number) => Math.sign(x) * Math.round(Math.abs(x))
 
 /** C# event 처럼: += 는 뒤에 붙이고, -= 는 뒤에서부터 같은 것 하나를 뺀다. 부를 때는 그 순간의 목록을 쓴다 */
 class Event<T extends unknown[]> {
@@ -31,13 +33,17 @@ interface IRadiationSensor {
 /* ───────── Core/RadiationField.cs ───────── */
 
 class RadiationField {
-  Level = 0
+  private percent = 0
+  get Level() {
+    return f(this.percent / 100)
+  }
   Changed = new Event<[number, number]>()
   Add(delta: number): boolean {
-    const before = this.Level
-    this.Level = Math.min(1, Math.max(0, f(this.Level + delta)))
-    if (this.Level === before) return false
-    this.Changed.invoke(before, this.Level)
+    const before = this.percent
+    const step = roundAway(f(delta * 100))
+    this.percent = Math.min(100, Math.max(0, this.percent + step))
+    if (this.percent === before) return false
+    this.Changed.invoke(f(before / 100), this.Level)
     return true
   }
 }
@@ -165,9 +171,6 @@ class LegacyProbe {
     return this.sense()
   }
 }
-
-/** Math.Round(x, MidpointRounding.AwayFromZero) */
-const roundAway = (x: number) => Math.sign(x) * Math.round(Math.abs(x))
 
 class GeigerX {
   private sense: () => number
