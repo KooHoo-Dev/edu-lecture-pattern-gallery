@@ -13,7 +13,7 @@ namespace PatternGallery.AdapterSensorUnits
         [SerializeField] float alarmLevel = 0.7f;
 
         [Header("시연용 입력 (실제 게임에서는 장비 SDK 가 값을 준다)")]
-        [Tooltip("오름·내림 키 한 번에 바뀌는 실제 방사선 (0~1 로 자른다)")]
+        [Tooltip("오름·내림 키 한 번에 바뀌는 실제 방사선 (1% 단위 정수로 들고 0~1 로 자른다)")]
         [Range(0.05f, 0.5f)]
         [SerializeField] float riseStep = 0.25f;
         [SerializeField] InputAction riseAction;
@@ -93,10 +93,12 @@ namespace PatternGallery.AdapterSensorUnits
 
         void OnValidate()
         {
-            // Play 중 Inspector 값을 바꾸면 코어에 넣는다. 편집 중에는 코어를 만들지 않는다
+            // Play 중 Inspector 값을 바꾸면 코어에 넣고 HUD 를 다시 그린다. 편집 중에는 코어를 만들지 않는다
             if (site == null) return;
             site.Hud.AlarmLevel = alarmLevel;
             site.RiseStep = riseStep;
+            // 다시 그리지 않으면 경보등이 옛 기준 그대로 남는다. 그 상태로 교체(E)하면 Attach 가 B 만 다시 읽어 A·B 경보등이 어긋난다
+            site.Hud.Refresh();
         }
 
         void OnRise(InputAction.CallbackContext _) => Site.Rise();
