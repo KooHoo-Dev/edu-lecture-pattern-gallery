@@ -1,0 +1,30 @@
+# src 86bdbed6002b
+# abstract-factory-zone-themes one-zone-only naive=1
+0.00 ev 시작 zone = "forest" · 이끼 바닥
+0.30 in spawn
+0.30 ev 덩굴 #1 → 자리 0 (SpawnDrone: zone "forest")
+0.50 st zone=forest drones=1 sets=forest flying=- p0=-
+0.80 in spawn
+0.80 ev 덩굴 #2 → 자리 1 (SpawnDrone: zone "forest")
+1.00 st zone=forest drones=2 sets=forest,forest flying=- p0=-
+1.30 in fire
+1.30 ev 덩굴 #1 → 가시 (MakeProjectile("forest"))
+1.30 ev 덩굴 #2 → 가시 (MakeProjectile("forest"))
+1.50 st zone=forest drones=2 sets=forest,forest flying=forest,forest p0=11.10
+2.00 st zone=forest drones=2 sets=forest,forest flying=forest,forest p0=8.10
+2.00 in spawn
+2.00 ev 덩굴 #3 → 자리 2 (SpawnDrone: zone "forest")
+2.40 in fire
+2.40 ev 덩굴 #1 → 가시 (MakeProjectile("forest"))
+2.40 ev 덩굴 #2 → 가시 (MakeProjectile("forest"))
+2.40 ev 덩굴 #3 → 가시 (MakeProjectile("forest"))
+2.50 st zone=forest drones=3 sets=forest,forest,forest flying=forest,forest,forest,forest,forest p0=5.10
+2.57 ev 가시 사라짐 (하린 앞)
+2.83 ev 가시 사라짐 (하린 앞)
+3.00 st zone=forest drones=3 sets=forest,forest,forest flying=forest,forest,forest p0=8.70
+3.42 ev 가시 사라짐 (하린 앞)
+3.50 st zone=forest drones=3 sets=forest,forest,forest flying=forest,forest p0=5.70
+3.67 ev 가시 사라짐 (하린 앞)
+3.93 ev 가시 사라짐 (하린 앞)
+4.00 st zone=forest drones=3 sets=forest,forest,forest flying=- p0=-
+end st zone=forest drones=3 sets=forest,forest,forest flying=- p0=-

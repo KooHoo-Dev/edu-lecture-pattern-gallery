@@ -1,0 +1,50 @@
+# src 86bdbed6002b
+# abstract-factory-zone-themes zone-hop naive=1
+0.00 ev 시작 zone = "forest" · 이끼 바닥
+0.30 in spawn
+0.30 ev 덩굴 #1 → 자리 0 (SpawnDrone: zone "forest")
+0.50 st zone=forest drones=1 sets=forest flying=- p0=-
+0.80 in fire
+0.80 ev 덩굴 #1 → 가시 (MakeProjectile("forest"))
+1.00 st zone=forest drones=1 sets=forest flying=forest p0=11.10
+1.50 st zone=forest drones=1 sets=forest flying=forest p0=8.10
+1.60 in lava
+1.60 ev zone = "lava" · 현무암 바닥
+2.00 st zone=lava drones=1 sets=forest flying=forest p0=5.10
+2.00 in spawn
+2.00 ev 화염 #2 → 자리 1 (SpawnDrone: zone "lava")
+2.30 in fire
+2.30 ev 덩굴 #1 → 화염탄 (MakeProjectile("lava"))
+2.30 ev !구역 섞임: 덩굴 #1 · 가시 대신 화염탄 (지금 zone "lava" 로 만들었다)
+2.30 ev 화염 #2 → 화염탄 (MakeProjectile("lava"))
+2.33 ev 가시 사라짐 (하린 앞)
+2.50 st zone=lava drones=2 sets=forest,lava flying=lava,lava p0=11.10
+3.00 st zone=lava drones=2 sets=forest,lava flying=lava,lava p0=8.10
+3.40 in ice
+3.40 ev zone = "ice" · 빙판 바닥
+3.50 st zone=ice drones=2 sets=forest,lava flying=lava,lava p0=5.10
+3.57 ev 화염탄 사라짐 (하린 앞)
+3.80 in spawn
+3.80 ev 서리 #3 → 자리 2 (SpawnDrone: zone "ice")
+3.83 ev 화염탄 사라짐 (하린 앞)
+4.00 st zone=ice drones=3 sets=forest,lava,ice flying=- p0=-
+4.30 in fire
+4.30 ev 덩굴 #1 → 화염탄 (MakeProjectile("ice"))
+4.30 ev 화염 #2 → 화염탄 (MakeProjectile("ice"))
+4.30 ev 서리 #3 → 화염탄 (MakeProjectile("ice"))
+4.30 ev !분기 누락: 서리 #3 · 얼음 조각 대신 화염탄 (MakeProjectile 에 case "ice" 가 없어 default)
+4.50 st zone=ice drones=3 sets=forest,lava,ice flying=lava,lava,lava p0=11.10
+5.00 st zone=ice drones=3 sets=forest,lava,ice flying=lava,lava,lava p0=8.10
+5.20 in fire
+5.20 ev 덩굴 #1 → 화염탄 (MakeProjectile("ice"))
+5.20 ev 화염 #2 → 화염탄 (MakeProjectile("ice"))
+5.20 ev 서리 #3 → 화염탄 (MakeProjectile("ice"))
+5.32 ev 화염탄 사라짐 (하린 앞)
+5.50 st zone=ice drones=3 sets=forest,lava,ice flying=lava,lava,lava,lava,lava p0=5.10
+5.57 ev 화염탄 사라짐 (하린 앞)
+5.83 ev 화염탄 사라짐 (하린 앞)
+6.00 st zone=ice drones=3 sets=forest,lava,ice flying=lava,lava,lava p0=7.50
+6.22 ev 화염탄 사라짐 (하린 앞)
+6.47 ev 화염탄 사라짐 (하린 앞)
+6.50 st zone=ice drones=3 sets=forest,lava,ice flying=lava p0=4.50
+end st zone=ice drones=3 sets=forest,lava,ice flying=lava p0=4.50

@@ -1,0 +1,48 @@
+# src 86bdbed6002b
+# abstract-factory-zone-themes zone-hop naive=0
+0.00 ev 시작 구역 forest · ForestFactory · 이끼 바닥
+0.30 in spawn
+0.30 ev 덩굴 #1 → 자리 0 (ForestFactory)
+0.50 st zone=forest drones=1 sets=forest flying=- p0=-
+0.80 in fire
+0.80 ev 덩굴 #1 → 가시 (ForestFactory.CreateProjectile)
+1.00 st zone=forest drones=1 sets=forest flying=forest p0=11.10
+1.50 st zone=forest drones=1 sets=forest flying=forest p0=8.10
+1.60 in lava
+1.60 ev 구역 → lava · LavaFactory · 현무암 바닥
+2.00 st zone=lava drones=1 sets=forest flying=forest p0=5.10
+2.00 in spawn
+2.00 ev 화염 #2 → 자리 1 (LavaFactory)
+2.30 in fire
+2.30 ev 덩굴 #1 → 가시 (ForestFactory.CreateProjectile)
+2.30 ev 화염 #2 → 화염탄 (LavaFactory.CreateProjectile)
+2.33 ev 가시 사라짐 (하린 앞)
+2.50 st zone=lava drones=2 sets=forest,lava flying=forest,lava p0=11.10
+3.00 st zone=lava drones=2 sets=forest,lava flying=forest,lava p0=8.10
+3.40 in ice
+3.40 ev 구역 → ice · IceFactory · 빙판 바닥
+3.50 st zone=ice drones=2 sets=forest,lava flying=forest,lava p0=5.10
+3.57 ev 화염탄 사라짐 (하린 앞)
+3.80 in spawn
+3.80 ev 서리 #3 → 자리 2 (IceFactory)
+3.83 ev 가시 사라짐 (하린 앞)
+4.00 st zone=ice drones=3 sets=forest,lava,ice flying=- p0=-
+4.30 in fire
+4.30 ev 덩굴 #1 → 가시 (ForestFactory.CreateProjectile)
+4.30 ev 화염 #2 → 화염탄 (LavaFactory.CreateProjectile)
+4.30 ev 서리 #3 → 얼음 조각 (IceFactory.CreateProjectile)
+4.50 st zone=ice drones=3 sets=forest,lava,ice flying=forest,lava,ice p0=11.10
+5.00 st zone=ice drones=3 sets=forest,lava,ice flying=forest,lava,ice p0=8.10
+5.20 in fire
+5.20 ev 덩굴 #1 → 가시 (ForestFactory.CreateProjectile)
+5.20 ev 화염 #2 → 화염탄 (LavaFactory.CreateProjectile)
+5.20 ev 서리 #3 → 얼음 조각 (IceFactory.CreateProjectile)
+5.32 ev 얼음 조각 사라짐 (하린 앞)
+5.50 st zone=ice drones=3 sets=forest,lava,ice flying=forest,lava,forest,lava,ice p0=5.10
+5.57 ev 화염탄 사라짐 (하린 앞)
+5.83 ev 가시 사라짐 (하린 앞)
+6.00 st zone=ice drones=3 sets=forest,lava,ice flying=forest,lava,ice p0=7.50
+6.22 ev 얼음 조각 사라짐 (하린 앞)
+6.47 ev 화염탄 사라짐 (하린 앞)
+6.50 st zone=ice drones=3 sets=forest,lava,ice flying=forest p0=4.50
+end st zone=ice drones=3 sets=forest,lava,ice flying=forest p0=4.50
