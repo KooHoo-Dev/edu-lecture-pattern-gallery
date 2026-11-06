@@ -110,8 +110,8 @@ export const meta: PatternMeta = {
       { id: 'active', label: 'ActiveState', sub: '부모 · EMP → 기절', x: 17, y: 50 },
       { id: 'combat', label: 'CombatState', sub: 'Active 의 자식 · 경계등 · 놓치면 수색', x: 50, y: 50 },
       { id: 'stunned', label: 'StunnedState', sub: 'Active 밖 · 시간 끝 → 순찰', x: 83, y: 50 },
-      { id: 'ps', label: 'Patrol · SearchState', sub: '잎 · 순찰, 수색만', x: 17, y: 91 },
-      { id: 'ca', label: 'Chase · AttackState', sub: '잎 · 추격, 충전·사격만', x: 50, y: 91 },
+      { id: 'ps', label: 'Patrol · SearchState', sub: ': HState · 잎 · 순찰, 수색만', x: 17, y: 91 },
+      { id: 'ca', label: 'Chase · AttackState', sub: ': HState · 잎 · 추격, 충전·사격만', x: 50, y: 91 },
     ],
     edges: [
       { id: 'ctrl-machine', from: 'ctrl', to: 'machine', kind: 'call' },
@@ -131,7 +131,7 @@ export const meta: PatternMeta = {
       { id: 'chase', label: 'ChaseState', sub: 'emp → 기절 · 경계등 켬/끔', x: 83, y: 9 },
       { id: 'ndrone', label: 'NaiveDrone', sub: '지금 상태 하나 · Exit → Enter', x: 17, y: 50 },
       { id: 'istate', label: 'IDroneState', sub: 'Enter · Tick · Exit · Handle', x: 50, y: 50, kind: 'interface' },
-      { id: 'attack', label: 'AttackState', sub: '나중에 더함 · 경계등 켜는 줄 없음', x: 33, y: 91 },
+      { id: 'attack', label: 'AttackState', sub: 'emp → 기절 · 경계등 켜는 줄 없음', x: 33, y: 91 },
       { id: 'stunned', label: 'StunnedState', sub: '시간 끝 → 순찰', x: 67, y: 91 },
     ],
     edges: [
@@ -144,7 +144,7 @@ export const meta: PatternMeta = {
     ],
   },
   steps: [
-    { n: 1, label: '입력은 잎에서 부모로 올라간다', body: '`DroneBrain.HitByEmp` 가 `StateMachine.Handle("emp")` 를 부르면, 기계는 지금 잎부터 `Parent` 를 따라 올라가며 층마다 `Handle` 을 부르고, 처음 `true` 를 돌려준 층이 맡는다. 잎(Patrol, Search, Chase, Attack)과 Combat 은 EMP 를 몰라 `false` 를 돌려주고, `ActiveState.Handle` 이 받아 `ChangeState(Stunned)` 를 부른다. 자동 데모 3.10초, 수색 중 EMP 가 이 길이다 (`emp → Active 가 처리`). 나중에 더한 `SearchState` 에는 EMP 줄이 하나도 없지만 Active 의 자식으로 걸었으므로 기절한다. 기절 중에는 Active 밖이라 받는 층이 없다.', target: 'ctrl-machine,machine,ps,ps-parent,active' },
+    { n: 1, label: '입력은 잎에서 부모로 올라간다', body: '`DroneBrain.HitByEmp` 가 `StateMachine.Handle("emp")` 를 부르면, 기계는 지금 잎부터 `Parent` 를 따라 올라가며 층마다 `Handle` 을 부르고, 처음 `true` 를 돌려준 층이 맡는다. 잎(Patrol, Search, Chase, Attack)과 Combat 은 EMP 를 몰라 `false` 를 돌려주고, `ActiveState.Handle` 이 받아 `ChangeState(Stunned)` 를 부른다. 자동 데모 3.10초, 수색 중 EMP 가 이 길이다 (사건 기록 `emp: Search → Active 가 처리` 는 입력을 받은 잎과 처리한 층을 함께 쓴다). 나중에 더한 `SearchState` 에는 EMP 줄이 하나도 없지만 Active 의 자식으로 걸었으므로 기절한다. 기절 중에는 Active 밖이라 받는 층이 없다.', target: 'ctrl-machine,machine,ps,ps-parent,active' },
     { n: 2, label: '나갈 때는 안쪽부터, 공통 조상 바로 아래까지', body: '`ChangeState(target)` 은 먼저 지금 잎과 target 을 함께 품은 가장 가까운 상태(공통 조상)를 찾는다. 그리고 지금 잎부터 `Parent` 를 따라 공통 조상 바로 아래까지 `Exit` 를 부른다. 2.70초 Chase → Search 는 공통 조상이 Active 라 `Exit Chase`, `Exit Combat` 순서로 나가고, 이때 `CombatState.Exit` 가 경계등을 끈다. 3.10초 Search → Stunned 는 공통 조상이 없어(뿌리가 다르다) `Exit Search`, `Exit Active` 까지 나간다.', target: 'machine,ca,combat' },
     { n: 3, label: '들어갈 때는 바깥부터, Chase → Attack 은 Combat 을 지나지 않는다', body: '그다음 공통 조상 아래에서 target 까지 바깥부터 `Enter` 를 부른다. 0.60초 Patrol → Chase 는 `Enter Combat`(경계등 켬) 다음 `Enter Chase`. 1.02초 Chase → Attack 은 공통 조상이 Combat 이라 `Exit Chase`, `Enter Attack` 만 불리고, Combat 은 나가지도 다시 들어오지도 않아 경계등이 켜진 채다. 경계등을 켜고 끄는 줄은 `CombatState` 의 `Enter`·`Exit` 두 줄뿐이다.', target: 'machine,ca,ca-parent,combat' },
     { n: 4, label: 'Tick 은 바깥 부모 규칙부터', body: '`StateMachine.Tick` 은 Active → Combat → 잎 순서로 `Tick` 을 부르고, 어느 층이 전이하면 그 프레임의 남은 층은 건너뛴다. `CombatState.Tick` 이 "감지 거리 + 0.5m(`LoseMargin`) 밖이면 수색" 을 먼저 보므로, 하린을 놓친 프레임에 자식(추격·공격)의 일이 돌지 않는다. 보이는 동안에는 Combat 이 마지막으로 본 자리를 적고, 잎은 자기 일(추격은 다가가기, 공격은 충전과 사격)만 한다. 위치·타이머·경계등 같은 드론별 값은 `Drone` 이 들고, 상태 객체는 `DroneStates` 의 static 한 벌이다.', target: 'machine,active,combat,ca' },
@@ -165,16 +165,15 @@ export const meta: PatternMeta = {
       '`Drone` 에 `DroneBrain` 을 붙인다. 붙이는 순간 `Reset` 이 시연용 EMP 키(E)와 `Body Renderer` 칸(같은 오브젝트의 Sprite Renderer 나 Mesh Renderer)을 채운다. `Alert Light` 칸에 `AlertLight` 를 끌어 넣는다. 기절하는 동안 몸 색이 `Stunned Color`(어두운 회색)로 바뀌고 끝나면 원래 색으로 돌아온다.',
       '`Target` 칸에 플레이어 오브젝트를 끌어 넣는다. 웹 무대의 다가가기·물러나기(Q/W)는 하린을 움직이는 시연용 입력이라 연결 컴포넌트에는 없고, 수강생의 플레이어를 원래 이동 코드 그대로 드론 쪽으로 걸리면 된다 (드론은 x 좌표만 본다). 플레이어가 아직 없으면 Cube 하나를 (-4, 0, 0) 에 두고 Play 중 Scene 뷰에서 x 로 끌어 옮긴다.',
       '`Main Camera` 를 Position (1, 1.5, -10), Rotation (0, 0, 0) 에 두고 Projection 을 `Orthographic`, Size 를 5 로 한다 (2D 템플릿은 처음부터 Orthographic 이다). 16:9 Game 뷰에서 x -8 부터 10 쯤까지 보여 순찰 구간(x 2~6), 수색하러 가는 왼쪽, 플레이어가 함께 보인다.',
-      'Play 하고 플레이어를 드론에 다가가게 했다가 멀리 물러나 본다. Console 에 `[Drone] Exit Patrol`, `[Drone] 경계등 켬`, `[Drone] Enter Combat`, `[Drone] Enter Chase` 가 차례로 남고, 공격 거리에서는 `Exit Chase`, `Enter Attack` 만 남는다. 감지 거리 밖까지 물러나면 `Exit Chase`, `경계등 끔`, `Exit Combat`, `Enter Search`. 그때 E 를 누르면 `Exit Search`, `Exit Active`, `기절 2.00초`, `Enter Stunned`, `emp → Active 가 처리` 가 남는다. Game 뷰 왼쪽 위에 지금 상태 경로와 경계등이 보인다.',
+      'Play 하고 플레이어를 드론에 다가가게 했다가 멀리 물러나 본다. Console 에 `[Drone] Exit Patrol`, `[Drone] 경계등 켬`, `[Drone] Enter Combat`, `[Drone] Enter Chase` 가 차례로 남고, 공격 거리에서는 `Exit Chase`, `Enter Attack` 만 남는다. 감지 거리 밖까지 물러나면 `Exit Chase`, `경계등 끔`, `Exit Combat`, `Enter Search`. 그때 E 를 누르면 `Exit Search`, `Exit Active`, `기절 2.00초`, `Enter Stunned`, `emp: Search → Active 가 처리` 가 남는다. Game 뷰 왼쪽 위에 지금 상태 경로와 경계등이 보인다.',
     ],
     verify: '공격 거리 안에 서 있는 동안 경계등(`AlertLight`)이 켜져 있고 Console 의 `Exit Chase` 와 `Enter Attack` 사이에 `경계등 끔` 이 없다. 수색 중(마지막 줄이 `Enter Search`)에 E 를 누르면 드론이 어두운 색으로 멈추고 `stunTime` 초 뒤 `Enter Active`, `Enter Patrol` 이 남는다.',
     pitfalls: [
       '거리로 전이하는 상태는 Unity 의 연속 이동에서 경계 위를 오갈 수 있다. 순찰·수색은 `<= detectRange` 에서 추격으로 들어오고 Combat 은 그보다 0.5m(`CombatState.LoseMargin`) 더 멀어져야 수색으로 나가며, 공격도 `attackRange` + 0.5m(`AttackState.LeaveMargin`)를 넘어야 추격으로 나간다. 두 경계가 같으면 플레이어가 경계에서 천천히 움직일 때 수색 ↔ 추격이 매 프레임 되풀이되어 `Exit Combat`·`Enter Combat` 이 매 프레임 남고 경계등이 깜박인다. 웹 시나리오는 하린이 1m 걸음으로 움직여 이 깜박임이 보이지 않는다. 여유를 바꾸려면 두 상수를 고친다.',
-      '거리는 가로(x) 거리다. 연결 컴포넌트는 플레이어의 y·z 를 보지 않고 드론의 y·z 는 시작 자리 그대로 둔다. `Update` 가 매 프레임 `transform.position` 을 코어의 `X` 로 덮어써서 벽·바닥 충돌을 보지 않고, 다른 스크립트(넉백 등)가 옮긴 x 는 남지 않는다. 장애물을 돌아와야 하면 추격·수색이 정한 목표를 NavMeshAgent 같은 이동 컴포넌트에 넘긴다.',
+      '거리는 가로(x) 거리다. 연결 컴포넌트는 플레이어의 y·z 를 보지 않고 드론의 y·z 는 시작 자리 그대로 둔다. `Update` 가 매 프레임 `transform.position` 을 코어의 `X` 로 덮어써서 벽·바닥 충돌을 보지 않고, 다른 스크립트(넉백 등)가 옮긴 x 는 남지 않는다. 장애물을 돌아와야 하면 추격·수색이 정한 목표를 NavMeshAgent 같은 이동 컴포넌트에 넘긴다. 마지막으로 본 자리(`LastSeenX`)는 `CombatState.Enter` 에서 한 번, `Tick` 에서 보이는 동안 매 프레임 적는다. `Tick` 에서만 적으면 전투에 들어간 바로 다음 프레임에 대상이 사라졌을 때(플레이어 순간이동, 대상 파괴로 `Target` 이 비면 아주 먼 곳으로 본다) "놓치면 수색" 이 먼저 나가 한 번도 적지 못하고, 이전 전투의 자리나 처음 값 x 0 으로 수색하러 간다 (웹 시나리오는 하린이 1m 걸음이라 이 경로가 나오지 않는다).',
       '`Time.timeScale` 이 0 이어도 `Update` 는 돌아 `Tick(0)` 이 불린다. 이동, 충전, 기절·수색 시간은 멈추지만 거리로 넘어가는 전이는 그대로 일어나고, 시연용 EMP 키(E)도 받는다. `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙는다.',
       '경계등과 기절 색은 `AlertChanged` 와 `Entered`·`Exited`(Stunned) 이벤트로만 맞춘다. 드론이 꺼져 있는 동안 다른 스크립트가 `HitByEmp` 를 부르면 코어는 기절하고 경계등을 끄지만 연결 컴포넌트는 듣지 않으므로, `OnEnable` 에서 지금 코어 상태로 경계등을 켜고 끄고 색을 칠한다. 3D 의 `Body Renderer` 색은 `material` 로 칠해 그 렌더러만의 머티리얼 사본을 만든다.',
-      '드론을 여러 대 놓아도 상태 객체는 `DroneStates` 의 static 한 벌을 같이 쓴다. 상태 객체에는 `Name` 과 `Parent` 만 있고 위치·타이머·경계등은 드론마다 `Drone` 이 든다. 상태의 `Enter`·`Exit` 안에서는 `ChangeState` 를 부르지 않는다 (전이 도중의 전이는 나가고 들어가는 순서를 꼬이게 한다). 화면 글(`Show Status On Screen`)은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)이고 실제 게임은 UGUI·TextMeshPro 로 만든다. 모든 드론이 같은 자리에 그리므로 여럿이면 한 대만 켠다.',
-      'Play 중 Inspector 값을 바꾸면 `OnValidate` 가 코어 설정에 넣는다. `stunTime` 은 기절에 들어갈 때 한 번 읽어 다음 기절부터, 나머지(감지·공격 거리, 충전·수색 시간, 속도)는 다음 프레임부터 쓴다.',
+      '드론을 여러 대 놓아도 상태 객체는 `DroneStates` 의 static 한 벌을 같이 쓴다. 상태 객체에는 `Name` 과 `Parent` 만 있고 위치·타이머·경계등은 드론마다 `Drone` 이 든다. 화면 글(`Show Status On Screen`)은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)이고 실제 게임은 UGUI·TextMeshPro 로 만든다. 모든 드론이 같은 자리에 그리므로 여럿이면 한 대만 켠다. 엄폐 상태나 보스 페이즈를 더할 때: 상태의 `Enter`·`Exit` 안(그리고 `Entered`·`Exited` 구독자 안)에서 `ChangeState` 를 부르면, 바깥 전이가 `Enter` 를 다 부르기 전에 안쪽 전이가 `Exit` 를 불러 순서가 꼬인다. `ChangeState(DroneStates.Combat)` 처럼 자식이 있는 상태를 주면 지금 상태가 잎이 아니게 되어 추격·공격의 `Tick` 이 돌지 않는다. `StateMachine.ChangeState` 는 두 경우 모두 `InvalidOperationException` 을 던진다 (Console 에 빨간 줄). 들어가자마자 다른 상태로 가야 하면 그 판단을 `Tick` 에 두고, 부모로 가려면 그 부모의 첫 잎(Combat 이면 Chase)을 준다.',      'Play 중 Inspector 값을 바꾸면 `OnValidate` 가 코어 설정에 넣는다. `stunTime` 은 기절에 들어갈 때 한 번 읽어 다음 기절부터, 나머지(감지·공격 거리, 충전·수색 시간, 속도)는 다음 프레임부터 쓴다.',
     ],
   },
   prompt: {

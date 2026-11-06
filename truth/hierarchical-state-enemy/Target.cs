@@ -48,7 +48,7 @@ namespace PatternGallery.HierarchicalStateEnemy
             machine = new StateMachine(drone, DroneStates.Patrol);
             machine.Exited += s => events.Add($"Exit {s.Name}");
             machine.Entered += s => events.Add($"Enter {s.Name}");
-            machine.Handled += (s, evt) => events.Add($"{evt} → {s.Name} 가 처리");
+            machine.Handled += (leaf, s, evt) => events.Add($"{evt}: {leaf.Name} → {s.Name} 가 처리");
             machine.Ignored += (leaf, evt) => events.Add($"{evt} 받는 층 없음 ({leaf.Name})");
             drone.AlertChanged += on => events.Add(on ? "경계등 켬" : "경계등 끔");
             drone.Fired += x => events.Add($"사격 → 하린 (거리 {Fmt.F(Math.Abs(x - drone.X))})");

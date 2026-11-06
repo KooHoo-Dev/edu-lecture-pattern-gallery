@@ -1,4 +1,4 @@
-# src a410de7c42ac
+# src 5e0861213baf
 # hierarchical-state-enemy combat-search-emp naive=0
 0.30 in approach
 0.50 st state=Active/Patrol x=9.75 harin=4.00 alert=0 charge=0.00 search=0.00 stun=0.00
@@ -34,7 +34,7 @@
 3.10 ev Exit Active
 3.10 ev 기절 2.00초
 3.10 ev Enter Stunned
-3.10 ev emp → Active 가 처리
+3.10 ev emp: Search → Active 가 처리
 3.50 st state=Stunned x=6.83 harin=0.50 alert=0 charge=0.00 search=0.00 stun=1.60
 4.00 st state=Stunned x=6.83 harin=0.50 alert=0 charge=0.00 search=0.00 stun=1.10
 4.50 st state=Stunned x=6.83 harin=0.50 alert=0 charge=0.00 search=0.00 stun=0.60

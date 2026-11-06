@@ -103,9 +103,12 @@ class Drone {
 class HState {
   Name: string
   Parent: HState | null
+  /** 자식이 하나라도 있는가 (Active, Combat). ChangeState 의 target 은 잎이어야 한다 */
+  HasChildren = false
   constructor(name: string, parent: HState | null) {
     this.Name = name
     this.Parent = parent
+    if (parent !== null) parent.HasChildren = true
   }
   Enter(_m: StateMachine) {}
   Exit(_m: StateMachine) {}
@@ -121,23 +124,31 @@ class StateMachine {
   Drone: Drone
   Current: HState
   private changed = false
+  private transitioning = false
 
   Entered = new Event<[HState]>()
   Exited = new Event<[HState]>()
-  Handled = new Event<[HState, string]>()
+  /** (입력을 받은 잎, 처리한 층, 입력) */
+  Handled = new Event<[HState, HState, string]>()
   Ignored = new Event<[HState, string]>()
 
   constructor(drone: Drone, start: HState) {
+    StateMachine.RequireLeaf(start)
     this.Drone = drone
     this.Current = start
-    this.EnterDown(start, null)
+    this.transitioning = true
+    try {
+      this.EnterDown(start, null)
+    } finally {
+      this.transitioning = false
+    }
   }
 
   Handle(evt: string) {
     const leaf = this.Current
     for (let s: HState | null = leaf; s !== null; s = s.Parent) {
       if (!s.Handle(this, evt)) continue
-      this.Handled.invoke(s, evt)
+      this.Handled.invoke(leaf, s, evt)
       return true
     }
     this.Ignored.invoke(leaf, evt)
@@ -156,15 +167,26 @@ class StateMachine {
   }
 
   ChangeState(target: HState) {
+    if (this.transitioning) throw new Error(`${target.Name} 로 바꾸려 했지만 지금 ${this.Current.Name} 로 전이하는 중이다 (InvalidOperationException)`)
+    StateMachine.RequireLeaf(target)
     if (target === this.Current) return
     const common = StateMachine.CommonAncestor(this.Current, target)
-    for (let s: HState | null = this.Current; s !== common && s !== null; s = s.Parent) {
-      s.Exit(this)
-      this.Exited.invoke(s)
+    this.transitioning = true
+    try {
+      for (let s: HState | null = this.Current; s !== common && s !== null; s = s.Parent) {
+        s.Exit(this)
+        this.Exited.invoke(s)
+      }
+      this.Current = target
+      this.changed = true
+      this.EnterDown(target, common)
+    } finally {
+      this.transitioning = false
     }
-    this.Current = target
-    this.changed = true
-    this.EnterDown(target, common)
+  }
+
+  static RequireLeaf(s: HState) {
+    if (s.HasChildren) throw new Error(`${s.Name} 는 자식이 있는 상태다. ChangeState 에는 잎을 준다 (InvalidOperationException)`)
   }
 
   private EnterDown(s: HState | null, stop: HState | null) {
@@ -238,6 +260,7 @@ const LoseMargin = f(0.5)
 class CombatState extends HState {
   Enter(m: StateMachine) {
     m.Drone.SetAlert(true)
+    m.Drone.LastSeenX = m.Drone.TargetX
   }
   Exit(m: StateMachine) {
     m.Drone.SetAlert(false)
@@ -447,7 +470,8 @@ const Naive = (() => {
       d.SearchTimer = 0
     },
     Handle() {
-      return false // [!] 나중에 더한 수색 상태: emp 규칙을 복사하지 않았다
+      // [!] 여기서 EMP 를 받지 않는다 (나중에 더한 수색 상태: emp 규칙을 복사하지 않았다)
+      return false
     },
     Tick(d, dt) {
       if (d.Distance <= d.DetectRange) {
@@ -466,9 +490,10 @@ const Naive = (() => {
     Name: 'Chase',
     Enter(d) {
       d.SetAlert(true)
+      d.LastSeenX = d.TargetX
     },
     Exit(d) {
-      d.SetAlert(false) // [!] 추격 → 공격으로 옮겨도 여기서 꺼진다
+      d.SetAlert(false) // [!] ChaseState.Exit 에서 끈다: 추격 → 공격으로 옮겨도 꺼진다
     },
     Handle(d, evt) {
       if (evt === 'emp') {
@@ -496,7 +521,8 @@ const Naive = (() => {
     Enter(d) {
       d.ChargeTimer = 0
       d.Charging = true
-      d.FaceTarget() // [!] Chase.Enter 의 SetAlert(true) 를 복사하지 않았다
+      d.FaceTarget()
+      // [!] 여기서 경계등을 켜지 않는다 (Chase.Enter 의 SetAlert(true) 를 복사하지 않았다)
     },
     Exit(d) {
       d.ChargeTimer = 0
@@ -560,6 +586,8 @@ const C = { dim: '#8796ae', faint: '#4a5872', line: '#26344c', warn: '#ffb547', 
 const CHARGE_FULL = f(0.6)
 /** 경계등 고리의 높이 (화면에만): 드론 이름표 위 */
 const ALERT_Y = 3.32
+/** 감지 거리 점선 상자의 높이 (화면에만) */
+const DETECT_H = 2.5
 const POSE = { Patrol: 'idle', Search: 'idle', Chase: 'run', Attack: 'attack', Stunned: 'down' } as const
 type Leaf = keyof typeof POSE
 /** 구조 그림 노드: 상태 이름 → 그 상태가 들어 있는 노드 */
@@ -590,12 +618,19 @@ function scene(d: DroneLook, harinX: number): WorldItem[] {
   ]
   if (!stunned) {
     const attack = d.attack
+    // 두 글을 위아래로 엇갈린다: 감지 거리는 큰 상자 윗변 바로 위, 공격 거리는 작은 상자 아래쪽. 두 거리가 같아도(3.5m) 겹치지 않는다.
+    // 큰 상자 안쪽 위는 경계등 고리와 그 설명("경계등 꺼짐") 자리다. 두 글 모두 하린의 반대쪽 모서리에 둔다
+    const side = harinX <= d.x ? 1 : -1
+    const edge = (x: number) => Math.max(0.1, Math.min(15.9, x))
+    const toward = side > 0 ? 'right' : 'left'
+    const away = side > 0 ? 'left' : 'right'
+    // 공격 상자가 좁으면(2m 미만) 안쪽 글이 드론 몸에 닿아, 상자 바깥 아래에 둔다 (감지 상자 모서리는 3.5m 이상이라 닿지 않는다)
+    const inside = attack >= 2
     world.push(
-      { kind: 'box', x: d.x - d.detect, y: 1, w: d.detect * 2, h: 2.5, stroke: C.faint, dashed: true },
-      // 감지 거리 글은 상자의 오른쪽 아래 (위쪽은 경계등 고리와 그 설명 자리)
-      { kind: 'text', x: Math.min(15.9, d.x + d.detect - 0.12), y: 1.15, text: `감지 ${d.detect.toFixed(1)}m`, align: 'right', size: 16, color: C.dim },
+      { kind: 'box', x: d.x - d.detect, y: 1, w: d.detect * 2, h: DETECT_H, stroke: C.faint, dashed: true },
+      { kind: 'text', x: edge(d.x + side * (d.detect - 0.12)), y: 1 + DETECT_H + 0.12, text: `감지 ${d.detect.toFixed(1)}m`, align: toward, size: 16, color: C.dim },
       { kind: 'box', x: d.x - attack, y: 1, w: attack * 2, h: 1.9, stroke: '#a8783a', dashed: true },
-      { kind: 'text', x: d.x + attack - 0.12, y: 1.15, text: `공격 ${attack.toFixed(1)}m`, align: 'right', size: 16, color: C.warn },
+      { kind: 'text', x: edge(d.x + side * (inside ? attack - 0.12 : attack + 0.12)), y: 1.15, text: `공격 ${attack.toFixed(1)}m`, align: inside ? toward : away, size: 16, color: C.warn },
     )
   }
   if (d.leaf === 'Search') {
@@ -676,13 +711,13 @@ function hierarchyTree(leaf: Leaf): WorldItem[] {
   ]
 }
 
-/** 나쁜 예: 같은 높이의 상자 다섯과 상자마다 복사한 규칙 꼬리표. 빠진 규칙은 빨갛게 */
-function flatTree(leaf: Leaf): WorldItem[] {
+/** 나쁜 예: 같은 높이의 상자 다섯과 상자마다 복사한 규칙 꼬리표. 빠진 규칙은 주황, 그 버그의 ✖ 가 사건 기록에 뜬 뒤에는 빨강 */
+function flatTree(leaf: Leaf, empBug: boolean, alertBug: boolean): WorldItem[] {
   const rows: [Leaf, [string, string][]][] = [
     ['Patrol', [['EMP→기절', C.dim]]],
-    ['Search', [['EMP→기절 없음', C.bug]]],
+    ['Search', [['EMP→기절 없음', empBug ? C.bug : C.warn]]],
     ['Chase', [['EMP→기절', C.dim], ['경계등 켬/끔', C.dim]]],
-    ['Attack', [['EMP→기절', C.dim], ['경계등 없음', C.bug]]],
+    ['Attack', [['EMP→기절', C.dim], ['경계등 없음', alertBug ? C.bug : C.warn]]],
     ['Stunned', [['시간 끝→순찰', C.dim]]],
   ]
   const world: WorldItem[] = []
@@ -727,8 +762,8 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       events.push(`Enter ${s.Name}`)
       touch(s)
     })
-    machine.Handled.add((s, evt) => {
-      events.push(`${evt} → ${s.Name} 가 처리`)
+    machine.Handled.add((leaf, s, evt) => {
+      events.push(`${evt}: ${leaf.Name} → ${s.Name} 가 처리`)
       touch(s)
     })
     machine.Ignored.add((leaf, evt) => {
@@ -882,9 +917,10 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       const world = scene(look, harinX)
       world.push(
         { kind: 'text', x: 0.4, y: 8.3, text: `State = ${leaf}State`, align: 'left', size: 26, color: bugAlert || ignoring ? C.bug : C.warn },
-        { kind: 'text', x: 0.4, y: 7.6, text: `AlertOn = ${n.AlertOn} · ${leaf}.Handle: emp ${leaf === 'Search' || leaf === 'Stunned' ? '없음' : '있음'}`, align: 'left', size: 20, color: leaf === 'Search' || bugAlert ? C.bug : C.dim },
+        // 빨강은 ✖ 판정(경계등 꺼진 공격, 무시된 EMP)이 이어지는 동안만. EMP 를 맞지 않은 수색은 emp 줄이 빠진 모양만 주황으로
+        { kind: 'text', x: 0.4, y: 7.6, text: `AlertOn = ${n.AlertOn} · ${leaf}.Handle: emp ${leaf === 'Search' || leaf === 'Stunned' ? '없음' : '있음'}`, align: 'left', size: 20, color: bugAlert || ignoring ? C.bug : leaf === 'Search' ? C.warn : C.dim },
         { kind: 'text', x: 0.4, y: 6.95, text: detail(look), align: 'left', size: 20, color: bugAlert ? C.bug : C.dim },
-        ...flatTree(leaf),
+        ...flatTree(leaf, reportedEmp, reportedAlert),
       )
       if (bugAlert) {
         // 버그가 이어지는 동안 남는 표시: 꺼진 경계등 옆의 원인
