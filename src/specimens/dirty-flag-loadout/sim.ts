@@ -265,7 +265,7 @@ const NaiveRepairKit = {
     if (!slot) return
     slot.count--
     if (slot.count === 0) loadout.slots.splice(loadout.slots.indexOf(slot), 1)
-    // [!] 여기서 loadout.isDirty = true 를 켜지 않는다 (캐시된 옛 무게와 속도가 남는다)
+    // [!] 여기서 isDirty = true 를 켜지 않는다 (옛 무게가 남는다)
   },
 }
 
@@ -294,11 +294,15 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   let x = Left
   let dir = 1
   let clock = 0
-  const at = { input: -9, kit: -9, recalc: -9, bug: -9, changed: -9 }
+  const at = { input: -9, kit: -9, recalc: -9, bug: -9, changed: -9, marked: -9 }
   let changedName = ''
+  /** HarinMover 처럼 Tick 마다 속도를 읽은 횟수 (무대 글에만 쓴다. 기록 대조에는 넣지 않는다) */
+  let reads = 0
 
   // 패턴
   let loadout: Loadout | null = null
+  /** LoadoutInput 의 무게 글처럼 Recalculated 에서 받은 무게만 보인다 */
+  let shownWeight = 0
 
   // 나쁜 예
   let naive: NaiveLoadout | null = null
@@ -339,17 +343,20 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     l.CountChanged.add((name, before, after) => {
       events.push(`${countText(name, before, after)} · 표시 ${l.IsDirty ? '켬' : '안 켬'}`)
       at.changed = clock
+      if (l.IsDirty) at.marked = clock
       changedName = name
     })
     l.UnitWeightChanged.add((name, before, after) => {
       events.push(`${name} 합금: 한 개 ${F2(before)} → ${F2(after)} · 표시 ${l.IsDirty ? '켬' : '안 켬'}`)
       at.changed = clock
+      if (l.IsDirty) at.marked = clock
       changedName = name
     })
     l.Ignored.add(reason => events.push(`받지 않음: ${reason}`))
     l.Recalculated.add((weight, count) => {
       events.push(recalcText(count, weight, l.Speed))
       at.recalc = clock
+      shownWeight = weight
     })
     void l.TotalWeight
   }
@@ -359,6 +366,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   const diff = (before: Captured[]) => {
     const n = naive!
     const flag = ` · 표시 ${n.isDirty ? '켬' : '안 켬'}`
+    if (n.isDirty) at.marked = clock
     const after = n.slots
     const len = Math.min(before.length, after.length)
     let i = 0
@@ -446,6 +454,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     },
     tick(dt) {
       clock += dt
+      reads++
       let speed: number
       if (naive) {
         speed = readNaiveSpeed()
@@ -471,26 +480,37 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     view(): SimView {
       const list = slotsForView()
       const real = sumOf(list)
-      const dirty = loadout ? loadout.IsDirty : naive!.isDirty
-      // 표시가 켜져 있으면 다음 Tick 에서 다시 계산한다. 그동안은 옛 캐시를 그대로 보인다 (그림이 계산을 일으키지 않게)
-      const cached = loadout ? (dirty ? null : loadout.TotalWeight) : naive!.cachedWeight
+      // 무대는 입력 다음 Tick 에서 바로 속도를 읽어 표시를 끈다. 켜진 표시가 화면에 보이게 표시를 켠 입력 뒤 0.4초 동안 남겨 그린다
+      const marked = recent(at.marked, 0.4)
+      const dirty = (loadout ? loadout.IsDirty : naive!.isDirty) || marked
+      // 그림이 계산을 일으키지 않게 TotalWeight 를 읽지 않는다. 패턴은 마지막 Recalculated 의 무게(LoadoutInput 의 무게 글과 같다), 나쁜 예는 캐시 필드
+      const shown = loadout ? shownWeight : naive!.cachedWeight
       const recalcs = loadout ? loadout.RecalcCount : naive!.recalcCount
       const base = loadout ? loadout.BaseSpeed : naive!.baseSpeed
-      const shown = cached ?? real
-      const speed = f(base * Math.max(MinSpeedRatio, f(1 - f(shown / MaxWeight))))
-      const justRecalc = recent(at.recalc, 0.6)
+      const ratio = f(1 - f(shown / MaxWeight))
+      const speed = f(base * Math.max(MinSpeedRatio, ratio))
+      const floored = ratio < MinSpeedRatio
+      const justRecalc = recent(at.recalc, 0.8)
       const world: WorldItem[] = [
         { kind: 'box', x: 0, y: 0, w: 16, h: 1, fill: '#22314a' },
         {
           kind: 'text',
           x: 0.6,
           y: 8.3,
-          text: loadout ? `다시 계산 ${recalcs} 회 · 표시 ${dirty ? 'dirty' : 'clean'}` : `다시 계산 ${recalcs} 회 · isDirty ${dirty ? 'true' : 'false'}`,
+          text: `속도 읽기 ${reads}회 · 다시 계산 ${recalcs}회 · ${loadout ? `표시 ${dirty ? 'dirty' : 'clean'}` : `isDirty ${dirty ? 'true' : 'false'}`}`,
           align: 'left',
           size: 24,
-          color: justRecalc ? '#7ee081' : '#e6ecf5',
+          color: marked ? '#ffb454' : justRecalc ? '#7ee081' : '#e6ecf5',
         },
-        { kind: 'text', x: 0.6, y: 7.6, text: `속도 = ${F1(base)} × (1 − ${F1(shown)} / 30) = ${F2(speed)}`, align: 'left', size: 20, color: '#8796ae' },
+        {
+          kind: 'text',
+          x: 0.6,
+          y: 7.6,
+          text: `속도 = ${F1(base)} × max(0.25, 1 − ${F1(shown)} / 30) = ${F2(speed)}${floored ? ' (하한 0.25)' : ''}`,
+          align: 'left',
+          size: 20,
+          color: floored ? '#ffb454' : '#8796ae',
+        },
         { kind: 'bar', x: 0.6, y: 6.4, w: 7.2, value: shown / MaxWeight, fill: stale ? '#ff6b6b' : '#5cc8ff', label: `총 무게${naive ? ' (캐시)' : ''} ${F1(shown)} / 30` },
       ]
       if (naive) {
@@ -498,7 +518,8 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         if (stale) world.push({ kind: 'text', x: 8.4, y: 6.4, text: `✖ 캐시 ${F1(shown)} · 실제 ${F1(real)}`, align: 'left', size: 24, color: '#ff5d6c' })
         if (stale) world.push({ kind: 'text', x: 8.4, y: 5.6, text: '수리 키트가 표시를 안 켰다', align: 'left', size: 18, color: '#ff9f43' })
       } else {
-        world.push({ kind: 'text', x: 8.4, y: 6.4, text: justRecalc ? '표시를 보고 한 번 다시 계산' : '바뀌지 않아 캐시를 그대로', align: 'left', size: 20, color: justRecalc ? '#7ee081' : '#8796ae' })
+        const note = marked ? ['표시 켬 → 읽을 때 다시 계산', '#ffb454'] : justRecalc ? ['표시를 보고 한 번 다시 계산하고 껐다', '#7ee081'] : ['바뀌지 않아 캐시를 그대로', '#8796ae']
+        world.push({ kind: 'text', x: 8.4, y: 6.4, text: note[0], align: 'left', size: 20, color: note[1] })
       }
       for (let i = 0; i < MaxSlots; i++) {
         const bx = 0.5 + i * 3.05
