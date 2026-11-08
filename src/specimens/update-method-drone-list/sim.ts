@@ -92,9 +92,9 @@ class DroneSwarm {
   Settings: SwarmSettings
   private drones: Drone[] = []
   private pending: Drone[] = []
+  private dying: Drone[] = []
   private updating = false
   private launched = 0
-  private deadCount = 0
   Spawned = new Event<[Drone]>()
   SpawnQueued = new Event<[Drone]>()
   DespawnRequested = new Event<[Drone]>()
@@ -136,7 +136,6 @@ class DroneSwarm {
   Despawn(d: Drone, reason: DespawnReason) {
     if (d.IsDead) return
     d.MarkDead(reason)
-    this.deadCount++
     this.DespawnRequested.invoke(d)
   }
 
@@ -159,19 +158,30 @@ class DroneSwarm {
       updated++
     }
     this.LastUpdated = updated
-    this.LastRemoved = this.deadCount
-    this.LastMerged = this.pending.length
-    if (this.deadCount > 0) {
-      for (const d of this.drones) if (d.IsDead) this.Despawned.invoke(d)
-      this.drones = this.drones.filter(d => !d.IsDead) // List<T>.RemoveAll
-      this.deadCount = 0
+
+    let removed = 0
+    while (true) {
+      this.dying = []
+      for (const d of this.drones) if (d.IsDead) this.dying.push(d)
+      if (this.dying.length === 0) break
+      for (const d of this.dying) this.Despawned.invoke(d)
+      const dying = this.dying
+      this.drones = this.drones.filter(d => !dying.includes(d)) // List<T>.RemoveAll(dying.Contains)
+      removed += dying.length
     }
+    this.dying = []
+    this.LastRemoved = removed
+
     this.updating = false
+    let merged = 0
     for (const d of this.pending) {
+      if (d.IsDead) continue
       this.drones.push(d)
+      merged++
       this.Spawned.invoke(d)
     }
     this.pending = []
+    this.LastMerged = merged
   }
 }
 
@@ -255,12 +265,79 @@ const RED = '#ff5d6c'
 /** 화면에만: 방금 일어난 일 글을 남기는 시간, 링을 남기는 시간 */
 const RECENT_SHOW = 1
 const RING_SHOW = 0.35
+/** 화면에만: 루프 끝 한 프레임의 합침·지움 수를 남기는 시간 */
+const HOLD = 0.4
+const DRONE_SCALE = 0.7
+const SPLITTER_SCALE = 0.95
 
 interface Ring {
   x: number
   lane: number
   at: number
   reason: DespawnReason
+}
+
+/** 화면에 그릴 드론 하나 (패턴과 나쁜 예 공통). red 는 ✖ 가 붙은 드론의 빨간 글 */
+interface Shown {
+  name: string
+  splitter: boolean
+  x: number
+  lane: number
+  updates: number
+  hp: number
+  red?: string
+}
+
+/** 무대 글 폭 어림 (월드 단위, 1단위 ≈ 55px). 한글은 글자 크기만큼, 그 밖은 0.56배 */
+const textWidth = (s: string, size: number) => {
+  let px = 0
+  for (const ch of s) px += (ch.codePointAt(0) ?? 0) > 0x2e80 ? size : size * 0.56
+  return px / 55
+}
+
+/** 드론 글 하나의 자리. 드론 가운데(x)에 맞추거나, 이웃과 겹치면 드론 쪽 끝에 붙여 서로 반대로 비킨다 */
+interface Label {
+  x: number
+  w: number
+  align: 'left' | 'center' | 'right'
+  row: number
+}
+const LABEL_GAP = 0.12
+/** 글 끝을 드론 가운데에서 이만큼 넘겨 붙인다 (비킨 글도 자기 드론 위에 걸친다) */
+const LABEL_HANG = 0.3
+const span = (l: Label): [number, number] =>
+  l.align === 'center' ? [l.x - l.w / 2, l.x + l.w / 2] : l.align === 'left' ? [l.x - LABEL_HANG, l.x - LABEL_HANG + l.w] : [l.x + LABEL_HANG - l.w, l.x + LABEL_HANG]
+/** text 그림의 x (align 에 맞춘 기준점) */
+const anchorX = (l: Label) => (l.align === 'center' ? l.x : l.align === 'left' ? l.x - LABEL_HANG : l.x + LABEL_HANG)
+const clear = (a: Label, b: Label | undefined) => !b || span(b)[1] + LABEL_GAP <= span(a)[0]
+
+/** 같은 줄의 글을 x 순서로 놓는다. 앞 글과 겹치면 (1) 이 글을 오른쪽으로 (2) 앞 글도 왼쪽으로 비켜 보고, 그래도 겹치면 한 칸 비킨 줄에 놓는다.
+ *  글은 world 가로 [minLeft, 16 - minLeft] 안에 둔다 (양쪽 끝에서 잘리지 않게) */
+const placeLabels = (xs: number[], ws: number[], minLeft: number): Label[] => {
+  const maxRight = 16 - minLeft
+  const fits = (l: Label) => span(l)[0] >= minLeft - 1e-6 && span(l)[1] <= maxRight + 1e-6
+  const rows: Label[][] = []
+  return xs.map((x0, i) => {
+    const w = ws[i]
+    const x = Math.min(Math.max(x0, minLeft + w / 2), maxRight - w / 2)
+    for (let row = 0; ; row++) {
+      const placed = (rows[row] ??= [])
+      const prev = placed[placed.length - 1]
+      const before = placed[placed.length - 2]
+      const center: Label = { x, w, align: 'center', row }
+      const left: Label = { x, w, align: 'left', row }
+      let ok: Label | undefined = clear(center, prev) ? center : fits(left) && clear(left, prev) ? left : undefined
+      if (!ok && prev && prev.align === 'center' && fits(left)) {
+        prev.align = 'right'
+        if (fits(prev) && clear(prev, before) && clear(left, prev)) ok = left
+        else prev.align = 'center'
+      }
+      if (ok) {
+        placed.push(ok)
+        return ok
+      }
+    }
+  })
 }
 
 export const createSim: SimFactory = (values: ParamValues, naive: boolean): PatternSim => {
@@ -270,8 +347,6 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   const splitCount = Math.round(Number(values.splitCount))
   const events: string[] = []
   let clock = 0
-  /** 끝난 Tick 수. 드론마다 '있어야 할 업데이트 횟수' = ticks - 들어온 때 (화면에만) */
-  let ticks = 0
   const at = { input: -9, mark: -9, queued: -9, loopEnd: -9, removed: -9, skip: -9 }
   let rings: Ring[] = []
   let recent = ''
@@ -283,17 +358,50 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   ]
   const ringItems = (): WorldItem[] =>
     rings.filter(r => clock - r.at < RING_SHOW).map(r => ({ kind: 'ring', x: r.x, y: LANE_Y[r.lane] + 0.45, r: 0.6, color: RING_COLOR[r.reason] }))
-  /** HP 0 인데 아직 목록에 있는 드론은 흐리게 (나쁜 예에서 건너뛰어 한 프레임 더 남을 때) */
-  const droneItem = (name: string, splitter: boolean, x: number, lane: number, updates: number, hp: number): WorldItem => ({
+  /** HP 0 인데 아직 목록에 있는 드론은 흐리게 (나쁜 예에서 건너뛰어 한 프레임 더 남을 때). 이름 글은 dronesItems 가 따로 놓는다 */
+  const droneItem = (d: Shown): WorldItem => ({
     kind: 'actor',
-    x,
-    y: LANE_Y[lane],
+    x: d.x,
+    y: LANE_Y[d.lane],
     role: 'enemy',
     facing: -1,
-    scale: splitter ? 0.95 : 0.7,
-    alpha: hp <= 0 ? 0.4 : 1,
-    label: hp <= 0 ? `${name} · HP 0 · u ${updates}` : `${name} · u ${updates}`,
+    scale: d.splitter ? SPLITTER_SCALE : DRONE_SCALE,
+    alpha: d.hp <= 0 ? 0.4 : 1,
   })
+  /** 드론과 글. 같은 줄에서 가까운 드론(분열 조각이 이웃 옆에 붙을 때, 기지 앞에 몰릴 때)의 글은 겹치지 않게 한 칸씩 비켜 놓는다.
+   *  이름 글은 위로, 빨간 글은 아래로 비킨다 */
+  const droneItems = (shown: Shown[]): WorldItem[] => {
+    const out: WorldItem[] = shown.map(droneItem)
+    const texts: WorldItem[] = []
+    for (let lane = 0; lane < LANE_Y.length; lane++) {
+      const row = shown.filter(d => d.lane === lane).sort((a, b) => a.x - b.x)
+      const names = row.map(d => (d.hp <= 0 ? `${d.name} · HP 0 · u ${d.updates}` : `${d.name} · u ${d.updates}`))
+      const nameAt = placeLabels(
+        row.map(d => d.x),
+        names.map(s => textWidth(s, 20)),
+        0.1,
+      )
+      row.forEach((d, i) => {
+        const top = LANE_Y[lane] + 1.4 * (d.splitter ? SPLITTER_SCALE : DRONE_SCALE) + 0.22
+        const lab = nameAt[i]
+        texts.push({ kind: 'text', x: anchorX(lab), y: top + lab.row * 0.36, text: names[i], size: 20, align: lab.align, color: d.hp <= 0 ? '#8796ae' : '#e6edf7' })
+      })
+      const reds = row.filter(d => d.red)
+      // 기지 쪽 끝에서 글이 왼쪽 밖으로 잘리지 않게 왼쪽 끝을 묶는다
+      const redAt = placeLabels(
+        reds.map(d => d.x),
+        reds.map(d => textWidth(d.red ?? '', 15)),
+        0.15,
+      )
+      reds.forEach((d, i) => {
+        const lab = redAt[i]
+        texts.push({ kind: 'text', x: anchorX(lab), y: LANE_Y[lane] - 0.4 - lab.row * 0.32, text: d.red ?? '', size: 15, align: lab.align, color: RED })
+      })
+    }
+    return [...out, ...ringItems(), ...texts]
+  }
+  /** 화면에만: 마지막으로 0 이 아니었던 합침·지움 수. 루프 끝 한 프레임에만 0 이 아니라 HOLD 초 남겨 보인다 */
+  let held = { merged: 0, removed: 0, at: -9 }
 
   if (!naive) {
     const swarm = new DroneSwarm({ ...defaultSettings(), MoveSpeed: moveSpeed, SplitDelay: splitDelay, SplitCount: splitCount })
@@ -342,9 +450,9 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           recentAt = clock
           at.loopEnd = clock
         }
+        if (swarm.LastMerged + swarm.LastRemoved > 0) held = { merged: swarm.LastMerged, removed: swarm.LastRemoved, at: clock }
         removed = []
         merged = []
-        ticks++
         clock += dt
         rings = rings.filter(r => clock - r.at < RING_SHOW)
       },
@@ -356,10 +464,10 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       },
       view(): SimView {
         const world = ground()
-        for (const d of swarm.Drones) world.push(droneItem(d.Name, d.Kind === DroneKind.Splitter, d.X, d.Lane, d.Updates, d.Hp))
-        world.push(...ringItems())
+        world.push(...droneItems(swarm.Drones.map(d => ({ name: d.Name, splitter: d.Kind === DroneKind.Splitter, x: d.X, lane: d.Lane, updates: d.Updates, hp: d.Hp }))))
+        const hold = clock - held.at < HOLD
         world.push(
-          { kind: 'text', x: 0.4, y: 8.3, text: `목록 ${swarm.Drones.length} · 이번 프레임 업데이트 ${swarm.LastUpdated} · 대기 ${swarm.LastMerged} · 지울 것 ${swarm.LastRemoved}`, align: 'left', size: 24, color: '#7ee081' },
+          { kind: 'text', x: 0.4, y: 8.3, text: `목록 ${swarm.Drones.length} · 이번 프레임 업데이트 ${swarm.LastUpdated} · 합침 ${hold ? held.merged : 0} · 지움 ${hold ? held.removed : 0}`, align: 'left', size: 24, color: '#7ee081' },
           {
             kind: 'text',
             x: 0.4,
@@ -392,8 +500,9 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   let bornMovedTotal = 0
   /** 화면에만: 태어난 프레임에 움직임 ✖ 를 쓴 드론 (사건 기록과 같은 판정) */
   const bornMoved = new Set<NaiveDrone>()
-  /** 화면에만: 드론이 목록에 들어온 Tick 번호 (입력이면 이번 Tick, Tick 안에서 Add 면 다음 Tick) */
-  const enteredAt = new Map<NaiveDrone, number>()
+  /** 화면에만: 같은 입력을 받는 패턴 코어. 같은 이름 드론의 업데이트 횟수가 나쁜 예 드론이 '있어야' 할 횟수다
+   *  (늦게 나뉜 부모의 조각이 물려받은 뒤처짐까지 나온다). 사건 기록과 ✖ 판정에는 쓰지 않는다 */
+  const ref = new DroneSwarm({ ...defaultSettings(), MoveSpeed: moveSpeed, SplitDelay: splitDelay, SplitCount: splitCount })
 
   const children = (parent: NaiveDrone, before: NaiveDrone[]) =>
     n.drones.filter(d => !before.includes(d) && d.name.length === parent.name.length + 1 && d.name.startsWith(parent.name)).map(d => d.name)
@@ -401,6 +510,9 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   return {
     input(name) {
       at.input = clock
+      if (name === 'spawn') ref.Launch(DroneKind.Normal)
+      else if (name === 'splitter') ref.Launch(DroneKind.Splitter)
+      else ref.DamageAll(1)
       if (name === 'emp') {
         n.OnEmp()
         events.push(`EMP: 드론 ${n.drones.length}대 HP -1`)
@@ -408,11 +520,10 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       }
       if (name === 'spawn') n.OnSpawn()
       else n.OnSplitter()
-      const d = n.drones[n.drones.length - 1]
-      enteredAt.set(d, ticks)
-      events.push(`${d.name} 출발 · 목록 ${n.drones.length}`)
+      events.push(`${n.drones[n.drones.length - 1].name} 출발 · 목록 ${n.drones.length}`)
     },
     tick(dt) {
+      ref.Tick(dt)
       const before = [...n.drones]
       const updates0 = before.map(d => d.updates)
       n.Update(dt)
@@ -453,9 +564,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         events.push(`!업데이트 건너뜀: ${d.name} 이번 프레임에 안 움직임 (바로 앞 칸 ${prev} Remove 로 당겨짐) · u ${d.updates}`)
       }
       for (const d of after) {
-        if (before.includes(d)) continue
-        enteredAt.set(d, ticks + 1)
-        if (d.updates === 0) continue
+        if (before.includes(d) || d.updates === 0) continue
         bornMovedTotal++
         bornMoved.add(d)
         events.push(`!태어난 프레임에 움직임: ${d.name} Add 된 프레임에 바로 Update 됨 · u ${d.updates}`)
@@ -464,7 +573,6 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         recent = `방금 도는 중에: ${parts.join(' · ')}`
         recentAt = clock
       }
-      ticks++
       clock += dt
       rings = rings.filter(r => clock - r.at < RING_SHOW)
     },
@@ -476,21 +584,18 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     },
     view(): SimView {
       const world = ground()
-      const marks: WorldItem[] = []
-      for (const d of n.drones) {
-        world.push(droneItem(d.name, d.isSplitter, d.x, d.lane, d.updates, d.hp))
+      const shown: Shown[] = n.drones.map(d => {
+        const s: Shown = { name: d.name, splitter: d.isSplitter, x: d.x, lane: d.lane, updates: d.updates, hp: d.hp }
         const skips = skipped.get(d)
         const born = bornMoved.has(d)
-        if (skips === undefined && !born) continue
-        // 사건 기록의 ✖ 와 같은 판정의 드론만: 프레임마다 한 번씩 Update 됐다면 있을 자리와 횟수
-        const expected = ticks - (enteredAt.get(d) ?? ticks)
-        const ex = d.x - (expected - d.updates) * moveSpeed * (1 / 60)
-        marks.push({ kind: 'box', x: ex - 0.4, y: LANE_Y[d.lane] - 0.05, w: 0.8, h: 1.15, stroke: RED, dashed: true })
+        if (skips === undefined && !born) return s
+        // 사건 기록의 ✖ 와 같은 판정의 드론만: 버그와, 같은 입력을 받은 패턴 코어의 같은 드론이 받은 업데이트 횟수
         const what = [skips !== undefined ? `건너뜀 ${skips}` : '', born ? '태어남' : ''].filter(Boolean).join('+')
-        // 기지 쪽 끝에서 글이 왼쪽 밖으로 잘리지 않게 가운데를 묶는다
-        marks.push({ kind: 'text', x: Math.max(d.x, 2.4), y: LANE_Y[d.lane] - 0.4, text: `${what} · 있어야 ${expected}`, size: 14, color: RED })
-      }
-      world.push(...marks, ...ringItems())
+        const twin = ref.Drones.find(r => r.Name === d.name)
+        s.red = `${what} · ${twin ? `있어야 u ${twin.Updates}` : '패턴은 이미 빠짐'}`
+        return s
+      })
+      world.push(...droneItems(shown))
       const bad = skippedTotal + bornMovedTotal > 0
       world.push(
         { kind: 'text', x: 0.4, y: 8.3, text: `목록 ${n.drones.length} · 이번 프레임 업데이트 ${naiveUpdated} · 대기 없음 (바로 Remove · Add)`, align: 'left', size: 24, color: '#ffb547' },
@@ -498,7 +603,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           kind: 'text',
           x: 0.4,
           y: 7.6,
-          text: clock - recentAt < RECENT_SHOW ? recent : `건너뜀 ${skippedTotal}번 · 태어난 프레임에 움직임 ${bornMovedTotal}대 · 점선과 "있어야" = 프레임마다 한 번씩 돌았다면의 자리와 u`,
+          text: clock - recentAt < RECENT_SHOW ? recent : `건너뜀 ${skippedTotal}번 · 태어나며 움직임 ${bornMovedTotal}대 · "있어야 u" = 같은 입력의 패턴`,
           align: 'left',
           size: 19,
           color: bad ? RED : '#8796ae',

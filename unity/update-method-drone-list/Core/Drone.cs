@@ -33,7 +33,7 @@ namespace PatternGallery.UpdateMethodDroneList
         /// <summary>Update 가 불린 횟수. 같은 프레임에 태어난 드론끼리는 늘 같아야 한다</summary>
         public int Updates;
 
-        /// <summary>목록에서 빠지기를 요청했다. 이번 Tick 이 끝날 때 지워진다</summary>
+        /// <summary>목록에서 빠지기를 요청했다. Tick 이 끝날 때 목록에서 지워진다 (대기 목록에 있었으면 합쳐지지 않는다)</summary>
         public bool IsDead { get; private set; }
         public DespawnReason Reason { get; private set; }
 
