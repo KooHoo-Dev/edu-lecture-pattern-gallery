@@ -53,4 +53,8 @@ export const PLANNED: PlannedSpecimen[] = [
   { id: 'event-queue-sound', title: '이벤트 큐: 효과음 요청 모으기', group: 'B', order: 2, oneLiner: '효과음을 바로 틀지 않고 큐에 모아, 같은 프레임의 같은 소리는 합치고 빈 채널이 나면 차례로 튼다' },
   { id: 'adapter-sensor-units', title: '어댑터 패턴: 센서 장비 단위 맞추기', group: 'F', order: 4, oneLiner: '장비마다 다른 API 와 단위를 어댑터 한 곳에서 우리 모양으로 바꿔, 화면과 경보는 한 모양만 안다' },
   { id: 'hierarchical-state-enemy', title: '상태 패턴: 계층 상태 기계', group: 'A', order: 4, oneLiner: '여러 상태에 공통인 규칙(EMP, 경계등)을 부모 상태 한 곳에 두고, 자식 상태는 자기 일만 한다' },
+  { id: 'update-method-drone-list', title: '업데이트 메서드: 드론 목록 한 프레임', group: 'A', order: 5, oneLiner: '매니저가 드론 목록을 돌며 하나씩 업데이트하되, 도는 중에 생기고 사라지는 드론은 루프 밖에서 정리한다' },
+  { id: 'service-locator-audio', title: '서비스 로케이터: 소리 서비스와 널 객체', group: 'B', order: 3, oneLiner: '게임 코드는 소리 서비스를 찾아 쓰기만 하고, 서비스가 없으면 아무것도 하지 않는 널 객체가 대신한다' },
+  { id: 'flyweight-drone-types', title: '플라이웨이트: 드론 종류 데이터 공유', group: 'D', order: 2, oneLiner: '종류마다 같은 값은 한 객체를 모든 드론이 함께 쓰고, 드론마다 다른 값은 드론이 든다' },
+  { id: 'dirty-flag-loadout', title: '더티 플래그: 장비 무게 다시 계산', group: 'D', order: 3, oneLiner: '비싼 합계는 바뀌었을 때만 다시 계산하고, 값을 바꾸는 모든 길이 다시 계산 표시를 켜게 한 곳에 모은다' },
 ]

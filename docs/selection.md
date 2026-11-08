@@ -1,7 +1,7 @@
 # 표본 선정 (패턴 갤러리)
 
-- 작성: 2026-11-03. 개정: 2026-11-05 (묶음 4 구성).
-- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 끝남, 배포 (2026-11-06, 3절 후보 다섯 모두).**
+- 작성: 2026-11-03. 개정: 2026-11-08 (묶음 5 구성: 교안 밖 Nystrom 패턴 넷).
+- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 끝남, 배포 (2026-11-06, 3절 후보 다섯 모두). 묶음 5 확정 (Jay, 2026-11-08, 구독 워커).**
 - 형식은 kit `design.md` 6절 (Shader Gallery 의 `docs/shader-selection.md` 형식). 공통 규칙은 kit-guide.
 - 교안 분석: [`research/lecture-analysis.md`](research/lecture-analysis.md). 교안 = `3000-Unity-3D/Assets/19. Legacy/2. OOP And Design Pattern/` (OOP 기초 3편 + 생성 5, 구조 5, 행동 5). 표본은 교안을 그대로 옮기지 않는다 (Jay 확인). 교안의 강조점과 함정은 가져오고, 상황은 외곽 탐사대로, 글은 증상에서 시작한다.
 
@@ -25,6 +25,10 @@
 | B 연결 | `event-queue-sound` 이벤트 큐: 효과음 요청 모으기 | 이벤트 큐 (교안 밖) | ★★ | **묶음 4 (배포)** |
 | F 조립 | `adapter-sensor-units` 어댑터 패턴: 센서 장비 단위 맞추기 | 어댑터 (구조 01) | ★ | **묶음 4 (배포)** |
 | A 행동 | `hierarchical-state-enemy` 상태 패턴: 계층 상태 기계 | 계층 상태 기계 (교안 밖, 상태의 다음 편) | ★★★ | **묶음 4 (배포)** |
+| A 행동 | `update-method-drone-list` 업데이트 메서드: 드론 목록 한 프레임 | 업데이트 메서드 (교안 밖) | ★★ | **묶음 5** |
+| B 연결 | `service-locator-audio` 서비스 로케이터: 소리 서비스와 널 객체 | 서비스 로케이터 (교안 밖, 싱글턴의 다음 편) | ★★ | **묶음 5** |
+| D 최적화 | `flyweight-drone-types` 플라이웨이트: 드론 종류 데이터 공유 | 플라이웨이트·타입 객체 (교안 밖) | ★★ | **묶음 5** |
+| D 최적화 | `dirty-flag-loadout` 더티 플래그: 장비 무게 다시 계산 | 더티 플래그 (교안 밖, 01 캡슐화) | ★★ | **묶음 5** |
 
 묶음 2 를 마치면 교안의 생성·구조·행동 세 묶음에 모두 표본이 생긴다 (생성 2, 구조 1, 행동 4).
 
@@ -82,6 +86,16 @@
 - 출처: Nystrom 'State' (계층 상태 기계 절).
 - 겹치는 표본: `state-drone-ai` (앞 편. 이 표본의 나쁜 예가 그 구조), `state-player-actions`.
 
+**`update-method-drone-list` 업데이트 메서드: 드론 목록 한 프레임** ★★ — 묶음 5
+
+- ID `update-method-drone-list`, 그룹 A, 순서 5, 난이도 2.
+- 한 줄: 매니저가 드론 목록을 돌며 하나씩 업데이트하되, 도는 중에 생기고 사라지는 드론은 루프 밖에서 정리한다.
+- 수업에서 왜 필요한가: 적이 많아지면 수강생은 매니저 하나가 목록을 도는 구조로 옮긴다. 그 순간 "도는 중에 지우면 다음 적을 건너뜀", "도는 중에 더한 적이 태어난 프레임에 바로 움직임", `foreach` 에서 지우면 `InvalidOperationException` 이 나온다. Unity 의 `Update` 도 같은 패턴이라는 것과 함께.
+- 무대와 시나리오: 잔해 드론 여럿이 나란히 기지 쪽으로 움직인다. 기지에 닿거나 피해로 파괴되면 목록에서 빠지고, 분열 드론은 업데이트 중에 둘로 나뉜다. 드론마다 업데이트 횟수를 보인다.
+- 효과 끄기: `for (i = 0; i < drones.Count; i++) drones[i].Update(dt)` 안에서 드론이 자기를 `Remove` 하고 새 드론을 `Add` 하는 흔한 코드. ✖ `업데이트 건너뜀` (지워진 드론 다음 드론이 그 프레임에 안 움직임), ✖ `태어난 프레임에 움직임`.
+- 출처: Nystrom 'Update Method', Microsoft `List<T>.RemoveAt`, `RemoveAll`.
+- 겹치는 표본: `object-pool-projectiles` (돌려주기 시점), `event-queue-sound` (모아 두었다 나중에 처리).
+
 ### B 연결
 
 **`observer-health-events` 관찰자 패턴: 체력 알림** ★
@@ -102,6 +116,16 @@
 - 효과 끄기: 요청 즉시 빈 AudioSource 를 찾아 재생하는 사운드 매니저. 같은 프레임에 폭발음이 채널을 모두 채워 ✖ `소리 겹침` (합친 음량이 기준을 넘음), 빈 채널이 없어 웨이브 끝 알림이 버려져 ✖ `알림 잘림`.
 - 출처: Nystrom 'Event Queue', Unity `AudioSource.PlayOneShot`, Unity Audio 프로젝트 설정 (Max Real Voices).
 - 겹치는 표본: `observer-health-events` (바로 부르기와 나중에 처리하기), `object-pool-projectiles` (AudioSource 풀).
+
+**`service-locator-audio` 서비스 로케이터: 소리 서비스와 널 객체** ★★ — 묶음 5
+
+- ID `service-locator-audio`, 그룹 B, 순서 3, 난이도 2.
+- 한 줄: 게임 코드는 소리 서비스를 찾아 쓰기만 하고, 서비스가 없으면 아무것도 하지 않는 널 객체가 대신한다.
+- 수업에서 왜 필요한가: `AudioManager.Instance.Play()` 를 곳곳에서 부르다 소리 매니저가 없는 테스트 씬에서 `NullReferenceException` 이 나고 그 아래 줄(크레딧 지급 등)이 실행되지 않는다. 고치려고 null 검사를 흩어 두면 한 곳은 꼭 빠진다. 싱글턴 표본의 다음 편으로, 의존을 한 곳에서 바꿔 끼우는 법을 보인다.
+- 무대와 시나리오: 정비 기지 포탑 발사, 드론 파괴, 크레딧 획득이 소리를 낸다. 소리 서비스를 빼고 넣을 수 있다 (테스트 씬, 소리 끔). 자동 데모: 발사 → 파괴 → 소리 서비스 빼기 → 발사 → 파괴.
+- 효과 끄기: 싱글턴을 직접 부르고, 발사 쪽에만 null 검사를 넣은 흔한 코드. ✖ `NullReferenceException` (소리 서비스가 없을 때 드론 파괴 처리가 멈춰 크레딧이 안 들어옴).
+- 출처: Nystrom 'Service Locator'.
+- 겹치는 표본: `singleton-scene-managers` (싱글턴의 대안), `event-queue-sound` (같은 소리 서비스 뒤에 큐).
 
 ### C 데이터
 
@@ -125,6 +149,26 @@
 - 효과 끄기: 풀은 있지만 빌릴 때 위치만 맞추고 속도·종류·수명을 다시 맞추지 않는 흔한 코드 ✖ `이전 상태 재사용` (냉각탄이 빠른 탄 속도로 날아감), 명중과 화면 밖에서 두 번 반납해 같은 탄이 둘로 쓰이는 ✖ `이중 반납`.
 - 출처: Nystrom 'Object Pool', Unity 스크립트 레퍼런스 `ObjectPool<T>`, Unity 전자책 (오브젝트 풀 장).
 - 겹치는 표본: `prototype-drone-clone` (복제와 재사용, 상태 초기화).
+
+**`flyweight-drone-types` 플라이웨이트: 드론 종류 데이터 공유** ★★ — 묶음 5
+
+- ID `flyweight-drone-types`, 그룹 D, 순서 2, 난이도 2.
+- 한 줄: 종류마다 같은 값(최대 HP, 속도)은 한 객체를 모든 드론이 함께 쓰고, 드론마다 다른 값(지금 HP, 위치)은 드론이 든다.
+- 수업에서 왜 필요한가: `ScriptableObject` 로 적 데이터를 나누는 것을 배우면 바로 "지금 HP 도 거기 넣었더니 적 하나를 때리면 모든 적의 HP 가 같이 깎인다" 를 겪는다. Play 를 끈 뒤에도 에셋 값이 바뀐 채 남는다. 공유할 값(내재 상태)과 개체마다 둘 값(외재 상태)을 나누는 것이 플라이웨이트의 핵심이고, Nystrom 의 타입 객체와도 잇는다.
+- 무대와 시나리오: 정찰형 셋, 중장갑 둘. 화면에 "종류 데이터 2개를 드론 5대가 공유" 를 보인다. 자동 데모: 첫 정찰형에 피해 → 중장갑에 피해 → 정찰형 하나 더 → 밸런스 수정(정찰형 최대 HP 증가, 모든 정찰형에 바로 반영).
+- 효과 끄기: 공유 데이터 객체에 지금 HP 를 둔 흔한 코드. ✖ `HP 공유` (한 대를 때리면 같은 종류가 모두 깎임), 새로 나온 드론이 다친 채로 나옴 (같은 원인, 글에 밝힘).
+- 출처: Nystrom 'Flyweight', 'Type Object', Unity 스크립트 레퍼런스 `ScriptableObject`.
+- 겹치는 표본: `prototype-drone-clone` (공유와 복사), `abstract-factory-zone-themes`.
+
+**`dirty-flag-loadout` 더티 플래그: 장비 무게 다시 계산** ★★ — 묶음 5
+
+- ID `dirty-flag-loadout`, 그룹 D, 순서 3, 난이도 2.
+- 한 줄: 비싼 합계는 바뀌었을 때만 다시 계산하고, 값을 바꾸는 모든 길이 "다시 계산" 표시를 켜게 한 곳에 모은다.
+- 수업에서 왜 필요한가: 매 프레임 합계를 다시 계산하다 캐시를 배우면, 값을 바꾸는 길 하나에서 표시를 빠뜨려 옛 값이 남는다. 바깥이 필드를 직접 고칠 수 있으면 반드시 생긴다. 교안 01 의 캡슐화(`private set`)가 왜 필요한지 보이는 예이기도 하다.
+- 무대와 시나리오: 하린의 장비 칸 (냉각 셀, 수리 키트 묶음 등). 총 무게가 이동 속도를 정한다. 줍기, 버리기, 수리 키트 쓰기. 화면에 "다시 계산 n 회" 를 보인다. 자동 데모: 줍기 둘 → 수리 키트 쓰기 → 버리기.
+- 효과 끄기: 캐시와 표시는 있지만 수리 키트가 묶음 수 필드를 직접 줄이고 표시를 켜지 않는 흔한 코드. ✖ `옛 무게` (무게와 속도가 바뀌지 않음).
+- 출처: Nystrom 'Dirty Flag'.
+- 겹치는 표본: `decorator-stat-buffs` (값이 바뀔 때 다시 계산), `observer-health-events`.
 
 ### E 생성 (새 그룹)
 
@@ -235,6 +279,10 @@
 | 11 | `adapter-sensor-units` | 어댑터 (구조 01) | F | ★ | 두 센서 API 의 단위(0~1, 0~100)가 섞여 막대가 넘침 | 4 |
 | 12 | `event-queue-sound` | 이벤트 큐 (교안 밖) | B | ★★ | 한 프레임에 같은 소리가 겹쳐 터짐 | 4 |
 | 13 | `hierarchical-state-enemy` | 계층 상태 기계 (교안 밖) | A | ★★★ | 상태마다 복사한 공통 규칙이 새 상태에서 빠짐 (EMP 무시, 경계등 꺼짐) | 4 (`state-drone-ai` 다음 편) |
+| 14 | `flyweight-drone-types` | 플라이웨이트 (교안 밖) | D | ★★ | 한 대를 때리면 같은 종류가 모두 깎임 (공유 데이터에 지금 HP) | 5 |
+| 15 | `service-locator-audio` | 서비스 로케이터 (교안 밖) | B | ★★ | 소리 매니저 없는 씬에서 예외로 크레딧 지급이 멈춤 | 5 |
+| 16 | `dirty-flag-loadout` | 더티 플래그 (교안 밖) | D | ★★ | 수리 키트를 써도 무게·속도가 그대로 | 5 |
+| 17 | `update-method-drone-list` | 업데이트 메서드 (교안 밖) | A | ★★ | 도는 중에 지운 드론 다음 드론이 그 프레임에 안 움직임 | 5 |
 
 교안의 브리지·템플릿 메서드·빌더는 단독 표본으로 만들지 않고 각각 전략·팩토리·프로토타입 표본의 글에 녹인다 (5절).
 
@@ -248,6 +296,7 @@
 | 2 | `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` | 끝남, 배포 (2026-11-03) |
 | 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | 끝남, 배포 (2026-11-03) |
 | 4 | `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy` | 끝남, 배포 (2026-11-06). 회사 크레딧 남은 추정 $52.87 을 이 묶음에 썼다 (Jay 결정, 기록 약 $37.1) |
+| 5 | `flyweight-drone-types`, `service-locator-audio`, `dirty-flag-loadout`, `update-method-drone-list` | **확정 (Jay, 2026-11-08)**. 회사 크레딧이 거의 남지 않아 워커를 **구독 프로필(`sub`)** 로 돌린다 |
 
 묶음 2 를 이 넷으로 고른 이유: 넷 다 무대에서 버그가 바로 보이고, 교안의 생성·구조·행동을 고루 덮고, 교안 예제가 이미 게임 상황(타워 조준, 스탯 버프, 적 복제, 매니저)이라 수업 흐름에 바로 붙는다. 싱글턴만 코어가 얇은 위험이 있어 맨 뒤에 돌린다.
 
