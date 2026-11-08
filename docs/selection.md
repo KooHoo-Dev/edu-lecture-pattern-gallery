@@ -1,7 +1,7 @@
 # 표본 선정 (패턴 갤러리)
 
 - 작성: 2026-11-03. 개정: 2026-11-08 (묶음 5 구성: 교안 밖 Nystrom 패턴 넷).
-- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 끝남, 배포 (2026-11-06, 3절 후보 다섯 모두). 묶음 5 확정 (Jay, 2026-11-08, 구독 워커).**
+- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 끝남, 배포 (2026-11-06, 3절 후보 다섯 모두). 묶음 5 끝남, 배포 (2026-11-08, 구독 워커).**
 - 형식은 kit `design.md` 6절 (Shader Gallery 의 `docs/shader-selection.md` 형식). 공통 규칙은 kit-guide.
 - 교안 분석: [`research/lecture-analysis.md`](research/lecture-analysis.md). 교안 = `3000-Unity-3D/Assets/19. Legacy/2. OOP And Design Pattern/` (OOP 기초 3편 + 생성 5, 구조 5, 행동 5). 표본은 교안을 그대로 옮기지 않는다 (Jay 확인). 교안의 강조점과 함정은 가져오고, 상황은 외곽 탐사대로, 글은 증상에서 시작한다.
 
@@ -25,10 +25,10 @@
 | B 연결 | `event-queue-sound` 이벤트 큐: 효과음 요청 모으기 | 이벤트 큐 (교안 밖) | ★★ | **묶음 4 (배포)** |
 | F 조립 | `adapter-sensor-units` 어댑터 패턴: 센서 장비 단위 맞추기 | 어댑터 (구조 01) | ★ | **묶음 4 (배포)** |
 | A 행동 | `hierarchical-state-enemy` 상태 패턴: 계층 상태 기계 | 계층 상태 기계 (교안 밖, 상태의 다음 편) | ★★★ | **묶음 4 (배포)** |
-| A 행동 | `update-method-drone-list` 업데이트 메서드: 드론 목록 한 프레임 | 업데이트 메서드 (교안 밖) | ★★ | **묶음 5** |
-| B 연결 | `service-locator-audio` 서비스 로케이터: 소리 서비스와 널 객체 | 서비스 로케이터 (교안 밖, 싱글턴의 다음 편) | ★★ | **묶음 5** |
-| D 최적화 | `flyweight-drone-types` 플라이웨이트: 드론 종류 데이터 공유 | 플라이웨이트·타입 객체 (교안 밖) | ★★ | **묶음 5** |
-| D 최적화 | `dirty-flag-loadout` 더티 플래그: 장비 무게 다시 계산 | 더티 플래그 (교안 밖, 01 캡슐화) | ★★ | **묶음 5** |
+| A 행동 | `update-method-drone-list` 업데이트 메서드: 드론 목록 한 프레임 | 업데이트 메서드 (교안 밖) | ★★ | **묶음 5 (배포)** |
+| B 연결 | `service-locator-audio` 서비스 로케이터: 소리 서비스와 널 객체 | 서비스 로케이터 (교안 밖, 싱글턴의 다음 편) | ★★ | **묶음 5 (배포)** |
+| D 최적화 | `flyweight-drone-types` 플라이웨이트: 드론 종류 데이터 공유 | 플라이웨이트·타입 객체 (교안 밖) | ★★ | **묶음 5 (배포)** |
+| D 최적화 | `dirty-flag-loadout` 더티 플래그: 장비 무게 다시 계산 | 더티 플래그 (교안 밖, 01 캡슐화) | ★★ | **묶음 5 (배포)** |
 
 묶음 2 를 마치면 교안의 생성·구조·행동 세 묶음에 모두 표본이 생긴다 (생성 2, 구조 1, 행동 4).
 
@@ -296,7 +296,7 @@
 | 2 | `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers` | 끝남, 배포 (2026-11-03) |
 | 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | 끝남, 배포 (2026-11-03) |
 | 4 | `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy` | 끝남, 배포 (2026-11-06). 회사 크레딧 남은 추정 $52.87 을 이 묶음에 썼다 (Jay 결정, 기록 약 $37.1) |
-| 5 | `flyweight-drone-types`, `service-locator-audio`, `dirty-flag-loadout`, `update-method-drone-list` | **확정 (Jay, 2026-11-08)**. 회사 크레딧이 거의 남지 않아 워커를 **구독 프로필(`sub`)** 로 돌린다 |
+| 5 | `flyweight-drone-types`, `service-locator-audio`, `dirty-flag-loadout`, `update-method-drone-list` | 끝남, 배포 (2026-11-08). 회사 크레딧이 거의 남지 않아 워커를 **구독 프로필(`sub`)** 로 돌린다 |
 
 묶음 2 를 이 넷으로 고른 이유: 넷 다 무대에서 버그가 바로 보이고, 교안의 생성·구조·행동을 고루 덮고, 교안 예제가 이미 게임 상황(타워 조준, 스탯 버프, 적 복제, 매니저)이라 수업 흐름에 바로 붙는다. 싱글턴만 코어가 얇은 위험이 있어 맨 뒤에 돌린다.
 

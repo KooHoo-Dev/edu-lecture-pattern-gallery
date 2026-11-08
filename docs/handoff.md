@@ -4,8 +4,8 @@
 
 ## 지금 상태
 
-- 표본 7개: 기준 샘플 `state-player-actions`, `observer-health-events` (구독 세션), 워커 파일럿 `command-undo-replay`, 묶음 2 `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers`, 묶음 3 `state-drone-ai`, `object-pool-projectiles`, `factory-drone-spawner`, `facade-hit-resolution` 묶음 4 `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy` (워커, 표본당 구현 + 수정 약 $6.6~7.9). 모두 독립 리뷰를 반영했다. 표본 16개.
-- 선정: `docs/selection.md` (Jay 교안 기준, 분석은 `docs/research/lecture-analysis.md`). 3절 후보는 모두 만들었다 (묶음 4). 다음은 Jay 와 정한다.
+- 표본 7개: 기준 샘플 `state-player-actions`, `observer-health-events` (구독 세션), 워커 파일럿 `command-undo-replay`, 묶음 2 `strategy-turret-targeting`, `decorator-stat-buffs`, `prototype-drone-clone`, `singleton-scene-managers`, 묶음 3 `state-drone-ai`, `object-pool-projectiles`, `factory-drone-spawner`, `facade-hit-resolution` 묶음 4 `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy`, 묶음 5 `flyweight-drone-types`, `service-locator-audio`, `dirty-flag-loadout`, `update-method-drone-list` (구독 워커) (워커, 표본당 구현 + 수정 약 $6.6~7.9). 모두 독립 리뷰를 반영했다. 표본 20개.
+- 선정: `docs/selection.md` (Jay 교안 기준, 분석은 `docs/research/lecture-analysis.md`). 3절 후보는 모두 만들었다 (묶음 5 까지). 다음은 Jay 와 정한다. 회사 크레딧이 거의 없어 워커는 구독 프로필(`profiles: ['sub']`)로 돌린다.
 - 배포: GitHub `KooHoo-Dev/edu-lecture-pattern-gallery` (공개). main push 마다 kit 의 재사용 워크플로가 빌드, `gallery check`, Pages 배포를 한다.
 
 ## 규칙
@@ -49,3 +49,4 @@ npm run kit:sync                                # 로컬 kit 변경을 node_modu
 - `dispatch run --parallel 2` 로 표본 잡을 함께 돌려도 된다 (검사 도구의 Chrome 포트·프로필, Unity 컴파일 임시 폴더가 잡마다 따로다). 다만 두 잡이 동시에 `git worktree add` 를 하다 하나가 실패할 수 있다 (묶음 4). 그러면 `dispatch retry <id>`.
 - 잡은 **세션 밖 터미널 탭**에서 돌린다. 세션의 백그라운드 명령으로 돌리면 끊길 수 있다 (묶음 4 첫 실행이 8분 만에 꺼졌다). 그 PowerShell 에서 `dispatch` 가 안 보이면 `node C:\Users\user\JayTools\JayDispatch\bin\dispatch.mjs <명령>`.
 - 다른 시나리오 화면은 `live <id> --query="auto=1&scenario=<시나리오 id>&t=<초>"` (가이드 7절의 주소 인자).
+- 구독 워커: 잡 명세에 `profiles: ['sub']` (make-jobs 가 `allowProfiles: [sub]` 로 쓴다). 구독 한도에 걸리면 dispatch 가 "차단: 구독 한도" 로 멈춘다 → Jay 에게 알리고 기다린다. 잡은 터미널 탭에서 돌리고 끝남은 `dispatch status` 를 읽는 Monitor 로 받는다.

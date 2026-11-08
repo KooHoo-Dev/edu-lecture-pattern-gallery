@@ -44,6 +44,7 @@
 ## 주의할 점
 - 구독자 컴포넌트가 다른 오브젝트에 있으면 `Awake`, `OnEnable` 순서가 정해져 있지 않다. 그래서 `PlayerHealth.Health` 는 처음 읽을 때 만든다. 체력을 `Awake` 에서만 만들면 구독자가 먼저 켜질 때 null 이다.
 - `UnityEvent` (Inspector 에서 연결하는 이벤트)도 같은 관찰자 패턴이다. 기획자가 Inspector 에서 연결해야 하면 `UnityEvent`, 코드에서만 쓰면 C# `event` 가 가볍고 해제도 분명하다. `UnityEvent` 에 코드로 `AddListener` 했다면 `RemoveListener` 도 한다.
+- `IHpObserver` 같은 인터페이스와 `List` 구독 목록으로 짜는 방식과 구조가 같다. C# `event` 는 그 목록과 차례 호출을 언어가 맡아 준 것이다. 차이 둘: `event` 는 같은 메서드를 두 번 `+=` 하면 두 번 부른다 (목록 방식은 `Contains` 로 막는다. `OnEnable`·`OnDisable` 짝으로만 붙이면 두 번 붙지 않는다). 목록 방식은 알림 도중 구독자가 자기를 빼면 `foreach` 가 `InvalidOperationException` 을 내지만, `event` 는 부르기 시작할 때의 대리자 목록을 그대로 써서 안전하다.
 - 씬을 넘어 사는 체력(`DontDestroyOnLoad`)에 씬의 UI 가 구독하면, UI 가 파괴될 때 `OnDisable` 에서 해제해야 다음 씬에서 예외가 나지 않는다.
 - 구독자가 핸들러 안에서 `Damage` 를 다시 부르면(출혈 같은 연쇄 피해), 뒤쪽 구독자는 바깥 변화를 안쪽 변화보다 늦게 받는다. 이 표본의 `Health` 는 `Died` 가 두 번 불리지 않게 막았지만, 연쇄 피해는 다음 프레임으로 미루는 쪽이 안전하다.
 
