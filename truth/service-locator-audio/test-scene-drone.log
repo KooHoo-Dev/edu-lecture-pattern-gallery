@@ -1,0 +1,36 @@
+# src d128750d2eab
+# service-locator-audio test-scene-drone naive=0
+0.00 ev AudioServiceHost OnEnable → Provide(AudioService)
+0.00 ev Services.Audio → AudioService
+0.40 in fire
+0.40 ev AudioService 재생: 발사음
+0.40 ev Turret 발사 · 탄약 4
+0.50 st audio=AudioService ammo=4 credits=0 kits=3 repaired=0 drones=5 sounds=1
+1.00 st audio=AudioService ammo=4 credits=0 kits=3 repaired=0 drones=5 sounds=1
+1.10 in destroy
+1.10 ev AudioService 재생: 파괴음
+1.10 ev DroneField 드론 1 파괴 · 크레딧 +10 → 10
+1.50 st audio=AudioService ammo=4 credits=10 kits=3 repaired=0 drones=4 sounds=2
+1.90 in toggleAudio
+1.90 ev AudioServiceHost OnDisable → 내가 등록한 서비스라 Provide(null)
+1.90 ev Services.Audio → NullAudioService (무음)
+2.00 st audio=NullAudioService ammo=4 credits=10 kits=3 repaired=0 drones=4 sounds=2
+2.50 st audio=NullAudioService ammo=4 credits=10 kits=3 repaired=0 drones=4 sounds=2
+2.60 in fire
+2.60 ev Turret 발사 · 탄약 3 (무음)
+3.00 st audio=NullAudioService ammo=3 credits=10 kits=3 repaired=0 drones=4 sounds=2
+3.40 in destroy
+3.40 ev DroneField 드론 2 파괴 (무음) · 크레딧 +10 → 20
+3.50 st audio=NullAudioService ammo=3 credits=20 kits=3 repaired=0 drones=3 sounds=2
+4.00 st audio=NullAudioService ammo=3 credits=20 kits=3 repaired=0 drones=3 sounds=2
+4.30 in toggleAudio
+4.30 ev AudioServiceHost OnEnable → Provide(AudioService)
+4.30 ev Services.Audio → AudioService
+4.50 st audio=AudioService ammo=3 credits=20 kits=3 repaired=0 drones=3 sounds=2
+5.00 st audio=AudioService ammo=3 credits=20 kits=3 repaired=0 drones=3 sounds=2
+5.10 in destroy
+5.10 ev AudioService 재생: 파괴음
+5.10 ev DroneField 드론 3 파괴 · 크레딧 +10 → 30
+5.50 st audio=AudioService ammo=3 credits=30 kits=3 repaired=0 drones=2 sounds=3
+6.00 st audio=AudioService ammo=3 credits=30 kits=3 repaired=0 drones=2 sounds=3
+end st audio=AudioService ammo=3 credits=30 kits=3 repaired=0 drones=2 sounds=3
