@@ -1,0 +1,48 @@
+# src 9bdabf067d10
+# update-method-drone-list emp-then-split naive=1
+0.20 in spawn
+0.20 ev D1 출발 · 목록 1
+0.50 st list=1 updated=1 skipped=0 born=0 D1 x=13.90 u=18
+0.50 in spawn
+0.50 ev D2 출발 · 목록 2
+0.80 in spawn
+0.80 ev D3 출발 · 목록 3
+1.00 st list=3 updated=3 skipped=0 born=0 D1 x=12.40 u=48 D2 x=13.30 u=30 D3 x=14.20 u=12
+1.10 in splitter
+1.10 ev S4 출발 · 목록 4
+1.40 in spawn
+1.40 ev D5 출발 · 목록 5
+1.50 st list=5 updated=5 skipped=0 born=0 D1 x=10.90 u=78 D2 x=11.80 u=60 D3 x=12.70 u=42 S4 x=13.60 u=24 D5 x=14.50 u=6
+1.70 in emp
+1.70 ev EMP: 드론 5대 HP -1
+1.70 ev D1 HP 0 → 바로 Remove
+1.70 ev D3 HP 0 → 바로 Remove
+1.70 ev D5 HP 0 → 바로 Remove
+1.70 ev D2 도 건너뜀 · HP 0 인데 목록에 남아 다음 프레임에 빠진다
+1.70 ev !업데이트 건너뜀: S4 이번 프레임에 안 움직임 (바로 앞 칸 D3 Remove 로 당겨짐) · u 36
+1.72 ev D2 HP 0 → 바로 Remove
+1.72 ev S4 또 건너뜀 · 모두 2번 (바로 앞 칸 D2 Remove)
+1.90 in spawn
+1.90 ev D6 출발 · 목록 2
+2.00 st list=2 updated=2 skipped=2 born=0 S4 x=12.20 u=52 D6 x=14.50 u=6
+2.13 ev S4 분열 → S4a, S4b 바로 Add, S4 바로 Remove
+2.13 ev !업데이트 건너뜀: D6 이번 프레임에 안 움직임 (바로 앞 칸 S4 Remove 로 당겨짐) · u 14
+2.13 ev !태어난 프레임에 움직임: S4a Add 된 프레임에 바로 Update 됨 · u 1
+2.13 ev !태어난 프레임에 움직임: S4b Add 된 프레임에 바로 Update 됨 · u 1
+2.50 st list=3 updated=3 skipped=3 born=2 D6 x=13.05 u=35 S4a x=10.65 u=22 S4b x=10.65 u=22
+2.60 in spawn
+2.60 ev D7 출발 · 목록 4
+3.00 st list=4 updated=4 skipped=3 born=2 D6 x=11.55 u=65 S4a x=9.15 u=52 S4b x=9.15 u=52 D7 x=13.60 u=24
+3.20 in spawn
+3.20 ev D8 출발 · 목록 5
+3.50 st list=5 updated=5 skipped=3 born=2 D6 x=10.05 u=95 S4a x=7.65 u=82 S4b x=7.65 u=82 D7 x=12.10 u=54 D8 x=13.90 u=18
+4.00 st list=5 updated=5 skipped=3 born=2 D6 x=8.55 u=125 S4a x=6.15 u=112 S4b x=6.15 u=112 D7 x=10.60 u=84 D8 x=12.40 u=48
+4.50 st list=5 updated=5 skipped=3 born=2 D6 x=7.05 u=155 S4a x=4.65 u=142 S4b x=4.65 u=142 D7 x=9.10 u=114 D8 x=10.90 u=78
+5.00 st list=5 updated=5 skipped=3 born=2 D6 x=5.55 u=185 S4a x=3.15 u=172 S4b x=3.15 u=172 D7 x=7.60 u=144 D8 x=9.40 u=108
+5.43 ev S4a 기지 도달 → 바로 Remove
+5.43 ev !업데이트 건너뜀: S4b 이번 프레임에 안 움직임 (바로 앞 칸 S4a Remove 로 당겨짐) · u 198
+5.45 ev S4b 기지 도달 → 바로 Remove
+5.45 ev !업데이트 건너뜀: D7 이번 프레임에 안 움직임 (바로 앞 칸 S4b Remove 로 당겨짐) · u 171
+5.50 st list=3 updated=3 skipped=5 born=2 D6 x=4.05 u=215 D7 x=6.15 u=173 D8 x=7.90 u=138
+6.00 st list=3 updated=3 skipped=5 born=2 D6 x=2.55 u=245 D7 x=4.65 u=203 D8 x=6.40 u=168
+end st list=3 updated=3 skipped=5 born=2 D6 x=2.55 u=245 D7 x=4.65 u=203 D8 x=6.40 u=168
