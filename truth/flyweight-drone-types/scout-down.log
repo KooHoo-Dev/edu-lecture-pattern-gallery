@@ -1,0 +1,30 @@
+# src f08c92d82dcb
+# flyweight-drone-types scout-down naive=0
+0.30 in hitScout
+0.30 ev S1 피해 1 → HP 3/4
+0.50 st types=2 drones=5 smax=4 hmax=8 hp=S1:3,S2:4,S3:4,H1:8,H2:8
+0.70 in hitScout
+0.70 ev S1 피해 1 → HP 2/4
+1.00 st types=2 drones=5 smax=4 hmax=8 hp=S1:2,S2:4,S3:4,H1:8,H2:8
+1.10 in hitScout
+1.10 ev S1 피해 1 → HP 1/4
+1.50 st types=2 drones=5 smax=4 hmax=8 hp=S1:1,S2:4,S3:4,H1:8,H2:8
+1.50 in hitScout
+1.50 ev S1 피해 1 → HP 0/4
+1.50 ev S1 파괴 → 목록에서 뺀다
+2.00 st types=2 drones=4 smax=4 hmax=8 hp=S2:4,S3:4,H1:8,H2:8
+2.20 in hitScout
+2.20 ev S2 피해 1 → HP 3/4
+2.50 st types=2 drones=4 smax=4 hmax=8 hp=S2:3,S3:4,H1:8,H2:8
+2.90 in hitScout
+2.90 ev S2 피해 1 → HP 2/4
+3.00 st types=2 drones=4 smax=4 hmax=8 hp=S2:2,S3:4,H1:8,H2:8
+3.50 st types=2 drones=4 smax=4 hmax=8 hp=S2:2,S3:4,H1:8,H2:8
+3.60 in spawn
+3.60 ev S4 나옴 · 정찰형 · HP 4/4
+4.00 st types=2 drones=5 smax=4 hmax=8 hp=S2:2,S3:4,H1:8,H2:8,S4:4
+4.30 in hitScout
+4.30 ev S2 피해 1 → HP 1/4
+4.50 st types=2 drones=5 smax=4 hmax=8 hp=S2:1,S3:4,H1:8,H2:8,S4:4
+5.00 st types=2 drones=5 smax=4 hmax=8 hp=S2:1,S3:4,H1:8,H2:8,S4:4
+end st types=2 drones=5 smax=4 hmax=8 hp=S2:1,S3:4,H1:8,H2:8,S4:4
