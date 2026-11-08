@@ -34,4 +34,18 @@ export default [
       GUIDE,
     ],
   },
+  {
+    id: 'service-locator-audio',
+    fix: true,
+    budgetUsd: 8,
+    profiles: ['sub'],
+    items: [
+      '**`unity.pitfalls` 의 의존성 주입 문장이 Unity 에서 그대로 안 된다.** "Inspector 칸으로 `IAudioService` 를 넘겨받는" 은 `[SerializeField]` 인터페이스 칸이 Inspector 에 보이지 않아 따라 할 수 없다 (가이드 3절). "생성자로 `IAudioService` 를, 또는 Inspector 칸으로 구체 컴포넌트(`AudioServiceHost`)를 넘겨받는" 으로 고친다.',
+      '**`mistakes` 의 도메인 리로드 항목 조건이 틀렸다.** Play 를 끝낼 때 `AudioServiceHost.OnDisable` 이 `Provide(null)` 을 부르므로 이 표본의 Host 라면 지난 서비스가 남지 않는다. 남는 경우는 등록 해제를 빠뜨렸을 때나 MonoBehaviour 가 아닌 곳에서 `Provide` 했을 때뿐이라고 밝히고, `Reset` 은 그런 경우를 대비한 방어 코드라고 쓴다. `Naive/NaiveAudioCalls.cs` 9행 근처 주석도 OnDestroy 가 Instance 를 비우므로 같게 고친다.',
+      '**정비 ✖ 글 위치** (`sim.ts` 466 근처): "✖ 키트만 쓰고 완료 기록 안 됨" 이 D1 옆(6.4, 3.7)에 있고 포탑 발사 화살표가 가로지른다. 정비대 바로 위로 옮기고 도윤 이름표·완료음 글과 겹치지 않게 (`p.`·`preset=`·`scenario=repair-without-sound` 화면으로 확인).',
+      '**`silent-start-bounty` note 시각**: "4.20 에 소리 매니저를 넣은 뒤의 파괴만" → 기록상 넣는 시각은 3.60. "3.60 에 소리 매니저를 다시 넣은 뒤 4.20 의 파괴만 30 을 받는다" 로.',
+      '**선택**: `mistakes` 의 구독을 남긴 항목에 "남은 구독의 `MissingReferenceException` 이 `Services.Audio.Play` 를 지나 게임 코드까지 올라와 크레딧 지급 줄도 멈춘다 (나쁜 예와 같은 증상)" 한마디. Host 를 둘 켰다가 나중 것을 끄면 앞 Host 로 되돌아가지 않고 무음이 된다는 한계를 괄호로. `Core/BaseGameCode.cs` 54행 근처 `DroneField` 가 개수를 `Math.Max(0, count)` 로 자르게. 나쁜 예의 `OnDestroy` 가 Instance 를 비우지 않는 흔한 변형이면 NRE 대신 파괴된 AudioSource 를 건드리는 `MissingReferenceException` 이 난다는 것과 `?.`·`??` 가 Unity 의 가짜 null 을 거르지 못한다는 것을 offNote 나 mistakes 에 한 줄 (6개·5개 상한이면 기존 항목에 합친다).',
+      GUIDE,
+    ],
+  },
 ]
