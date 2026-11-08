@@ -1,0 +1,32 @@
+# src d128750d2eab
+# service-locator-audio silent-start-bounty naive=1
+0.00 ev AudioManager Awake → Instance = this
+0.30 in toggleAudio
+0.30 ev AudioManager 파괴 → OnDestroy 에서 Instance = null
+0.50 st audio=null ammo=2 credits=0 kits=3 repaired=0 drones=5 sounds=0
+0.80 in fire
+0.80 ev Turret 발사 · 탄약 1 (무음: null 검사로 건너뜀)
+1.00 st audio=null ammo=1 credits=0 kits=3 repaired=0 drones=5 sounds=0
+1.30 in fire
+1.30 ev Turret 발사 · 탄약 0 (무음: null 검사로 건너뜀)
+1.50 st audio=null ammo=0 credits=0 kits=3 repaired=0 drones=5 sounds=0
+1.80 in fire
+1.80 ev Turret 탄약 없음 (쏘지 않음)
+2.00 st audio=null ammo=0 credits=0 kits=3 repaired=0 drones=5 sounds=0
+2.40 in destroy
+2.40 ev DroneField 드론 1 파괴
+2.40 ev !NullReferenceException: AudioManager.Instance 가 null → 아래 줄(크레딧 +30)이 실행되지 않았다
+2.50 st audio=null ammo=0 credits=0 kits=3 repaired=0 drones=4 sounds=0
+3.00 st audio=null ammo=0 credits=0 kits=3 repaired=0 drones=4 sounds=0
+3.00 in destroy
+3.00 ev DroneField 드론 2 파괴
+3.00 ev !NullReferenceException: AudioManager.Instance 가 null → 아래 줄(크레딧 +30)이 실행되지 않았다
+3.50 st audio=null ammo=0 credits=0 kits=3 repaired=0 drones=3 sounds=0
+3.60 in toggleAudio
+3.60 ev AudioManager Awake → Instance = this
+4.00 st audio=AudioManager ammo=0 credits=0 kits=3 repaired=0 drones=3 sounds=0
+4.20 in destroy
+4.20 ev AudioManager 재생: 파괴음
+4.20 ev DroneField 드론 3 파괴 · 크레딧 +30 → 30
+4.50 st audio=AudioManager ammo=0 credits=30 kits=3 repaired=0 drones=2 sounds=1
+end st audio=AudioManager ammo=0 credits=30 kits=3 repaired=0 drones=2 sounds=1
