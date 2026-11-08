@@ -1,0 +1,32 @@
+# src 9bdabf067d10
+# update-method-drone-list fast-three-pieces naive=0
+0.20 in spawn
+0.20 ev D1 출발 · 목록 1
+0.40 in spawn
+0.40 ev D2 출발 · 목록 2
+0.50 st list=2 updated=2 D1 x=13.45 u=18 D2 x=14.35 u=6
+0.60 in splitter
+0.60 ev S3 출발 · 목록 3
+1.00 st list=3 updated=3 D1 x=11.20 u=48 D2 x=12.10 u=36 S3 x=13.00 u=24
+1.00 in spawn
+1.00 ev D4 출발 · 목록 4
+1.18 ev S3a 대기 목록에 (분열)
+1.18 ev S3b 대기 목록에 (분열)
+1.18 ev S3c 대기 목록에 (분열)
+1.18 ev S3 분열 → 지울 표시
+1.18 ev 지움 S3 (루프가 끝난 뒤 RemoveAll)
+1.18 ev 합침 S3a, S3b, S3c → 목록 6 (다음 프레임부터 Update)
+1.50 st list=6 updated=6 D1 x=8.95 u=78 D2 x=9.85 u=66 D4 x=12.55 u=30 S3a x=10.75 u=18 S3b x=10.75 u=18 S3c x=10.75 u=18
+2.00 st list=6 updated=6 D1 x=6.70 u=108 D2 x=7.60 u=96 D4 x=10.30 u=60 S3a x=8.50 u=48 S3b x=8.50 u=48 S3c x=8.50 u=48
+2.50 st list=6 updated=6 D1 x=4.45 u=138 D2 x=5.35 u=126 D4 x=8.05 u=90 S3a x=6.25 u=78 S3b x=6.25 u=78 S3c x=6.25 u=78
+3.00 st list=6 updated=6 D1 x=2.20 u=168 D2 x=3.10 u=156 D4 x=5.80 u=120 S3a x=4.00 u=108 S3b x=4.00 u=108 S3c x=4.00 u=108
+3.08 ev D1 기지 도달 → 지울 표시
+3.08 ev 지움 D1 (루프가 끝난 뒤 RemoveAll)
+3.28 ev D2 기지 도달 → 지울 표시
+3.28 ev 지움 D2 (루프가 끝난 뒤 RemoveAll)
+3.48 ev S3a 기지 도달 → 지울 표시
+3.48 ev S3b 기지 도달 → 지울 표시
+3.48 ev S3c 기지 도달 → 지울 표시
+3.48 ev 지움 S3a, S3b, S3c (루프가 끝난 뒤 RemoveAll)
+3.50 st list=1 updated=4 D4 x=3.55 u=150
+end st list=1 updated=1 D4 x=2.65 u=162

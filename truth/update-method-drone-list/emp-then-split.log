@@ -1,0 +1,46 @@
+# src 9bdabf067d10
+# update-method-drone-list emp-then-split naive=0
+0.20 in spawn
+0.20 ev D1 출발 · 목록 1
+0.50 st list=1 updated=1 D1 x=13.90 u=18
+0.50 in spawn
+0.50 ev D2 출발 · 목록 2
+0.80 in spawn
+0.80 ev D3 출발 · 목록 3
+1.00 st list=3 updated=3 D1 x=12.40 u=48 D2 x=13.30 u=30 D3 x=14.20 u=12
+1.10 in splitter
+1.10 ev S4 출발 · 목록 4
+1.40 in spawn
+1.40 ev D5 출발 · 목록 5
+1.50 st list=5 updated=5 D1 x=10.90 u=78 D2 x=11.80 u=60 D3 x=12.70 u=42 S4 x=13.60 u=24 D5 x=14.50 u=6
+1.70 in emp
+1.70 ev EMP: 드론 5대 HP -1
+1.70 ev D1 HP 0 → 지울 표시
+1.70 ev D2 HP 0 → 지울 표시
+1.70 ev D3 HP 0 → 지울 표시
+1.70 ev D5 HP 0 → 지울 표시
+1.70 ev 지움 D1, D2, D3, D5 (루프가 끝난 뒤 RemoveAll)
+1.90 in spawn
+1.90 ev D6 출발 · 목록 2
+2.00 st list=2 updated=2 S4 x=12.10 u=54 D6 x=14.50 u=6
+2.10 ev S4a 대기 목록에 (분열)
+2.10 ev S4b 대기 목록에 (분열)
+2.10 ev S4 분열 → 지울 표시
+2.10 ev 지움 S4 (루프가 끝난 뒤 RemoveAll)
+2.10 ev 합침 S4a, S4b → 목록 3 (다음 프레임부터 Update)
+2.50 st list=3 updated=3 D6 x=13.00 u=36 S4a x=10.60 u=23 S4b x=10.60 u=23
+2.60 in spawn
+2.60 ev D7 출발 · 목록 4
+3.00 st list=4 updated=4 D6 x=11.50 u=66 S4a x=9.10 u=53 S4b x=9.10 u=53 D7 x=13.60 u=24
+3.20 in spawn
+3.20 ev D8 출발 · 목록 5
+3.50 st list=5 updated=5 D6 x=10.00 u=96 S4a x=7.60 u=83 S4b x=7.60 u=83 D7 x=12.10 u=54 D8 x=13.90 u=18
+4.00 st list=5 updated=5 D6 x=8.50 u=126 S4a x=6.10 u=113 S4b x=6.10 u=113 D7 x=10.60 u=84 D8 x=12.40 u=48
+4.50 st list=5 updated=5 D6 x=7.00 u=156 S4a x=4.60 u=143 S4b x=4.60 u=143 D7 x=9.10 u=114 D8 x=10.90 u=78
+5.00 st list=5 updated=5 D6 x=5.50 u=186 S4a x=3.10 u=173 S4b x=3.10 u=173 D7 x=7.60 u=144 D8 x=9.40 u=108
+5.42 ev S4a 기지 도달 → 지울 표시
+5.42 ev S4b 기지 도달 → 지울 표시
+5.42 ev 지움 S4a, S4b (루프가 끝난 뒤 RemoveAll)
+5.50 st list=3 updated=3 D6 x=4.00 u=216 D7 x=6.10 u=174 D8 x=7.90 u=138
+6.00 st list=3 updated=3 D6 x=2.50 u=246 D7 x=4.60 u=204 D8 x=6.40 u=168
+end st list=3 updated=3 D6 x=2.50 u=246 D7 x=4.60 u=204 D8 x=6.40 u=168

@@ -1,0 +1,40 @@
+# src 9bdabf067d10
+# update-method-drone-list splitters-only naive=0
+0.20 in splitter
+0.20 ev S1 출발 · 목록 1
+0.50 st list=1 updated=1 S1 x=13.90 u=18
+1.00 st list=1 updated=1 S1 x=12.40 u=48
+1.20 in splitter
+1.20 ev S2 출발 · 목록 2
+1.20 ev S1a 대기 목록에 (분열)
+1.20 ev S1b 대기 목록에 (분열)
+1.20 ev S1 분열 → 지울 표시
+1.20 ev 지움 S1 (루프가 끝난 뒤 RemoveAll)
+1.20 ev 합침 S1a, S1b → 목록 3 (다음 프레임부터 Update)
+1.50 st list=3 updated=3 S2 x=13.90 u=18 S1a x=10.90 u=17 S1b x=10.90 u=17
+2.00 st list=3 updated=3 S2 x=12.40 u=48 S1a x=9.40 u=47 S1b x=9.40 u=47
+2.20 in splitter
+2.20 ev S3 출발 · 목록 4
+2.20 ev S2a 대기 목록에 (분열)
+2.20 ev S2b 대기 목록에 (분열)
+2.20 ev S2 분열 → 지울 표시
+2.20 ev 지움 S2 (루프가 끝난 뒤 RemoveAll)
+2.20 ev 합침 S2a, S2b → 목록 5 (다음 프레임부터 Update)
+2.50 st list=5 updated=5 S1a x=7.90 u=77 S1b x=7.90 u=77 S3 x=13.90 u=18 S2a x=10.90 u=17 S2b x=10.90 u=17
+3.00 st list=5 updated=5 S1a x=6.40 u=107 S1b x=6.40 u=107 S3 x=12.40 u=48 S2a x=9.40 u=47 S2b x=9.40 u=47
+3.20 in splitter
+3.20 ev S4 출발 · 목록 6
+3.20 ev S3a 대기 목록에 (분열)
+3.20 ev S3b 대기 목록에 (분열)
+3.20 ev S3 분열 → 지울 표시
+3.20 ev 지움 S3 (루프가 끝난 뒤 RemoveAll)
+3.20 ev 합침 S3a, S3b → 목록 7 (다음 프레임부터 Update)
+3.50 st list=7 updated=7 S1a x=4.90 u=137 S1b x=4.90 u=137 S2a x=7.90 u=77 S2b x=7.90 u=77 S4 x=13.90 u=18 S3a x=10.90 u=17 S3b x=10.90 u=17
+4.00 st list=7 updated=7 S1a x=3.40 u=167 S1b x=3.40 u=167 S2a x=6.40 u=107 S2b x=6.40 u=107 S4 x=12.40 u=48 S3a x=9.40 u=47 S3b x=9.40 u=47
+4.20 ev S4a 대기 목록에 (분열)
+4.20 ev S4b 대기 목록에 (분열)
+4.20 ev S4 분열 → 지울 표시
+4.20 ev 지움 S4 (루프가 끝난 뒤 RemoveAll)
+4.20 ev 합침 S4a, S4b → 목록 8 (다음 프레임부터 Update)
+4.50 st list=8 updated=8 S1a x=1.90 u=197 S1b x=1.90 u=197 S2a x=4.90 u=137 S2b x=4.90 u=137 S3a x=7.90 u=77 S3b x=7.90 u=77 S4a x=10.90 u=17 S4b x=10.90 u=17
+end st list=8 updated=8 S1a x=1.90 u=197 S1b x=1.90 u=197 S2a x=4.90 u=137 S2b x=4.90 u=137 S3a x=7.90 u=77 S3b x=7.90 u=77 S4a x=10.90 u=17 S4b x=10.90 u=17

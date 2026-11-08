@@ -1,0 +1,31 @@
+# src 9bdabf067d10
+# update-method-drone-list fast-three-pieces naive=1
+0.20 in spawn
+0.20 ev D1 출발 · 목록 1
+0.40 in spawn
+0.40 ev D2 출발 · 목록 2
+0.50 st list=2 updated=2 skipped=0 born=0 D1 x=13.45 u=18 D2 x=14.35 u=6
+0.60 in splitter
+0.60 ev S3 출발 · 목록 3
+1.00 st list=3 updated=3 skipped=0 born=0 D1 x=11.20 u=48 D2 x=12.10 u=36 S3 x=13.00 u=24
+1.00 in spawn
+1.00 ev D4 출발 · 목록 4
+1.18 ev S3 분열 → S3a, S3b, S3c 바로 Add, S3 바로 Remove
+1.18 ev !업데이트 건너뜀: D4 이번 프레임에 안 움직임 (바로 앞 칸 S3 Remove 로 당겨짐) · u 11
+1.18 ev !태어난 프레임에 움직임: S3a Add 된 프레임에 바로 Update 됨 · u 1
+1.18 ev !태어난 프레임에 움직임: S3b Add 된 프레임에 바로 Update 됨 · u 1
+1.18 ev !태어난 프레임에 움직임: S3c Add 된 프레임에 바로 Update 됨 · u 1
+1.50 st list=6 updated=6 skipped=1 born=3 D1 x=8.95 u=78 D2 x=9.85 u=66 D4 x=12.63 u=29 S3a x=10.68 u=19 S3b x=10.68 u=19 S3c x=10.68 u=19
+2.00 st list=6 updated=6 skipped=1 born=3 D1 x=6.70 u=108 D2 x=7.60 u=96 D4 x=10.38 u=59 S3a x=8.43 u=49 S3b x=8.43 u=49 S3c x=8.43 u=49
+2.50 st list=6 updated=6 skipped=1 born=3 D1 x=4.45 u=138 D2 x=5.35 u=126 D4 x=8.13 u=89 S3a x=6.18 u=79 S3b x=6.18 u=79 S3c x=6.18 u=79
+3.00 st list=6 updated=6 skipped=1 born=3 D1 x=2.20 u=168 D2 x=3.10 u=156 D4 x=5.88 u=119 S3a x=3.93 u=109 S3b x=3.93 u=109 S3c x=3.93 u=109
+3.08 ev D1 기지 도달 → 바로 Remove
+3.08 ev !업데이트 건너뜀: D2 이번 프레임에 안 움직임 (바로 앞 칸 D1 Remove 로 당겨짐) · u 161
+3.30 ev D2 기지 도달 → 바로 Remove
+3.30 ev D4 또 건너뜀 · 모두 2번 (바로 앞 칸 D2 Remove)
+3.47 ev S3a 기지 도달 → 바로 Remove
+3.47 ev S3c 기지 도달 → 바로 Remove
+3.47 ev !업데이트 건너뜀: S3b 이번 프레임에 안 움직임 (바로 앞 칸 S3a Remove 로 당겨짐) · u 137
+3.48 ev S3b 기지 도달 → 바로 Remove
+3.50 st list=1 updated=2 skipped=4 born=3 D4 x=3.70 u=148
+end st list=1 updated=1 skipped=4 born=3 D4 x=2.80 u=160
