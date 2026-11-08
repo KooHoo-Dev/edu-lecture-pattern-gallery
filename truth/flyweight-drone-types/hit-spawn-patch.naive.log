@@ -1,0 +1,29 @@
+# src f08c92d82dcb
+# flyweight-drone-types hit-spawn-patch naive=1
+0.40 in hitScout
+0.40 ev S1 피해 1 → HP 3/4
+0.40 ev !HP 공유: S1 을 때렸는데 S2 S3 도 HP 3 (정찰형 종류 데이터의 currentHp 하나를 함께 쓴다)
+0.50 st types=2 drones=5 smax=4 hmax=8 hp=S1:3,S2:3,S3:3,H1:8,H2:8 scur=3 hcur=8 ehp=S1:3,S2:4,S3:4,H1:8,H2:8
+1.00 st types=2 drones=5 smax=4 hmax=8 hp=S1:3,S2:3,S3:3,H1:8,H2:8 scur=3 hcur=8 ehp=S1:3,S2:4,S3:4,H1:8,H2:8
+1.40 in hitHeavy
+1.40 ev H1 피해 1 → HP 7/8
+1.40 ev !HP 공유: H1 을 때렸는데 H2 도 HP 7 (중장갑 종류 데이터의 currentHp 하나를 함께 쓴다)
+1.50 st types=2 drones=5 smax=4 hmax=8 hp=S1:3,S2:3,S3:3,H1:7,H2:7 scur=3 hcur=7 ehp=S1:3,S2:4,S3:4,H1:7,H2:8
+2.00 st types=2 drones=5 smax=4 hmax=8 hp=S1:3,S2:3,S3:3,H1:7,H2:7 scur=3 hcur=7 ehp=S1:3,S2:4,S3:4,H1:7,H2:8
+2.40 in hitScout
+2.40 ev S1 피해 1 → HP 2/4
+2.40 ev 같은 종류 S2 S3 도 HP 2
+2.50 st types=2 drones=5 smax=4 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8
+3.00 st types=2 drones=5 smax=4 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8
+3.40 in spawn
+3.40 ev S4 나옴 · 정찰형 · HP 2/4
+3.40 ev S4 가 다친 채 나왔다: HP 2 (새 드론은 HP 4 로 나와야 한다. 종류 에셋의 currentHp 를 읽었다)
+3.50 st types=2 drones=6 smax=4 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7,S4:2 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8,S4:4
+4.00 st types=2 drones=6 smax=4 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7,S4:2 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8,S4:4
+4.40 in patch
+4.40 ev 밸런스 수정: 정찰형 최대 HP 4 → 6 (정찰형 4대에 바로 반영, 지금 HP 는 그대로)
+4.50 st types=2 drones=6 smax=6 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7,S4:2 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8,S4:4
+5.00 st types=2 drones=6 smax=6 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7,S4:2 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8,S4:4
+5.50 st types=2 drones=6 smax=6 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7,S4:2 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8,S4:4
+6.00 st types=2 drones=6 smax=6 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7,S4:2 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8,S4:4
+end st types=2 drones=6 smax=6 hmax=8 hp=S1:2,S2:2,S3:2,H1:7,H2:7,S4:2 scur=2 hcur=7 ehp=S1:2,S2:4,S3:4,H1:7,H2:8,S4:4
