@@ -4,10 +4,11 @@ using UnityEngine;
 
 namespace PatternGallery.DirtyFlagLoadout
 {
+    [RequireComponent(typeof(LoadoutInput))]
     public class HarinMover : MonoBehaviour
     {
         [Tooltip("속도를 읽을 장비 칸. 같은 오브젝트에 붙이면 Reset 이 채운다")]
-        [SerializeField] LoadoutInput loadout;
+        [SerializeField] LoadoutInput loadoutInput;
         [Tooltip("걷는 구간 (월드 x). 화면 연출만, 무게 규칙과 상관없다")]
         [SerializeField] float leftX = -6f;
         [SerializeField] float rightX = 6f;
@@ -16,12 +17,12 @@ namespace PatternGallery.DirtyFlagLoadout
 
         void Reset()
         {
-            loadout = GetComponent<LoadoutInput>();
+            loadoutInput = GetComponent<LoadoutInput>();
         }
 
         void Update()
         {
-            float speed = loadout.Loadout.Speed; // [4] 매 프레임 읽는다. 바뀌지 않았으면 캐시를 그대로 쓴다
+            float speed = loadoutInput.Loadout.Speed; // [4] 매 프레임 읽는다. 바뀌지 않았으면 캐시를 그대로 쓴다
             Vector3 p = transform.position;
             p.x += dir * speed * Time.deltaTime;
             if (p.x >= rightX)

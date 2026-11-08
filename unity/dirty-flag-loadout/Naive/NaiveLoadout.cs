@@ -86,7 +86,7 @@ namespace PatternGallery.DirtyFlagLoadout.Naive
             if (slot == null) return;
             slot.count--;
             if (slot.count == 0) loadout.slots.Remove(slot);
-            // [!] 여기서 loadout.isDirty = true 를 켜지 않는다 (캐시된 옛 무게와 속도가 남는다)
+            // [!] 여기서 isDirty = true 를 켜지 않는다 (옛 무게가 남는다)
         }
     }
 }
