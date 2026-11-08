@@ -26,10 +26,10 @@ namespace PatternGallery.UpdateMethodDroneList
         public readonly SwarmSettings Settings;
         readonly List<Drone> drones = new List<Drone>();
         readonly List<Drone> pending = new List<Drone>();
-        static readonly Predicate<Drone> IsDead = d => d.IsDead;
+        /// <summary>정리 한 바퀴에서 뜬 표시된 드론 (Tick 마다 다시 쓴다)</summary>
+        readonly List<Drone> dying = new List<Drone>();
         bool updating;
         int launched;
-        int deadCount;
 
         /// <summary>목록에 들어왔다 (입력으로 바로, 또는 루프가 끝난 뒤 대기 목록에서)</summary>
         public event Action<Drone> Spawned;
@@ -37,7 +37,8 @@ namespace PatternGallery.UpdateMethodDroneList
         public event Action<Drone> SpawnQueued;
         /// <summary>드론이 빠지기를 요청했다 (표시만. 아직 목록에 있다)</summary>
         public event Action<Drone> DespawnRequested;
-        /// <summary>루프가 끝난 뒤 목록에서 지웠다. 화면 오브젝트는 여기서 Destroy 한다</summary>
+        /// <summary>루프가 끝난 뒤 목록에서 지우기 직전이다 (핸들러 안에서 Drones 는 아직 이 드론을 들고 있다). 화면 오브젝트는 여기서 Destroy 한다.
+        /// 대기 목록에 있다가 같은 프레임에 빠진 드론은 목록에 들어온 적이 없어 Spawned 도 Despawned 도 없다</summary>
         public event Action<Drone> Despawned;
         /// <summary>EMP: (맞은 드론 수, 피해)</summary>
         public event Action<int, int> Damaged;
@@ -52,9 +53,9 @@ namespace PatternGallery.UpdateMethodDroneList
         public bool IsUpdating => updating;
         /// <summary>마지막 Tick 에서 Update 를 부른 드론 수</summary>
         public int LastUpdated { get; private set; }
-        /// <summary>마지막 Tick 의 루프가 끝났을 때 대기 목록에 있던 수 (그 뒤 합쳤다)</summary>
+        /// <summary>마지막 Tick 이 끝날 때 대기 목록에서 목록에 합친 수 (같은 프레임에 빠진 드론은 빼고)</summary>
         public int LastMerged { get; private set; }
-        /// <summary>마지막 Tick 의 루프가 끝났을 때 지울 표시가 된 수 (그 뒤 지웠다)</summary>
+        /// <summary>마지막 Tick 이 끝날 때 목록에서 지운 수</summary>
         public int LastRemoved { get; private set; }
 
         /// <summary>오른쪽 끝에 새 드론 하나를 내보낸다 (입력)</summary>
@@ -80,12 +81,11 @@ namespace PatternGallery.UpdateMethodDroneList
             Spawned?.Invoke(d);
         }
 
-        /// <summary>빠지기 요청. 표시만 하고 목록은 Tick 이 끝날 때 바뀐다</summary>
+        /// <summary>빠지기 요청. 표시만 하고 목록은 Tick 이 끝날 때 바뀐다. 대기 목록의 드론이면 합치지 않는다</summary>
         public void Despawn(Drone d, DespawnReason reason)
         {
             if (d.IsDead) return;
             d.MarkDead(reason); // [2]
-            deadCount++;
             DespawnRequested?.Invoke(d);
         }
 
@@ -115,23 +115,34 @@ namespace PatternGallery.UpdateMethodDroneList
                 updated++;
             }
             LastUpdated = updated;
-            LastRemoved = deadCount;
-            LastMerged = pending.Count;
-            if (deadCount > 0)
+
+            // 표시된 드론을 떠서 알린 뒤 지운다. Despawned 를 받은 쪽이 다른 드론을 또 Despawn 하면 새 표시가 생기므로, 새 표시가 없을 때까지 되풀이한다.
+            // 그 사이 Spawn 은 아직 updating 이라 대기 목록으로 간다 (목록을 도는 중인 핸들러가 있어도 바뀌지 않는다)
+            int removed = 0;
+            while (true)
             {
-                // Despawned 를 받은 쪽이 Spawn 해도 아직 updating 이라 대기 목록으로 간다 (도는 중인 drones 를 바꾸지 않는다)
+                dying.Clear();
                 foreach (Drone d in drones)
-                    if (d.IsDead) Despawned?.Invoke(d);
-                drones.RemoveAll(IsDead); // [4] 표시된 드론을 한꺼번에 지운다
-                deadCount = 0;
+                    if (d.IsDead) dying.Add(d);
+                if (dying.Count == 0) break;
+                foreach (Drone d in dying) Despawned?.Invoke(d); // [4] 목록에서 지우기 직전에 알린다
+                drones.RemoveAll(dying.Contains); // [4] 이번에 뜬 드론만 한꺼번에 지운다 (알리는 중에 새로 표시된 드론은 다음 바퀴에 알린다)
+                removed += dying.Count;
             }
+            dying.Clear();
+            LastRemoved = removed;
+
             updating = false;
+            int merged = 0;
             foreach (Drone d in pending)
             {
+                if (d.IsDead) continue; // [4] 대기 중에 빠지기를 요청한 드론은 합치지 않는다 (목록에 들어온 적이 없다)
                 drones.Add(d); // [4] 대기 목록을 합친다. 다음 프레임부터 Update 된다
+                merged++;
                 Spawned?.Invoke(d);
             }
             pending.Clear();
+            LastMerged = merged;
         }
     }
 }

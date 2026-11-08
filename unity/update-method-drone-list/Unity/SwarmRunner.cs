@@ -23,7 +23,7 @@ namespace PatternGallery.UpdateMethodDroneList
         [Header("화면")]
         [Tooltip("드론 프리팹 (Project 창의 에셋). 스크립트는 붙이지 않는다: 드론마다 Update 를 두지 않고 이 컴포넌트가 목록을 돈다")]
         [SerializeField] GameObject dronePrefab;
-        [Tooltip("분열 드론을 보통 드론보다 이만큼 크게 보인다")]
+        [Tooltip("분열 드론을 보통 드론보다 이만큼 키운다")]
         [SerializeField] float splitterScale = 1.4f;
         [Tooltip("드론 줄(3줄) 사이 세로 간격 (m). 줄은 화면에만 쓰고 규칙에는 쓰지 않는다. 첫 줄이 이 오브젝트의 높이다")]
         [SerializeField] float laneGap = 1.5f;
@@ -125,7 +125,7 @@ namespace PatternGallery.UpdateMethodDroneList
         {
             if (views.TryGetValue(d, out GameObject go))
             {
-                Destroy(go); // [4] Unity 의 Destroy 도 그 자리에서 지우지 않고 이번 프레임 끝까지 미룬다 (같은 생각)
+                Destroy(go); // [4] Unity 의 Destroy 도 그 자리에서 지우지 않고 그 프레임의 Update 가 끝날 때까지 미룬다 (같은 생각)
                 views.Remove(d);
             }
             Log($"{d.Name} 목록에서 지움");
@@ -167,7 +167,7 @@ namespace PatternGallery.UpdateMethodDroneList
             shownUpdated = Swarm.LastUpdated;
             shownMerged = Swarm.LastMerged;
             shownRemoved = Swarm.LastRemoved;
-            statusText = $"목록 {count} · 이번 프레임 업데이트 {shownUpdated} · 대기 {shownMerged} · 지울 것 {shownRemoved}";
+            statusText = $"목록 {count} · 이번 프레임 업데이트 {shownUpdated} · 합침 {shownMerged} · 지움 {shownRemoved}";
         }
 
         void Log(string message)

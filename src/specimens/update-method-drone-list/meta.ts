@@ -26,7 +26,7 @@ export const meta: PatternMeta = {
       step: 0.5,
       default: 3,
       unit: 'm/s',
-      hint: '드론이 오른쪽 끝에서 기지까지 13m 를 가는 빠르기. 빠를수록 기지에 일찍 닿아, 나쁜 예에서 앞 드론이 빠질 때 다음 드론이 건너뛰는 장면이 일찍 나오고 한 프레임 뒤처진 거리(빨간 점선과의 간격)도 커진다. 자동 데모는 3 이상이어야 6초 안에 조각이 기지에 닿는다',
+      hint: '드론이 오른쪽 끝에서 기지까지 13m 를 가는 빠르기. 빠를수록 기지에 일찍 닿아, 나쁜 예에서 앞 드론이 빠질 때 다음 드론이 건너뛰는 장면이 일찍 나온다. 건너뛴 한 프레임의 거리는 속도 ÷ 60 (3 이면 0.05m)이라 화면에서는 안 보이고, 빨간 글의 업데이트 횟수(u)와 "있어야 u" 의 차이로 본다. 자동 데모는 3 이상이어야 6초 안에 조각이 기지에 닿는다',
     },
     {
       key: 'splitDelay',
@@ -123,7 +123,7 @@ export const meta: PatternMeta = {
     nodes: [
       { id: 'runner', label: 'SwarmRunner', sub: 'MonoBehaviour · Update 하나', x: 50, y: 8 },
       { id: 'swarm', label: 'DroneSwarm', sub: '코어 · Tick 이 목록을 돈다', x: 50, y: 36 },
-      { id: 'dead', label: '지울 목록', sub: 'IsDead 표시', x: 17, y: 64, kind: 'object' },
+      { id: 'dead', label: '지울 표시', sub: 'Drone.IsDead', x: 17, y: 64, kind: 'object' },
       { id: 'pending', label: '대기 목록', sub: '도는 중에 만든 드론', x: 83, y: 64, kind: 'object' },
       { id: 'drone', label: 'Drone', sub: 'Update(dt, swarm)', x: 50, y: 92, kind: 'object' },
     ],
@@ -172,7 +172,7 @@ export const meta: PatternMeta = {
     {
       n: 4,
       label: '루프가 끝나면 표시된 드론을 지우고 대기 목록을 합친다',
-      body: '루프가 끝나면 표시된 드론마다 `Despawned` 를 알리고 `RemoveAll(d => d.IsDead)` 로 한꺼번에 지운 뒤, 대기 목록을 목록 뒤에 붙인다. 합친 조각은 다음 프레임부터 Update 된다. `SwarmRunner` 는 `Despawned` 에서 드론 오브젝트를 `Destroy` 한다. Unity 의 `Destroy` 도 그 자리에서 지우지 않고 그 프레임의 Update 가 끝날 때까지 미루는데, 같은 생각이다. 왼쪽 위의 대기·지울 것 숫자가 이 순간의 수다.',
+      body: '루프가 끝나면 표시된 드론을 떠서 하나씩 `Despawned` 로 알린 뒤 (목록에서 지우기 직전이라 핸들러 안의 `Drones.Count` 는 옛 값이다) `RemoveAll` 로 한꺼번에 지운다. 알림을 받은 쪽이 다른 드론을 또 `Despawn` 하면 새 표시가 없을 때까지 되풀이한다. 그다음 대기 목록을 목록 뒤에 붙이는데, 대기 중에 빠지기를 요청한 드론은 붙이지 않는다. 합친 조각은 다음 프레임부터 Update 된다. `SwarmRunner` 는 `Despawned` 에서 드론 오브젝트를 `Destroy` 한다. Unity 의 `Destroy` 도 그 자리에서 지우지 않고 그 프레임의 Update 가 끝날 때까지 미루는데, 같은 생각이다. 왼쪽 위의 합침·지움 숫자가 이 순간의 수다 (한 프레임뿐이라 웹 무대는 0.4초 남겨 보인다).',
       target: 'swarm-dead,swarm-pending',
     },
   ],
@@ -180,7 +180,8 @@ export const meta: PatternMeta = {
     '증상은 "EMP 로 여러 대를 잡았더니 남은 드론 하나가 줄에서 뒤처진다" 이다. 한 프레임은 0.05m 안팎이라 Unity 화면에서는 잘 안 보이지만, 그 드론의 분열이 늦어지고 같은 프레임에 기지에 닿아야 할 조각 하나가 한 프레임 늦게 빠진다. ' +
     '원인은 매니저의 `for (int i = 0; i < drones.Count; i++) drones[i].Update(dt, this);` 안에서 드론이 자기를 바로 `drones.Remove(this)` 하는 흔한 코드다. `Remove` 는 뒤 드론을 한 칸씩 당기는데 루프는 그대로 `i++` 해서, 지워진 드론 바로 다음 드론이 그 프레임에 Update 되지 않는다 (업데이트 건너뜀). EMP, 기지 도달, 분열 어느 쪽으로 빠져도, 어느 순서로 눌러도 같다. 건너뛴 드론이 HP 0 이면 다음 프레임에 빠지므로 ✖ 대신 사건 줄로 적는다. ' +
     '분열 드론이 조각을 바로 `drones.Add` 하면 `i < drones.Count` 가 늘어난 `Count` 를 읽어 루프가 그 조각까지 돌고, 조각이 태어난 프레임에 움직인다 (태어난 프레임에 움직임). 분열 드론이 목록 맨 끝이면 자기 Remove 로 당겨진 칸이 첫 조각이라 첫 조각만 우연히 그 프레임에 돌지 않는다. ' +
-    '무대에서 ✖ 가 붙은 드론 아래의 빨간 글이 그 버그(건너뜀 횟수, 태어남)와 "있어야" 할 업데이트 횟수이고, 빨간 점선이 프레임마다 한 번씩 Update 됐다면 있을 자리다. 둘 다 그 드론이 빠질 때까지 남는다.',
+    '어긋남은 한 프레임 거리라 위치로는 안 보이므로 숫자로 본다. 무대에서 ✖ 가 붙은 드론 아래의 빨간 글이 그 버그(건너뜀 횟수, 태어남)와 "있어야 u", 곧 같은 입력을 받은 패턴 코어의 같은 드론이 받은 업데이트 횟수다. 드론 위의 u 와 견주면 된다. ' +
+    '늦게 나뉜 S4 의 조각 S4a, S4b 는 태어난 프레임에 한 번 더 돌았는데도 "있어야 u" 보다 하나 적다 (부모의 뒤처짐을 물려받았다). 패턴에서는 이미 기지에 닿아 빠진 드론이면 "패턴은 이미 빠짐" 이 나온다. 빨간 글은 그 드론이 빠질 때까지 남는다.',
   mistakes: [
     {
       title: '적 여럿이 한꺼번에 죽은 프레임에 살아남은 적 하나가 한 박자 늦게 움직인다',
@@ -192,11 +193,11 @@ export const meta: PatternMeta = {
     },
     {
       title: '분열로 만든 적이 만들어진 프레임에 벌써 한 걸음 가 있다',
-      body: '도는 중에 `Add` 했다. `i < drones.Count` 는 매번 `Count` 를 다시 읽어 방금 붙인 드론까지 돈다. 새 드론이 Update 에서 또 무언가를 만들면 한 프레임 안에서 끝없이 늘 수도 있다. 새 드론은 대기 목록에 넣고 루프가 끝난 뒤 합친다. 루프 전에 `int count = drones.Count;` 로 세어 그만큼만 도는 방법도 있지만 (Nystrom), 도는 중의 `Remove` 와 함께 쓰면 칸 번호가 다시 어긋난다.',
+      body: '도는 중에 `Add` 했다. `i < drones.Count` 는 매번 `Count` 를 다시 읽어 방금 붙인 드론까지 돈다. 새 드론이 Update 에서 또 무언가를 만들면 한 프레임 안에서 끝없이 늘 수도 있다. 새 드론은 대기 목록에 넣고 루프가 끝난 뒤 합친다. 루프 전에 `int count = drones.Count;` 로 세어 그만큼만 도는 방법도 있지만 (Nystrom), 도는 중의 `Remove` 와 함께 쓰면 칸 번호가 다시 어긋나고, 루프 전에 센 `count` 로 돌면서 `Remove` 하면 줄어든 목록의 끝을 넘어 `ArgumentOutOfRangeException` 도 난다.',
     },
     {
       title: '거꾸로 돌기로 고쳤는데 이웃을 터뜨리는 드론을 넣자 한 드론이 두 번 움직인다',
-      body: '`for (int i = drones.Count - 1; i >= 0; i--)` 로 돌면 자기를 지울 때 당겨지는 칸은 이미 돈 드론이고, 끝에 `Add` 한 드론도 시작 때의 `Count` 밖이라 이번 프레임에 돌지 않는다. 그러나 이것은 "자기만 지우고 끝에만 더할 때" 만 맞는다. 앞쪽(아직 안 돈 칸)의 이웃을 지우면 지금 드론이 한 칸 당겨져 다음 반복에서 또 Update 되고, 중간에 `Insert` 하면 다른 드론을 건너뛴다. 도는 순서도 뒤에서 앞으로 바뀐다. 표시 후 정리는 누가 누구를 지우고 만들든 같게 동작한다.',
+      body: '`for (int i = drones.Count - 1; i >= 0; i--)` 로 돌면 자기를 지울 때 당겨지는 칸은 이미 돈 드론이고, 끝에 `Add` 한 드론도 시작 때의 `Count` 밖이라 이번 프레임에 돌지 않는다. 그러나 이것은 "자기만 지우고 끝에만 더할 때" 만 맞는다. 앞쪽(아직 안 돈 칸)의 이웃을 지우면 지금 드론이 한 칸 당겨져 다음 반복에서 또 Update 되고, 중간에 `Insert` 하면 다른 드론을 건너뛴다. 도는 순서도 뒤에서 앞으로 바뀐다. 표시 후 정리에서는 도는 중에 어느 드론이 어느 드론을 지워도 목록 칸이 움직이지 않는다: 표시된 드론은 그 프레임의 나머지 차례를 건너뛰고, 나머지는 모두 한 번씩 Update 된다. 만든 드론은 대기 목록에 있다가 루프 뒤에 합치고, 같은 프레임에 만들고 지운 드론은 합치지 않는다. `Despawned` 를 받은 쪽이 또 지우면 새 표시가 없을 때까지 정리를 되풀이한다.',
     },
     {
       title: 'Destroy 한 적을 목록이 계속 들고 있다가 `MissingReferenceException` 이 난다',
@@ -210,14 +211,14 @@ export const meta: PatternMeta = {
       '기지 그림: 같은 메뉴로 Square(3D 는 Cube)를 하나 만들어 이름을 `Base` 로 바꾸고 Position (-7.2, -1, 0), Scale (1, 4, 1) 에 둔다. 자리 표시일 뿐 스크립트가 없다.',
       '`GameObject > Create Empty` 로 `Drone Swarm` 을 만들어 Position (-8, -2.5, 0) 에 두고 `SwarmRunner` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(Q 드론 출발, W 분열 드론 출발, E EMP)를 넣는다. `Drone Prefab` 칸에 2단계의 프리팹을 넣는다. 드론은 월드 x 6.8 에 나타나 x -6.2 에서 기지에 닿고, 세 줄은 `Lane Gap` 1.5 간격으로 월드 y -2.5, -1, 0.5 에 놓인다.',
       '`Main Camera` 를 Position (0, 0, -10) 에 두고 Projection 을 `Orthographic`, Size 를 5 로 한다 (2D 템플릿은 처음부터 Orthographic 이다). Game 뷰 비율을 16:9 로 두면 가로 -8.9 ~ 8.9, 세로 -5 ~ 5 가 보여 기지, 드론이 나타나는 자리, 세 줄이 모두 화면에 들어온다.',
-      'Play 하고 Q 를 세 번, W 를 한 번 누른 뒤 E 를 누른다. Console 에 `[Swarm] D1 HP 0 → 지울 표시` 같은 줄이 모두 나온 다음 `[Swarm] D1 목록에서 지움` 줄들이 이어지고, Hierarchy 의 `Drone Swarm` 아래 드론 오브젝트가 사라진다. 분열 드론은 나오고 1초 뒤 `S4a 대기 목록에 (분열)` 을 남기고 조각 둘로 바뀐다. Game 뷰 왼쪽 위에 `목록 n · 이번 프레임 업데이트 n · 대기 n · 지울 것 n` 이 보인다.',
+      'Play 하고 Q 를 세 번, W 를 한 번 누른 뒤 E 를 누른다. Console 에 `[Swarm] D1 HP 0 → 지울 표시` 같은 줄이 모두 나온 다음 `[Swarm] D1 목록에서 지움` 줄들이 이어지고, Hierarchy 의 `Drone Swarm` 아래 드론 오브젝트가 사라진다. 분열 드론은 나오고 1초 뒤 `S4a 대기 목록에 (분열)` 을 남기고 조각 둘로 바뀐다. Game 뷰 왼쪽 위에 `목록 n · 이번 프레임 업데이트 n · 합침 n · 지움 n` 이 보인다.',
     ],
     verify: '분열 드론이 나뉘는 프레임에 Console 에 `대기 목록에 (분열)` 줄들, `분열 → 지울 표시`, `목록에서 지움`, `목록에 들어옴` 줄들이 이 순서로 나오고, EMP 로 여러 대를 잡아도 `지울 표시` 줄이 모두 나온 뒤에야 `목록에서 지움` 줄이 나온다.',
     pitfalls: [
       'Unity 의 `MonoBehaviour.Update` 자체가 업데이트 메서드 패턴이다: 엔진이 켜진 컴포넌트를 돌며 `Update` 를 부르고, 그 도중의 `Destroy` 는 그 프레임의 Update 가 끝날 때까지 미룬다. 드론마다 `Update` 를 두는 대신 이 표본처럼 매니저 하나가 목록을 돌면, 수백 대일 때 엔진이 스크립트의 `Update` 를 부르는 횟수가 드론 수에서 한 번으로 줄고, 도는 순서와 생기고 사라지는 시점도 코드에 드러난다.',
       '코어 시간은 `Tick(Time.deltaTime)` 으로 받는다. `Time.timeScale` 이 0(일시정지)이어도 `SwarmRunner.Update` 는 불려 `Tick(0)` 이 돈다: 드론은 멈추지만 업데이트 횟수(u)는 계속 오르고, EMP 로 HP 0 이 된 드론은 그대로 빠진다. 일시정지 중에 드론을 아예 멈추려면 `Time.deltaTime` 이 0 일 때 `Tick` 을 부르지 않는다.',
       'Play 중에 바꾼 `Move Speed`, `Split Delay`, `Split Count` 는 `OnValidate` 가 코어 설정에 넣어 다음 프레임부터 쓴다. `Lane Gap` 은 위치를 옮길 때마다 읽어 바로 반영되고, `Splitter Scale` 은 다음에 나오는 분열 드론부터 쓴다.',
-      'Game 뷰 왼쪽 위의 상태 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. 실제 게임은 UGUI·TextMeshPro 로 만든다. 대기·지울 것 숫자는 마지막 프레임의 루프가 끝난 순간의 수라, 분열이나 파괴가 있던 한 프레임에만 0 이 아니다.',
+      'Game 뷰 왼쪽 위의 상태 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. 실제 게임은 UGUI·TextMeshPro 로 만든다. 합침·지움 숫자는 마지막 프레임의 루프가 끝난 뒤 합치고 지운 수라, 분열이나 파괴가 있던 한 프레임에만 0 이 아니다 (웹 무대는 보이게 0.4초 남긴다).',
       '`InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 드론이 두 대 나온다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다 (기본값 Value 는 다시 켤 때 눌려 있던 키를 바로 처리한다).',
     ],
   },

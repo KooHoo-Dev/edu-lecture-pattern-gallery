@@ -23,7 +23,7 @@ namespace PatternGallery.UpdateMethodDroneList.Naive
             x -= manager.moveSpeed * dt;
             if (hp <= 0 || x <= manager.baseX)
             {
-                manager.drones.Remove(this); // [!] 도는 중에 바로 지운다: 뒤 칸이 당겨져 다음 드론을 건너뛴다
+                manager.drones.Remove(this); // [!] 도는 중에 지운다: 뒤 칸이 당겨져 다음 드론을 건너뛴다
                 return;
             }
             if (isSplitter && age >= manager.splitDelay)
@@ -31,9 +31,9 @@ namespace PatternGallery.UpdateMethodDroneList.Naive
                 for (int k = 0; k < manager.splitCount; k++)
                 {
                     var piece = new NaiveDrone { name = name + (char)('a' + k), x = x, hp = manager.droneHp, lane = (lane + k) % 3 };
-                    manager.drones.Add(piece); // [!] 도는 중에 바로 더한다: 늘어난 Count 로 이번 프레임에 돈다
+                    manager.drones.Add(piece); // [!] 도는 중에 더한다: 늘어난 Count 로 이번 프레임에 돈다
                 }
-                manager.drones.Remove(this); // [!] 나뉜 드론도 바로 지운다: 다음 드론을 건너뛴다
+                manager.drones.Remove(this); // [!] 나뉜 드론도 지운다: 다음 드론을 건너뛴다
             }
         }
     }
