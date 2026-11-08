@@ -32,6 +32,10 @@ export default async function checkDomain({ project, ids, err, warn }) {
       if (/^\s*namespace\s+[\w.]+\s*;/m.test(code)) err(`${rel}: 파일 범위 namespace 는 Unity 6 의 C# 9 에서 안 된다`)
       if (/\bFindObjectOfType\b|\.velocity\b|\bInput\.Get(Key|Axis|Button|Mouse)/.test(code)) err(`${rel}: 쓰지 않는 API (FindObjectOfType, Rigidbody.velocity, 구 Input Manager)`)
       if (!/^\s*\/\/.*\S/.test(code.split(/\r?\n/).find(l => l.trim()) ?? '')) warn(`${rel}: 첫 줄에 무엇을 하는지 한국어 주석을 둔다`)
+      // 단계 표시 `// [n]` 은 코드 줄 끝에 둔다. 주석만 있는 줄에 두면 무대의 코드 줄 칸에 빈 줄로 나온다 (묶음 5 리뷰)
+      code.split(/\r?\n/).forEach((line, i) => {
+        if (/^\s*\/\/ \[\d+\]/.test(line)) err(`${rel}:${i + 1}: // [n] 은 코드 줄 끝에 둔다 (주석만 있는 줄은 코드 칸에 빈 줄로 나온다)`)
+      })
       if (rel.includes('/Core/') || rel.includes('/Naive/')) {
         // 주석과 문자열은 빼고 본다 ("UnityEngine 을 쓰지 않는다" 같은 설명 때문에)
         const bare = code.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '').replace(/"(?:[^"\\\n]|\\.)*"/g, '""')
