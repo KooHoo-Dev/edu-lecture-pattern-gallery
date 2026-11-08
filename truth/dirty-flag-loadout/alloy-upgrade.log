@@ -1,0 +1,23 @@
+# src 3dc21dcca735
+# dirty-flag-loadout alloy-upgrade naive=0
+0.00 ev 다시 계산 1회 → 총 무게 11.00 · 속도 2.53
+0.40 in upgrade
+0.40 ev 산소 캔 합금: 한 개 4.00 → 2.00 · 표시 켬
+0.40 ev 다시 계산 2회 → 총 무게 9.00 · 속도 2.80
+0.50 st w=9.00 real=9.00 speed=2.80 recalcs=2 x=2.49 slots=1/2/1
+1.00 st w=9.00 real=9.00 speed=2.80 recalcs=2 x=3.89 slots=1/2/1
+1.20 in useKit
+1.20 ev 수리 키트 2 → 1 · 표시 켬
+1.20 ev 다시 계산 3회 → 총 무게 7.00 · 속도 3.07
+1.50 st w=7.00 real=7.00 speed=3.07 recalcs=3 x=5.37 slots=1/1/1
+2.00 st w=7.00 real=7.00 speed=3.07 recalcs=3 x=6.91 slots=1/1/1
+2.00 in upgrade
+2.00 ev 받지 않음: 합금으로 바꿀 산소 캔 없음
+2.50 st w=7.00 real=7.00 speed=3.07 recalcs=3 x=8.44 slots=1/1/1
+2.80 in pickup
+2.80 ev 냉각 셀 1 → 2 · 표시 켬
+2.80 ev 다시 계산 4회 → 총 무게 8.00 · 속도 2.93
+3.00 st w=8.00 real=8.00 speed=2.93 recalcs=4 x=9.95 slots=1/1/2
+3.50 st w=8.00 real=8.00 speed=2.93 recalcs=4 x=11.41 slots=1/1/2
+4.00 st w=8.00 real=8.00 speed=2.93 recalcs=4 x=12.88 slots=1/1/2
+end st w=8.00 real=8.00 speed=2.93 recalcs=4 x=12.88 slots=1/1/2
