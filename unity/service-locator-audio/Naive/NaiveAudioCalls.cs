@@ -6,7 +6,9 @@
 //   PlayCount, LastClip              실제로는 AudioSource.PlayOneShot(clip). 재생했다는 표시 필드다
 // Instance 가 null 이면 이 C# 에서도 진짜 NullReferenceException 이 나고, 그 메서드의 아래 줄(크레딧 지급, 정비 완료 기록)은 실행되지 않는다.
 // Unity 에서는 Console 에 예외가 빨갛게 남고 그 메서드만 멈춘다. 게임은 계속 돌아 "크레딧이 안 들어온다" 로만 보인다.
-// static Instance 는 Play 를 다시 시작해도 남을 수 있어(도메인 리로드를 끈 경우) 하네스가 시나리오마다 비운다.
+// 하네스는 시나리오마다 static Instance 를 비운다. Unity 에서는 Play 를 끝낼 때 OnDestroy 가 비우므로 다음 Play 에 남지 않는다
+// (도메인 리로드를 끈 에디터에서 남는 것은 OnDestroy 에서 비우기를 빠뜨린 변형이다. 그때는 NullReferenceException 대신
+//  파괴된 AudioSource 를 건드리는 MissingReferenceException 이 나고, ?. · ?? 는 Unity 의 가짜 null 을 거르지 못해 막지 못한다).
 // 갤러리의 '효과 끄기' 가 같은 입력으로 돌린다. 프로젝트에 넣지 않는다.
 using System;
 
@@ -65,7 +67,7 @@ namespace PatternGallery.ServiceLocatorAudio.Naive
             int index = Array.IndexOf(alive, true);
             if (index < 0) return false;
             alive[index] = false;
-            AudioManager.Instance.Play("drone-down"); // [!] 발사 쪽과 달리 null 검사를 빠뜨렸다: 소리 매니저가 없으면 여기서 예외
+            AudioManager.Instance.Play("drone-down"); // [!] 발사 쪽과 달리 null 검사가 없다: 여기서 예외, 크레딧 줄을 건너뜀
             Credits += reward;
             return true;
         }
@@ -80,7 +82,7 @@ namespace PatternGallery.ServiceLocatorAudio.Naive
         {
             if (Kits <= 0) return false;
             Kits--;
-            AudioManager.Instance.Play("repair-done"); // [!] 여기도 검사가 없다: 예외가 나면 키트만 쓰고 완료 기록이 빠진다
+            AudioManager.Instance.Play("repair-done"); // [!] 여기도 검사가 없다: 키트만 쓰고 완료 기록이 빠진다
             Completed++;
             return true;
         }

@@ -68,7 +68,7 @@ export const meta: PatternMeta = {
       label: '소리 없는 씬에서 시작, 보상 30 · 탄약 2',
       duration: 4.8,
       values: { startAmmo: 2, reward: 30 },
-      note: '0.30 에 소리 서비스를 빼 소리 없는 테스트 씬처럼 시작한다. 1.80 의 세 번째 발사는 탄약이 없어 두 모드 모두 받지 않는다. 나쁜 예는 2.40 과 3.00 에 드론마다 예외가 나 60 크레딧을 놓치고, 4.20 에 소리 매니저를 넣은 뒤의 파괴만 30 을 받는다',
+      note: '0.30 에 소리 서비스를 빼 소리 없는 테스트 씬처럼 시작한다. 1.80 의 세 번째 발사는 탄약이 없어 두 모드 모두 받지 않는다. 나쁜 예는 2.40 과 3.00 에 드론마다 예외가 나 60 크레딧을 놓치고, 3.60 에 소리 매니저를 다시 넣은 뒤 4.20 의 파괴만 30 을 받는다',
       inputs: [
         [0.3, 'toggleAudio'],
         [0.8, 'fire'],
@@ -121,11 +121,11 @@ export const meta: PatternMeta = {
   ],
   offNote: '게임 코드가 곳곳에서 `AudioManager.Instance.Play(...)` 를 바로 부르는 흔한 코드다. 처음 예외가 난 발사 쪽에만 `if (AudioManager.Instance != null)` 을 넣었고, 드론 파괴와 정비 완료에는 빠뜨렸다. 소리 매니저를 빼면(테스트 씬, 소리 끔) 발사는 조용히 넘어가지만, 드론 파괴는 `Play` 줄에서 `NullReferenceException` 이 나 그 아래 크레딧 지급 줄이 실행되지 않는다. 드론은 사라졌는데 크레딧은 그대로다. 정비 완료도 수리 키트만 줄고 완료 기록이 빠진다. 어떤 순서로 누르든 소리 매니저가 없는 동안의 파괴·정비마다 같다 (남은 드론이나 수리 키트가 없어 받지 않은 입력은 `Play` 까지 가지 않는다). Unity 에서는 Console 에 예외가 빨갛게 남고 그 메서드만 멈춰 게임은 계속 돌아, "크레딧이 가끔 안 들어온다" 로 보고된다. 검사를 하나 더 넣으면 이번 곳은 막히지만 소리를 내는 코드를 더할 때 또 빠진다.',
   mistakes: [
-    { title: '소리 매니저를 뺀 테스트 씬에서 드론을 잡았는데 크레딧이 안 들어온다', body: '`AudioManager.Instance.Play(...)` 가 `NullReferenceException` 을 던져 그 아래 크레딧 지급 줄이 실행되지 않았다. Console 에 예외가 남지만 게임은 계속 돌아 놓치기 쉽다. null 검사를 부르는 곳마다 흩어 두면 한 곳은 꼭 빠진다. 서비스는 로케이터(`Services.Audio`)에서 찾고, 없을 때는 아무것도 하지 않는 `NullAudioService` 를 돌려주게 한 곳에서 정한다.' },
+    { title: '소리 매니저를 뺀 테스트 씬에서 드론을 잡았는데 크레딧이 안 들어온다', body: '`AudioManager.Instance.Play(...)` 가 `NullReferenceException` 을 던져 그 아래 크레딧 지급 줄이 실행되지 않았다. Console 에 예외가 남지만 게임은 계속 돌아 놓치기 쉽다. null 검사를 부르는 곳마다 흩어 두면 한 곳은 꼭 빠진다. `OnDestroy` 에서 `Instance` 를 비우지 않는 흔한 변형이면 NullReferenceException 대신 파괴된 AudioSource 를 건드리는 `MissingReferenceException` 이 나고, `?.`·`??` 는 Unity 의 가짜 null 을 거르지 못해 막지 못한다 (`!= null` 비교만 거른다). 서비스는 로케이터(`Services.Audio`)에서 찾고, 없을 때는 아무것도 하지 않는 `NullAudioService` 를 돌려주게 한 곳에서 정한다.' },
     { title: '"소리 끔" 을 만들었더니 여기저기서 NullReferenceException 이 난다', body: '소리를 끄려고 로케이터에 null 을 등록했다. 그러면 로케이터를 거쳐도 부르는 쪽이 다시 null 을 받아 검사를 흩어야 한다. 이 표본의 `Services.Provide` 는 null 을 받으면 `NullAudioService` 로 바꿔 담는다. 소리 끔 설정도 `Provide(null)` 이나 `Provide(NullAudioService.Instance)` 로 만든다.' },
-    { title: '소리 오브젝트를 지운 뒤 소리가 사라지거나 MissingReferenceException 이 난다', body: '`OnDisable` 에서 등록을 지우지 않아 로케이터가 파괴된 연결 컴포넌트의 서비스를 계속 돌려준다. 이 표본처럼 `Played` 구독도 함께 뗐다면 소리만 조용히 사라지고(서비스 자리는 그대로 `AudioService`), 구독을 남겼다면 핸들러가 파괴된 AudioSource 를 건드려 `MissingReferenceException` 이 난다. 켤 때 등록, 끌 때 해제를 짝으로 둔다.' },
-    { title: '다른 소리 오브젝트를 끄자 켜져 있는 쪽 소리까지 사라진다', body: '`OnDisable` 에서 무조건 `Provide(null)` 했다. 씬을 바꾸는 중이나 시험용 서비스를 겹쳐 둘 때 다른 오브젝트가 등록한 서비스를 내가 지운다. `AudioServiceHost` 처럼 `Services.Audio == Service` 일 때, 곧 내가 등록한 것일 때만 지운다. (켜는 쪽은 늘 덮어쓰므로 나중에 켜진 것이 이긴다.)' },
-    { title: '도메인 리로드를 끈 에디터에서 두 번째 Play 부터 소리가 이상하다', body: 'Enter Play Mode 설정에서 도메인 리로드를 끄면 `static` 필드가 지난 실행의 서비스를 들고 다음 Play 를 시작한다. 소리 서비스를 놓지 않은 씬인데도 지난 Play 의 서비스가 남는다. `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` 을 붙인 static 메서드에서 `Services.Reset()` 을 부른다. 이 표본은 `AudioServiceHost.ResetStatics` 다. 제네릭 클래스 안에 두면 불리지 않는다.' },
+    { title: '소리 오브젝트를 지운 뒤 소리가 사라지거나 MissingReferenceException 이 난다', body: '`OnDisable` 에서 등록을 지우지 않아 로케이터가 파괴된 연결 컴포넌트의 서비스를 계속 돌려준다. 이 표본처럼 `Played` 구독도 함께 뗐다면 소리만 조용히 사라지고(서비스 자리는 그대로 `AudioService`), 구독을 남겼다면 핸들러가 파괴된 AudioSource 를 건드려 `MissingReferenceException` 이 난다. 이 예외는 `Services.Audio.Play` 를 지나 게임 코드까지 올라와 크레딧 지급 줄도 멈춘다 (나쁜 예와 같은 증상). 켤 때 등록, 끌 때 해제를 짝으로 둔다.' },
+    { title: '다른 소리 오브젝트를 끄자 켜져 있는 쪽 소리까지 사라진다', body: '`OnDisable` 에서 무조건 `Provide(null)` 했다. 씬을 바꾸는 중이나 시험용 서비스를 겹쳐 둘 때 다른 오브젝트가 등록한 서비스를 내가 지운다. `AudioServiceHost` 처럼 `Services.Audio == Service` 일 때, 곧 내가 등록한 것일 때만 지운다. (켜는 쪽은 늘 덮어쓰므로 나중에 켜진 것이 이긴다. 로케이터는 하나만 기억해, Host 둘을 켰다가 나중 것을 끄면 앞 Host 로 되돌아가지 않고 무음이 된다.)' },
+    { title: '도메인 리로드를 끈 에디터에서 두 번째 Play 부터 소리가 이상하다', body: 'Enter Play Mode 설정에서 도메인 리로드를 끄면 `static` 필드는 지난 Play 의 값을 들고 다음 Play 를 시작한다. 이 표본의 `AudioServiceHost` 라면 Play 를 끝낼 때 `OnDisable` 이 `Provide(null)` 을 부르므로 지난 서비스가 남지 않는다. 남는 것은 `OnDisable` 의 등록 해제를 빠뜨렸을 때나 MonoBehaviour 가 아닌 곳(정적 초기화, 에디터 코드)에서 `Provide` 했을 때다. 그러면 소리 서비스를 놓지 않은 씬인데도 지난 Play 의 서비스가 남는다. `[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]` 을 붙인 static 메서드에서 `Services.Reset()` 을 불러 그런 경우를 막는다 (방어 코드). 이 표본은 `AudioServiceHost.ResetStatics` 다. 제네릭 클래스 안에 두면 불리지 않는다.' },
   ],
   unity: {
     setup: [
@@ -142,7 +142,7 @@ export const meta: PatternMeta = {
       '`Services.Audio` 를 `Awake` 에서 필드에 담아 두지 않는다. 담아 둔 뒤에는 서비스를 빼고 넣은 것이 반영되지 않고, 파괴된 연결 컴포넌트의 서비스를 계속 부른다. 이 표본의 게임 코드는 부를 때마다 `Services.Audio` 로 찾는다.',
       '오브젝트 사이의 `Awake`, `OnEnable` 순서는 정해져 있지 않다. 다른 오브젝트의 `Awake`·`OnEnable` 에서 낸 첫 소리는 `AudioServiceHost.OnEnable` 보다 먼저 와 무음(널 객체)일 수 있다. 예외는 나지 않는다. 시작 소리는 `Start` 이후에 낸다 (씬의 모든 `OnEnable` 이 `Start` 보다 먼저 돈다).',
       '`ResetStatics` 의 `[RuntimeInitializeOnLoadMethod]` 는 씬에 `AudioServiceHost` 가 없어도 클래스가 프로젝트에 있으면 Play 마다 불린다. 그래서 소리를 뺀 테스트 씬도 깨끗한 로케이터로 시작한다. 이 메서드는 제네릭이 아닌 클래스에 둔다.',
-      '서비스 로케이터도 결국 전역 접근이다. `Turret` 이 소리를 쓴다는 것이 생성자나 필드에 드러나지 않아 의존이 숨고, 테스트에서는 `Services.Reset` 과 `Provide` 를 잊지 말아야 한다. 쓰는 곳이 적고 조립하는 곳이 분명하면 생성자나 Inspector 칸으로 `IAudioService` 를 넘겨받는 의존성 주입이 더 분명하다. 소리·로그처럼 어디서나 쓰고 없어도 되는 서비스에 로케이터가 잘 맞는다.',
+      '서비스 로케이터도 결국 전역 접근이다. `Turret` 이 소리를 쓴다는 것이 생성자나 필드에 드러나지 않아 의존이 숨고, 테스트에서는 `Services.Reset` 과 `Provide` 를 잊지 말아야 한다. 쓰는 곳이 적고 조립하는 곳이 분명하면 생성자로 `IAudioService` 를, 또는 Inspector 칸으로 구체 컴포넌트(`AudioServiceHost`)를 넘겨받는 의존성 주입이 더 분명하다 (인터페이스 형식의 `[SerializeField]` 칸은 Inspector 에 보이지 않는다). 소리·로그처럼 어디서나 쓰고 없어도 되는 서비스에 로케이터가 잘 맞는다.',
     ],
   },
   prompt: {

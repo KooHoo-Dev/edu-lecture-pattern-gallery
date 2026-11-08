@@ -93,7 +93,7 @@ class DroneField {
   Destroyed = new Event<[number, number]>()
   NoneLeft = new Event<[]>()
   constructor(count: number, reward: number) {
-    this.alive = new Array<boolean>(count).fill(true)
+    this.alive = new Array<boolean>(Math.max(0, count)).fill(true)
     this.Reward = reward
   }
   get Count() {
@@ -462,8 +462,9 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
 
       // 정비대
       world.push({ kind: 'box', x: 4.6, y: 1, w: 4, h: 0.7, fill: '#2b3d33', label: `정비대 · 완료 ${repaired()}건` })
-      world.push({ kind: 'actor', x: 8.1, y: 1.7, role: 'ally', label: '도윤', scale: 0.6 })
-      if (isNaive && failedRepairs > 0) world.push({ kind: 'text', x: 6.4, y: 3.7, text: `✖ 키트만 쓰고 완료 기록 안 됨 (${failedRepairs}건)`, color: '#ff5d6c', size: 16 })
+      world.push({ kind: 'actor', x: 8.5, y: 1.7, role: 'ally', label: '도윤', scale: 0.6 })
+      // 정비대 바로 위. 포탑 발사 화살표(왼쪽 위로 지나감)와 도윤(오른쪽 끝), 완료음 글(y 2.65) 사이
+      if (isNaive && failedRepairs > 0) world.push({ kind: 'text', x: 6.5, y: 1.87, text: `✖ 키트만 쓰고 기록 빠짐 ${failedRepairs}건`, color: '#ff5d6c', size: 14 })
 
       // 소리
       if (recent(at.sound, 0.7)) {

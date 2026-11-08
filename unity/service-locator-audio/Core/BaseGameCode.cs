@@ -51,8 +51,8 @@ namespace PatternGallery.ServiceLocatorAudio
 
         public DroneField(int count, int reward)
         {
-            alive = new bool[count];
-            for (int i = 0; i < count; i++) alive[i] = true;
+            alive = new bool[Math.Max(0, count)];
+            for (int i = 0; i < alive.Length; i++) alive[i] = true;
             Reward = reward;
         }
 
