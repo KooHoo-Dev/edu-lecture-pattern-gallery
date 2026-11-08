@@ -208,14 +208,33 @@ export function drawDiagram(g: CanvasRenderingContext2D, d: Diagram, r: Rect, ac
   const box = new Map(d.nodes.map(n => [n.id, { ...P(n.x, n.y), n }]))
   g.save()
   if (dim) g.globalAlpha = 0.35
+  // 같은 두 노드 사이 화살표가 여럿이면 옆으로 비켜 그린다 (겹쳐서 하나로 보이지 않게)
+  const pairKey = (e: { from: string; to: string }) => [e.from, e.to].sort().join('|')
+  const pairs = new Map<string, string[]>()
+  for (const e of d.edges) pairs.set(pairKey(e), [...(pairs.get(pairKey(e)) ?? []), e.id])
+  // 라벨은 노드를 그린 뒤에 (짧은 화살표의 라벨이 노드 밑에 묻히지 않게)
+  const labels: { text: string; x: number; y: number; color: string }[] = []
   // 화살표 먼저
   for (const e of d.edges) {
-    const a = box.get(e.from)
-    const b = box.get(e.to)
-    if (!a || !b) continue
+    const a0 = box.get(e.from)
+    const b0 = box.get(e.to)
+    if (!a0 || !b0) continue
     const on = active.has(e.id) || focus.has(e.id)
     // 단계 강조(주황)가 지금 일하는 표시(초록)에 묻히지 않게 단계를 앞세운다
     const color = focus.has(e.id) ? C.warn : active.has(e.id) ? C.accent : C.faint
+    const same = pairs.get(pairKey(e)) ?? [e.id]
+    let a = a0
+    let b = b0
+    if (same.length > 1) {
+      // 방향과 상관없이 같은 쪽을 기준으로 수직 방향을 잡는다
+      const [p, q] = e.from < e.to ? [a0, b0] : [b0, a0]
+      const len = Math.hypot(q.x - p.x, q.y - p.y) || 1
+      const off = (same.indexOf(e.id) - (same.length - 1) / 2) * 18
+      const nx = (-(q.y - p.y) / len) * off
+      const ny = ((q.x - p.x) / len) * off
+      a = { ...a0, x: a0.x + nx, y: a0.y + ny }
+      b = { ...b0, x: b0.x + nx, y: b0.y + ny }
+    }
     const [x1, y1] = edgePoint(a, b, NW, NH)
     const [x2, y2] = edgePoint(b, a, NW, NH)
     g.strokeStyle = color
@@ -228,17 +247,7 @@ export function drawDiagram(g: CanvasRenderingContext2D, d: Diagram, r: Rect, ac
     g.stroke()
     g.setLineDash([])
     arrowHead(g, x1, y1, x2, y2, 14, e.kind === 'implements')
-    if (e.label) {
-      g.font = font(17, 600)
-      g.textAlign = 'center'
-      const mx = (x1 + x2) / 2
-      const my = (y1 + y2) / 2
-      const w = g.measureText(e.label).width + 12
-      g.fillStyle = C.panel
-      g.fillRect(mx - w / 2, my - 15, w, 22)
-      g.fillStyle = on ? color : C.dim
-      g.fillText(e.label, mx, my + 2)
-    }
+    if (e.label) labels.push({ text: e.label, x: (x1 + x2) / 2, y: (y1 + y2) / 2, color: on ? color : C.dim })
   }
   for (const { x, y, n } of box.values()) {
     const on = active.has(n.id)
@@ -267,6 +276,15 @@ export function drawDiagram(g: CanvasRenderingContext2D, d: Diagram, r: Rect, ac
       g.font = font(16, 500)
       g.fillText(n.sub, x, y + 20, NW - 12)
     }
+  }
+  for (const l of labels) {
+    g.font = font(17, 600)
+    g.textAlign = 'center'
+    const w = g.measureText(l.text).width + 12
+    g.fillStyle = C.panel
+    g.fillRect(l.x - w / 2, l.y - 15, w, 22)
+    g.fillStyle = l.color
+    g.fillText(l.text, l.x, l.y + 2)
   }
   g.restore()
 }
