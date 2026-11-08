@@ -2,7 +2,8 @@
 // 실제로는 NaiveDroneType 이 ScriptableObject, NaiveDrone 이 드론 오브젝트의 MonoBehaviour, NaiveSquad 가 입력을 받는 MonoBehaviour 다.
 // 정찰형 드론은 모두 같은 에셋 하나를 가리키므로 currentHp 도 하나뿐이다. 한 대를 때리면 같은 종류가 모두 깎이고,
 // 새로 나온 드론도 깎인 HP 로 나온다. currentHp 는 에셋 Inspector 에 maxHp 와 같게 적어 두었다.
-// 에디터에서는 Play 를 꺼도 에셋에 깎인 currentHp 가 남아 다음 Play 도 다친 채 시작한다 (빌드에서는 남지 않는다).
+// 에디터에서는 Play 를 꺼도 에셋에 깎인 currentHp 가 남아 다음 Play 도 다친 채 시작한다.
+// 빌드도 새 실행이면 남지 않지만, 한 실행 안에서는 씬을 다시 불러도 에셋이 메모리에 있는 동안 값이 남는다.
 // 여기서는 Unity 없이 돌리려고 순수 C# 으로 옮겼다 (Destroy(gameObject) 는 목록에서 빼는 것으로). 갤러리의 '효과 끄기' 가 같은 입력으로 돌린다.
 // 프로젝트에 넣지 않는다.
 using System;
@@ -18,7 +19,7 @@ namespace PatternGallery.FlyweightDroneTypes.Naive
         public int maxHp;
         public float speed;
         public string color;
-        public int currentHp; // [!] 공유 에셋에 지금 HP: 같은 종류 드론이 모두 이 칸 하나를 쓴다
+        public int currentHp; // [!] 공유 에셋에 지금 HP: 같은 종류가 이 칸 하나를 쓴다
     }
 
     /// <summary>실제로는 드론 오브젝트에 붙은 MonoBehaviour. type 칸에 에셋을 끌어 넣는다</summary>
@@ -32,7 +33,7 @@ namespace PatternGallery.FlyweightDroneTypes.Naive
 
         public void TakeDamage(int amount)
         {
-            type.currentHp = Math.Max(0, type.currentHp - amount); // [!] 자기 HP 가 아니라 종류 에셋의 칸을 깎는다
+            type.currentHp = Math.Max(0, type.currentHp - amount); // [!] 자기 HP 가 아니라 에셋의 칸을 깎는다
         }
     }
 

@@ -1,0 +1,21 @@
+# src 2927dd880357
+# flyweight-drone-types lone-scout-patch naive=1
+0.30 in hitScout
+0.30 ev S1 피해 1 → HP 3/4
+0.50 st types=2 drones=3 smax=4 hmax=8 hp=H1:8,H2:8,S1:3 scur=3 hcur=8 ehp=H1:8,H2:8,S1:3
+1.00 st types=2 drones=3 smax=4 hmax=8 hp=H1:8,H2:8,S1:3 scur=3 hcur=8 ehp=H1:8,H2:8,S1:3
+1.00 in patch
+1.00 ev 밸런스 수정: 정찰형 최대 HP 4 → 6 (정찰형 1대에 바로 반영, 지금 HP 는 그대로)
+1.50 st types=2 drones=3 smax=6 hmax=8 hp=H1:8,H2:8,S1:3 scur=3 hcur=8 ehp=H1:8,H2:8,S1:3
+1.70 in spawn
+1.70 ev S2 나옴 · 정찰형 · HP 3/6
+1.70 ev !HP 공유: S2 가 정찰형 에셋의 currentHp 를 함께 읽어 다친 채 나왔다 (HP 3/6. 새 드론은 꽉 찬 HP 로 나와야 한다)
+2.00 st types=2 drones=4 smax=6 hmax=8 hp=H1:8,H2:8,S1:3,S2:3 scur=3 hcur=8 ehp=H1:8,H2:8,S1:3,S2:6
+2.40 in hitHeavy
+2.40 ev H1 피해 1 → HP 7/8
+2.40 ev !HP 공유: H1 을 때렸는데 H2 도 HP 7 (중장갑 종류 데이터의 currentHp 하나를 함께 쓴다)
+2.50 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:7,S1:3,S2:3 scur=3 hcur=7 ehp=H1:7,H2:8,S1:3,S2:6
+3.00 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:7,S1:3,S2:3 scur=3 hcur=7 ehp=H1:7,H2:8,S1:3,S2:6
+3.50 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:7,S1:3,S2:3 scur=3 hcur=7 ehp=H1:7,H2:8,S1:3,S2:6
+4.00 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:7,S1:3,S2:3 scur=3 hcur=7 ehp=H1:7,H2:8,S1:3,S2:6
+end st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:7,S1:3,S2:3 scur=3 hcur=7 ehp=H1:7,H2:8,S1:3,S2:6

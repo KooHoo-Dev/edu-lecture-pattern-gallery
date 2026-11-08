@@ -27,6 +27,8 @@ namespace PatternGallery.FlyweightDroneTypes
         /// <summary>
         /// 밸런스 수정: 최대 HP 를 올린다. 새 종류 객체로 바꾸지 않고 이 객체 하나를 고치므로,
         /// 이 객체를 가리키는 드론 모두에 바로 반영된다. 드론은 부르지 않는다 (Squad.Patch 만 부른다).
+        /// 고치는 것은 ToDroneType() 이 Play 때 만든 런타임 객체라 에셋은 그대로다.
+        /// 내재 상태는 원래 읽기 전용이고, 이 메서드만 종류 전체에 일부러 반영하는 수정이다.
         /// </summary>
         public void RaiseMaxHp(int amount)
         {

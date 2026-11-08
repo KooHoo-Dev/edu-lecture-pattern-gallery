@@ -246,11 +246,11 @@ const GX = (x: number) => 1 + x
 const BAR_Y = 2.45
 const BW = 1.5
 const BAR_MAX = 10
-/** 종류 상자: 아래 끝, 높이, 폭, 가운데 x (정찰형, 중장갑) */
+/** 종류 상자: 아래 끝, 높이, 폭, 가운데 x (정찰형, 중장갑). 중장갑이 왼쪽 자리에 있어 상자도 왼쪽이다 (화살표가 엇갈리지 않게) */
 const BOX_Y = 4.45
 const BOX_H = 1.3
 const BOX_W = 6.8
-const BOX_CX = [3.9, 12.1]
+const BOX_CX = [12.1, 3.9]
 const scaleOf = (code: string) => (code === 'S' ? 0.6 : 0.85)
 
 type Kind = 'hit' | 'destroy' | 'spawn' | 'patch' | 'rejected' | 'none' | ''
@@ -300,8 +300,9 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   squad.Damage = intOf('damage')
   squad.PatchHp = intOf('patchHp')
   const scouts = intOf('scoutCount')
-  for (let i = 0; i < scouts; i++) squad.Spawn(scout)
+  // 중장갑을 먼저 왼쪽 자리에 둔다. 새 정찰형은 왼쪽부터 빈 자리에 나오므로 정찰형 옆(오른쪽)에 생긴다
   for (let i = 0; i < HeavyCount; i++) squad.Spawn(heavy)
+  for (let i = 0; i < scouts; i++) squad.Spawn(scout)
 
   let naive: NaiveSquad | null = null
   if (isNaive) {
@@ -310,8 +311,8 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     naive.patchHp = intOf('patchHp')
     naive.scoutType = Object.assign(new NaiveDroneType(), { typeName: '정찰형', code: 'S', maxHp: 4, speed: f(2), color: '#5cc8ff', currentHp: 4 })
     naive.heavyType = Object.assign(new NaiveDroneType(), { typeName: '중장갑', code: 'H', maxHp: 8, speed: f(1), color: '#ffb547', currentHp: 8 })
-    for (let i = 0; i < scouts; i++) naive.Spawn(naive.scoutType)
     for (let i = 0; i < HeavyCount; i++) naive.Spawn(naive.heavyType)
+    for (let i = 0; i < scouts; i++) naive.Spawn(naive.scoutType)
   } else {
     squad.Spawned.add(d => {
       events.push(SpawnLine(d.Name, d.Type.Name, d.Hp, d.Type.MaxHp))
@@ -364,14 +365,18 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     return d ? d.Hp : -1
   }
 
-  const FindBugs = (n: NaiveSquad, type: NaiveDroneType, hit: string | null) => {
+  const FindBugs = (n: NaiveSquad, type: NaiveDroneType, hit: string | null, spawned: string | null) => {
     if (sharedBug.has(type.typeName)) return false
     const wrong = n.drones.filter(d => d.type === type && ExpectedHp(d.droneName) >= 0 && ExpectedHp(d.droneName) !== d.Hp).map(d => d.droneName)
     if (wrong.length === 0) return false
     sharedBug.add(type.typeName)
+    at.bug = clock
+    if (spawned !== null && wrong.length === 1 && wrong[0] === spawned) {
+      events.push(`!HP 공유: ${spawned} 가 ${type.typeName} 에셋의 currentHp 를 함께 읽어 다친 채 나왔다 (HP ${type.currentHp}/${type.maxHp}. 새 드론은 꽉 찬 HP 로 나와야 한다)`)
+      return true
+    }
     const who = hit !== null ? `${hit} 을 때렸는데 ` : ''
     events.push(`!HP 공유: ${who}${wrong.join(' ')} 도 HP ${type.currentHp} (${type.typeName} 종류 데이터의 currentHp 하나를 함께 쓴다)`)
-    at.bug = clock
     return true
   }
 
@@ -396,7 +401,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       at.destroyed = clock
       gone = { x: target.x, name: target.droneName, code: type.code }
     }
-    if (FindBugs(n, type, target.droneName)) return
+    if (FindBugs(n, type, target.droneName, null)) return
     const others = n.drones.filter(d => d.type === type && d !== target).map(d => d.droneName)
     if (others.length === 0) return
     const fallen = type.currentHp === 0 ? ' (맞지 않았는데 HP 0 이다. 다음 한 방에 쓰러진다)' : ''
@@ -418,11 +423,10 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     at.spawn = clock
     spawnName = d.droneName
     note = `${d.droneName}: ${d.type.typeName} 에셋을 가리키고 HP 는 에셋의 currentHp`
-    if (d.Hp !== d.type.maxHp) {
-      events.push(`${d.droneName} 가 다친 채 나왔다: HP ${d.Hp} (새 드론은 HP ${d.type.maxHp} 로 나와야 한다. 종류 에셋의 currentHp 를 읽었다)`)
-      note = `${d.droneName} 가 에셋의 currentHp ${d.Hp} 를 읽어 다친 채 나왔다`
-    }
-    FindBugs(n, d.type, null)
+    if (d.Hp !== d.type.maxHp) note = `${d.droneName}: 에셋의 currentHp 를 읽어 다친 채 나왔다 (HP ${d.Hp}/${d.type.maxHp})`
+    // 이 스폰에서 HP 공유가 처음 드러나면 ✖ 하나로 쓰고, 이미 ✖ 를 쓴 종류면 그 결과라 사건 줄로 쓴다
+    if (FindBugs(n, d.type, null, d.droneName)) return
+    if (d.Hp !== d.type.maxHp) events.push(`${d.droneName} 가 다친 채 나왔다: HP ${d.Hp} (새 드론은 HP ${d.type.maxHp} 로 나와야 한다. 종류 에셋의 currentHp 를 읽었다)`)
   }
 
   const naiveInput = (n: NaiveSquad, name: string) => {
@@ -476,14 +480,14 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
 
       // 종류 상자 둘 (위쪽). 나쁜 예는 상자 안에 공유된 지금 HP 가 보인다
       const typeInfo = naive
-        ? [naive.scoutType, naive.heavyType].map(t => ({ name: t.typeName, max: t.maxHp, speed: t.speed, cur: t.currentHp as number | null }))
-        : [scout, heavy].map(t => ({ name: t.Name, max: t.MaxHp, speed: t.Speed, cur: null as number | null }))
+        ? [naive.scoutType, naive.heavyType].map(t => ({ name: t.typeName, max: t.maxHp, speed: t.speed, color: t.color, cur: t.currentHp as number | null }))
+        : [scout, heavy].map(t => ({ name: t.Name, max: t.MaxHp, speed: t.Speed, color: t.ColorHex, cur: null as number | null }))
       typeInfo.forEach((t, i) => {
         const count = list.filter(d => d.typeIndex === i).length
         const bug = naive !== null && sharedBug.has(t.name)
         const patched = i === 0 && recent(at.patch, 0.9)
         world.push({ kind: 'box', x: BOX_CX[i] - BOX_W / 2, y: BOX_Y, w: BOX_W, h: BOX_H, fill: patched ? C.fresh : C.box, stroke: naive ? (bug ? C.bug : C.warn) : C.line })
-        world.push({ kind: 'text', x: BOX_CX[i], y: BOX_Y + 0.82, text: `${t.name} · 최대 HP ${t.max} · 속도 ${t.speed.toFixed(0)}`, size: 20, color: '#e6ecf5' })
+        world.push({ kind: 'text', x: BOX_CX[i], y: BOX_Y + 0.82, text: `${t.name} · 최대 HP ${t.max} · 속도 ${t.speed.toFixed(0)}`, size: 20, color: t.color })
         if (t.cur === null) world.push({ kind: 'text', x: BOX_CX[i], y: BOX_Y + 0.3, text: `DroneType 객체 하나 · 드론 ${count}대가 가리킨다`, size: 16, color: C.dim })
         else world.push({ kind: 'text', x: BOX_CX[i], y: BOX_Y + 0.3, text: `지금 HP ${t.cur} · 드론 ${count}대가 이 칸 하나를 쓴다`, size: 17, color: bug ? C.bug : C.warn })
       })
@@ -499,8 +503,9 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       for (const d of list) {
         const cx = GX(d.x)
         const bx = BOX_CX[d.typeIndex] + (cx - BOX_CX[d.typeIndex]) * 0.35
-        const hurt = d.name === hitName && recent(at.hit, 0.25)
-        world.push({ kind: 'arrow', x1: cx, y1: 3.3, x2: bx, y2: BOX_Y - 0.02, color: d.wrong ? C.bug : naive ? C.warn : C.line })
+        const hurt = d.name === hitName && recent(at.hit, 0.35)
+        // 화살표는 종류 색: 정찰형은 정찰형 상자로, 중장갑은 중장갑 상자로 모이는 것이 색으로도 보인다
+        world.push({ kind: 'arrow', x1: cx, y1: 3.3, x2: bx, y2: BOX_Y - 0.02, color: d.wrong ? C.bug : typeInfo[d.typeIndex].color })
         world.push({ kind: 'actor', x: cx, y: 1, role: 'enemy', scale: scaleOf(d.code), pose: hurt ? 'hurt' : 'idle' })
         world.push({ kind: 'bar', x: cx - BW / 2, y: BAR_Y, w: BW, value: d.hp / BAR_MAX, fill: d.wrong ? C.bug : C.hp, label: `${d.hp}/${d.max}` })
         world.push({ kind: 'box', x: cx - BW / 2, y: BAR_Y, w: BW * Math.min(1, d.max / BAR_MAX), h: 0.32, stroke: recent(at.patch, 0.9) && d.typeIndex === 0 ? C.ok : '#c8d0de' })

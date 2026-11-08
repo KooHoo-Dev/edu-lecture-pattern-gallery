@@ -28,8 +28,9 @@ namespace PatternGallery.FlyweightDroneTypes
             heavy = new DroneType("중장갑", "H", 8, 1f, "#ffb547");
             squad = new Squad(scout, heavy) { Damage = v.Int("damage"), PatchHp = v.Int("patchHp") };
             int scouts = v.Int("scoutCount");
-            for (int i = 0; i < scouts; i++) squad.Spawn(scout);
+            // 중장갑을 먼저 왼쪽 자리에 둔다. 새 정찰형은 왼쪽부터 빈 자리에 나오므로 정찰형 옆(오른쪽)에 생긴다
             for (int i = 0; i < HeavyCount; i++) squad.Spawn(heavy);
+            for (int i = 0; i < scouts; i++) squad.Spawn(scout);
             if (isNaive)
             {
                 naive = new NaiveSquad
@@ -39,8 +40,8 @@ namespace PatternGallery.FlyweightDroneTypes
                     scoutType = new NaiveDroneType { typeName = "정찰형", code = "S", maxHp = 4, speed = 2f, color = "#5cc8ff", currentHp = 4 },
                     heavyType = new NaiveDroneType { typeName = "중장갑", code = "H", maxHp = 8, speed = 1f, color = "#ffb547", currentHp = 8 },
                 };
-                for (int i = 0; i < scouts; i++) naive.Spawn(naive.scoutType);
                 for (int i = 0; i < HeavyCount; i++) naive.Spawn(naive.heavyType);
+                for (int i = 0; i < scouts; i++) naive.Spawn(naive.scoutType);
                 return; // 그림자 코어의 사건은 적지 않는다
             }
             squad.Spawned += d => events.Add(SpawnLine(d.Name, d.Type.Name, d.Hp, d.Type.MaxHp));
@@ -99,7 +100,7 @@ namespace PatternGallery.FlyweightDroneTypes
             hit();
             events.Add(HitLine(target.droneName, naive.damage, target.Hp, type.maxHp));
             if (!naive.drones.Contains(target)) events.Add(DestroyedLine(target.droneName));
-            if (FindBugs(type, target.droneName)) return;
+            if (FindBugs(type, target.droneName, null)) return;
             var others = naive.drones.Where(d => d.type == type && d != target).Select(d => d.droneName).ToList();
             if (others.Count == 0) return;
             string fallen = type.currentHp == 0 ? " (맞지 않았는데 HP 0 이다. 다음 한 방에 쓰러진다)" : "";
@@ -117,8 +118,9 @@ namespace PatternGallery.FlyweightDroneTypes
             }
             NaiveDrone d = naive.drones[naive.drones.Count - 1];
             events.Add(SpawnLine(d.droneName, d.type.typeName, d.Hp, d.type.maxHp));
+            // 이 스폰에서 HP 공유가 처음 드러나면 ✖ 하나로 쓰고, 이미 ✖ 를 쓴 종류면 그 결과라 사건 줄로 쓴다
+            if (FindBugs(d.type, null, d.droneName)) return;
             if (d.Hp != d.type.maxHp) events.Add($"{d.droneName} 가 다친 채 나왔다: HP {d.Hp} (새 드론은 HP {d.type.maxHp} 로 나와야 한다. 종류 에셋의 currentHp 를 읽었다)");
-            FindBugs(d.type, null);
         }
 
         /// <summary>그림자 코어에서 같은 이름의 드론 HP. 그림자에 없으면 -1</summary>
@@ -130,14 +132,20 @@ namespace PatternGallery.FlyweightDroneTypes
 
         /// <summary>
         /// 나쁜 예 드론 가운데 그 종류에서 HP 가 그림자 코어(있어야 할 결과)와 다른 드론을 찾는다.
-        /// 종류마다 처음 한 번만 ✖ 로 적는다. 적었으면 true
+        /// 종류마다 처음 한 번만 ✖ 로 적는다 (공유 칸 currentHp 는 다시 맞춰지지 않아 버그 상태가 끝나지 않는다). 적었으면 true.
+        /// 맞은 드론(hitName)이나 방금 나온 드론(spawnedName)을 주어로 쓴다
         /// </summary>
-        bool FindBugs(NaiveDroneType type, string hitName)
+        bool FindBugs(NaiveDroneType type, string hitName, string spawnedName)
         {
             if (sharedBug.Contains(type.typeName)) return false;
             var wrong = naive.drones.Where(d => d.type == type && ExpectedHp(d.droneName) >= 0 && ExpectedHp(d.droneName) != d.Hp).Select(d => d.droneName).ToList();
             if (wrong.Count == 0) return false;
             sharedBug.Add(type.typeName);
+            if (spawnedName != null && wrong.Count == 1 && wrong[0] == spawnedName)
+            {
+                events.Add($"!HP 공유: {spawnedName} 가 {type.typeName} 에셋의 currentHp 를 함께 읽어 다친 채 나왔다 (HP {type.currentHp}/{type.maxHp}. 새 드론은 꽉 찬 HP 로 나와야 한다)");
+                return true;
+            }
             string who = hitName != null ? $"{hitName} 을 때렸는데 " : "";
             events.Add($"!HP 공유: {who}{string.Join(" ", wrong)} 도 HP {type.currentHp} ({type.typeName} 종류 데이터의 currentHp 하나를 함께 쓴다)");
             return true;

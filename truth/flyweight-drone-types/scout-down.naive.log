@@ -1,39 +1,39 @@
-# src f08c92d82dcb
+# src 2927dd880357
 # flyweight-drone-types scout-down naive=1
 0.30 in hitScout
 0.30 ev S1 피해 1 → HP 3/4
 0.30 ev !HP 공유: S1 을 때렸는데 S2 S3 도 HP 3 (정찰형 종류 데이터의 currentHp 하나를 함께 쓴다)
-0.50 st types=2 drones=5 smax=4 hmax=8 hp=S1:3,S2:3,S3:3,H1:8,H2:8 scur=3 hcur=8 ehp=S1:3,S2:4,S3:4,H1:8,H2:8
+0.50 st types=2 drones=5 smax=4 hmax=8 hp=H1:8,H2:8,S1:3,S2:3,S3:3 scur=3 hcur=8 ehp=H1:8,H2:8,S1:3,S2:4,S3:4
 0.70 in hitScout
 0.70 ev S1 피해 1 → HP 2/4
 0.70 ev 같은 종류 S2 S3 도 HP 2
-1.00 st types=2 drones=5 smax=4 hmax=8 hp=S1:2,S2:2,S3:2,H1:8,H2:8 scur=2 hcur=8 ehp=S1:2,S2:4,S3:4,H1:8,H2:8
+1.00 st types=2 drones=5 smax=4 hmax=8 hp=H1:8,H2:8,S1:2,S2:2,S3:2 scur=2 hcur=8 ehp=H1:8,H2:8,S1:2,S2:4,S3:4
 1.10 in hitScout
 1.10 ev S1 피해 1 → HP 1/4
 1.10 ev 같은 종류 S2 S3 도 HP 1
-1.50 st types=2 drones=5 smax=4 hmax=8 hp=S1:1,S2:1,S3:1,H1:8,H2:8 scur=1 hcur=8 ehp=S1:1,S2:4,S3:4,H1:8,H2:8
+1.50 st types=2 drones=5 smax=4 hmax=8 hp=H1:8,H2:8,S1:1,S2:1,S3:1 scur=1 hcur=8 ehp=H1:8,H2:8,S1:1,S2:4,S3:4
 1.50 in hitScout
 1.50 ev S1 피해 1 → HP 0/4
 1.50 ev S1 파괴 → 목록에서 뺀다
 1.50 ev 같은 종류 S2 S3 도 HP 0 (맞지 않았는데 HP 0 이다. 다음 한 방에 쓰러진다)
-2.00 st types=2 drones=4 smax=4 hmax=8 hp=S2:0,S3:0,H1:8,H2:8 scur=0 hcur=8 ehp=S2:4,S3:4,H1:8,H2:8
+2.00 st types=2 drones=4 smax=4 hmax=8 hp=H1:8,H2:8,S2:0,S3:0 scur=0 hcur=8 ehp=H1:8,H2:8,S2:4,S3:4
 2.20 in hitScout
 2.20 ev S2 피해 1 → HP 0/4
 2.20 ev S2 파괴 → 목록에서 뺀다
 2.20 ev 같은 종류 S3 도 HP 0 (맞지 않았는데 HP 0 이다. 다음 한 방에 쓰러진다)
-2.50 st types=2 drones=3 smax=4 hmax=8 hp=S3:0,H1:8,H2:8 scur=0 hcur=8 ehp=S2:3,S3:4,H1:8,H2:8
+2.50 st types=2 drones=3 smax=4 hmax=8 hp=H1:8,H2:8,S3:0 scur=0 hcur=8 ehp=H1:8,H2:8,S2:3,S3:4
 2.90 in hitScout
 2.90 ev S3 피해 1 → HP 0/4
 2.90 ev S3 파괴 → 목록에서 뺀다
-3.00 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=S2:2,S3:4,H1:8,H2:8
-3.50 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=S2:2,S3:4,H1:8,H2:8
+3.00 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=H1:8,H2:8,S2:2,S3:4
+3.50 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=H1:8,H2:8,S2:2,S3:4
 3.60 in spawn
 3.60 ev S4 나옴 · 정찰형 · HP 0/4
 3.60 ev S4 가 다친 채 나왔다: HP 0 (새 드론은 HP 4 로 나와야 한다. 종류 에셋의 currentHp 를 읽었다)
-4.00 st types=2 drones=3 smax=4 hmax=8 hp=H1:8,H2:8,S4:0 scur=0 hcur=8 ehp=S2:2,S3:4,H1:8,H2:8,S4:4
+4.00 st types=2 drones=3 smax=4 hmax=8 hp=H1:8,H2:8,S4:0 scur=0 hcur=8 ehp=H1:8,H2:8,S2:2,S3:4,S4:4
 4.30 in hitScout
 4.30 ev S4 피해 1 → HP 0/4
 4.30 ev S4 파괴 → 목록에서 뺀다
-4.50 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=S2:1,S3:4,H1:8,H2:8,S4:4
-5.00 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=S2:1,S3:4,H1:8,H2:8,S4:4
-end st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=S2:1,S3:4,H1:8,H2:8,S4:4
+4.50 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=H1:8,H2:8,S2:1,S3:4,S4:4
+5.00 st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=H1:8,H2:8,S2:1,S3:4,S4:4
+end st types=1 drones=2 smax=4 hmax=8 hp=H1:8,H2:8 scur=0 hcur=8 ehp=H1:8,H2:8,S2:1,S3:4,S4:4
