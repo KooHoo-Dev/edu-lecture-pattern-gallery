@@ -11,8 +11,10 @@ namespace PatternGallery.FlyweightDroneTypes
     {
         [Header("조절 값 (웹 갤러리와 같은 이름)")]
         [Tooltip("피해 입력 한 번에 깎는 HP. Play 중에 바꾸면 다음 피해부터 쓴다")]
+        [Min(1)]
         [SerializeField] int damage = 1;
         [Tooltip("밸런스 수정 한 번에 정찰형 최대 HP 에 더하는 값. Play 중에 바꾸면 다음 수정부터 쓴다")]
+        [Min(1)]
         [SerializeField] int patchHp = 2;
         [Tooltip("처음 구역에 둘 정찰형 수. Play 를 시작할 때 한 번만 읽는다")]
         [SerializeField] int scoutCount = 3;
@@ -46,16 +48,18 @@ namespace PatternGallery.FlyweightDroneTypes
 
         /// <summary>
         /// 처음 읽을 때 만든다. 다른 오브젝트의 OnEnable 이 이 오브젝트의 Awake 보다 먼저 불려도 null 이 아니게.
+        /// 종류 에셋 칸이 잘못됐으면 만들지 않고 LogError 를 남긴 뒤 null (빈 에셋을 읽다 NullReferenceException 이 나지 않게).
         /// </summary>
-        public Squad Squad => squad ??= BuildSquad();
+        public Squad Squad => squad ??= HasTypes() ? BuildSquad() : null;
 
         Squad BuildSquad()
         {
             scout = scoutType.ToDroneType(); // [1] 에셋마다 한 번만 만든다. 모든 정찰형이 이 객체 하나를 가리킨다
             heavy = heavyType.ToDroneType(); // [1]
             var s = new Squad(scout, heavy) { Damage = damage, PatchHp = patchHp };
-            for (int i = 0; i < scoutCount; i++) s.Spawn(scout);
+            // 중장갑을 먼저 왼쪽 자리에 둔다. 새 정찰형은 왼쪽부터 빈 자리에 나오므로 정찰형 옆(오른쪽)에 생긴다
             for (int i = 0; i < heavyCount; i++) s.Spawn(heavy);
+            for (int i = 0; i < scoutCount; i++) s.Spawn(scout);
             return s;
         }
 
@@ -68,7 +72,7 @@ namespace PatternGallery.FlyweightDroneTypes
             patchAction = new InputAction("Patch", InputActionType.Button, "<Keyboard>/r");
         }
 
-        /// <summary>두 종류 에셋이 들어 있고 이름이 서로 다른지 본다. 아니면 알리고 다른 값으로 대신하지 않는다</summary>
+        /// <summary>두 종류 에셋이 들어 있고 이름·머리 글자가 비지 않았으며 이름이 서로 다른지 본다. 아니면 알리고 다른 값으로 대신하지 않는다</summary>
         bool HasTypes()
         {
             if (scoutType == null || heavyType == null)
@@ -76,9 +80,14 @@ namespace PatternGallery.FlyweightDroneTypes
                 Debug.LogError("[Squad] Scout Type 과 Heavy Type 칸에 종류 에셋(Create > Pattern Gallery > Drone Type)을 넣는다", this);
                 return false;
             }
-            if (string.IsNullOrEmpty(scoutType.TypeName) || scoutType.TypeName == heavyType.TypeName)
+            if (string.IsNullOrEmpty(scoutType.TypeName) || string.IsNullOrEmpty(heavyType.TypeName) || scoutType.TypeName == heavyType.TypeName)
             {
                 Debug.LogError("[Squad] 두 종류 에셋의 Type Name 을 비우지 말고 서로 다르게 적는다 (종류 사전의 열쇠다)", this);
+                return false;
+            }
+            if (string.IsNullOrEmpty(scoutType.Code) || string.IsNullOrEmpty(heavyType.Code))
+            {
+                Debug.LogError("[Squad] 두 종류 에셋의 Code 를 비우지 않는다 (드론 이름 S1, H1 의 머리 글자다)", this);
                 return false;
             }
             return true;
@@ -86,11 +95,13 @@ namespace PatternGallery.FlyweightDroneTypes
 
         void OnEnable()
         {
-            if (squad == null && !HasTypes())
+            if (Squad == null) // 종류 에셋 칸이 잘못됐다. HasTypes 가 LogError 를 남겼다
             {
                 enabled = false;
                 return;
             }
+            if (dronePrefab == null)
+                Debug.LogError("[Squad] Drone Prefab 칸에 Project 창의 Drone 프리팹을 넣는다. 비어 있으면 드론이 화면에 나오지 않는다 (Console 기록만 남는다)", this);
             Squad.Spawned += OnSpawned;
             Squad.SpawnRejected += OnSpawnRejected;
             Squad.Damaged += OnDamaged;
@@ -172,9 +183,9 @@ namespace PatternGallery.FlyweightDroneTypes
 
         void OnTypePatched(DroneType type, int previous)
         {
-            // [4] 코어는 공유라 이미 반영됐다. 화면은 이 종류를 가리키는 드론의 뷰를 모두 다시 그린다
+            // 코어는 공유라 이미 반영됐다. 화면은 이 종류를 가리키는 드론의 뷰를 모두 다시 그린다
             foreach (KeyValuePair<Drone, DroneView> pair in views)
-                if (pair.Key.Type == type && pair.Value != null) pair.Value.ShowHp(barFullHp);
+                if (pair.Key.Type == type && pair.Value != null) pair.Value.ShowHp(barFullHp); // [4]
             Log($"밸런스 수정: {type.Name} 최대 HP {previous} → {type.MaxHp} ({type.Name} {Squad.CountOf(type)}대에 바로 반영, 지금 HP 는 그대로)");
             RefreshStatus();
         }

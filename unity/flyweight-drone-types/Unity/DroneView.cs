@@ -32,7 +32,7 @@ namespace PatternGallery.FlyweightDroneTypes
             if (body != null && ColorUtility.TryParseHtmlString(drone.Type.ColorHex, out Color c))
             {
                 if (body is SpriteRenderer sprite) sprite.color = c;
-                else body.material.color = c;
+                else body.material.color = c; // material 은 드론마다 사본이다. sharedMaterial 을 고치면 머티리얼 에셋째 바뀐다 (나쁜 예와 같은 공유 에셋 변경)
             }
             ShowHp(barFullHp);
         }

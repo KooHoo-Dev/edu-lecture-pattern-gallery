@@ -16,6 +16,7 @@ namespace PatternGallery.FlyweightDroneTypes
         [SerializeField] Color color = Color.white;
 
         public string TypeName => typeName;
+        public string Code => code;
 
         /// <summary>
         /// 코어 종류 객체를 새로 만든다. 부를 때마다 새 객체라, 종류마다 한 번만 부르고 그 객체를 모든 드론이 함께 쓴다.

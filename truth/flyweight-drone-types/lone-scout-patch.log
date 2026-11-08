@@ -1,0 +1,19 @@
+# src 2927dd880357
+# flyweight-drone-types lone-scout-patch naive=0
+0.30 in hitScout
+0.30 ev S1 피해 1 → HP 3/4
+0.50 st types=2 drones=3 smax=4 hmax=8 hp=H1:8,H2:8,S1:3
+1.00 st types=2 drones=3 smax=4 hmax=8 hp=H1:8,H2:8,S1:3
+1.00 in patch
+1.00 ev 밸런스 수정: 정찰형 최대 HP 4 → 6 (정찰형 1대에 바로 반영, 지금 HP 는 그대로)
+1.50 st types=2 drones=3 smax=6 hmax=8 hp=H1:8,H2:8,S1:3
+1.70 in spawn
+1.70 ev S2 나옴 · 정찰형 · HP 6/6
+2.00 st types=2 drones=4 smax=6 hmax=8 hp=H1:8,H2:8,S1:3,S2:6
+2.40 in hitHeavy
+2.40 ev H1 피해 1 → HP 7/8
+2.50 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:8,S1:3,S2:6
+3.00 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:8,S1:3,S2:6
+3.50 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:8,S1:3,S2:6
+4.00 st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:8,S1:3,S2:6
+end st types=2 drones=4 smax=6 hmax=8 hp=H1:7,H2:8,S1:3,S2:6
