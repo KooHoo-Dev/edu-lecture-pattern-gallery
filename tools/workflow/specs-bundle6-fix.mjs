@@ -19,4 +19,17 @@ export default [
       CONSISTENCY,
     ],
   },
+  {
+    id: 'memento-checkpoint',
+    fix: true,
+    budgetUsd: 8,
+    profiles: PROFILES,
+    items: [
+      '**JsonUtility 주의 문구가 사실과 다르다** (`meta.ts` 149 근처). 6000.3 `JsonUtility.ToJson` 문서는 public 필드만 말하고 나머지는 매뉴얼의 Serialization rules 로 넘긴다. 규칙은 "public 이거나 `[SerializeField]` 이면 직렬화" 라 `[SerializeField] private` 필드는 담긴다. 지금 글대로면 수강생이 메멘토를 public 필드로 열어야 한다고 믿어 캡슐화(이 표본의 핵심)와 부딪힌다. 고칠 문장: "`[Serializable]` 클래스에 `[SerializeField] int hp;` 와 `public int Hp => hp;` 처럼 두면 바깥에는 읽기 전용이면서 `JsonUtility` 가 담는다. readonly 필드와 `get` 만 있는 자동 속성은 담지 않는다. `FromJson` 은 private 필드도 채우므로, 고칠 수 없다는 약속은 코드 관례로 지킨다." (이 표본의 `ExplorerMemento` 를 그대로 넣으면 값이 안 담긴다는 결론은 맞다. 이유를 위처럼.) adaptIdeas 의 "public 필드로 옮겨" 에 이 방식도 함께.',
+      '**Unity 로그가 틀린 이유를 말한다** (`Unity/CheckpointInput.cs` 159–163): `Hurt Damage` 가 0 이하면 `InputIgnored("hurt")` 가 나는데 Console 에 "끝 칸이라 더 가지 않음" 이 찍힌다. 분기를 `input == "walk" && !IsDown` 로 바꾸거나 `hurtDamage` 에 `[Min(1)]`.',
+      '**숫자가 어긋난 채 남는다** (`sim.ts` 609, 628): 나쁜 예에서 ✖ 뒤에 다시 주우면 `bugExtra` 가 그대로라 빨간 칸은 2개인데 글은 "조각 1개가 그대로" (`scenario` 2 의 3.5~4.1초). `p.items.length - savedItems.length` 로 그때그때 계산한다.',
+      '**글 다듬기**: offNote "저장 뒤 주운 칸은 빨간 ✖로 남는다" → "빨간 칸으로 남고 ✖ 가 붙는다" (무대와 같게). related 의 "둘 다 바뀌어야 할 참조 필드만 새로 만든다" → "둘 다 따로 가져야 할 참조 필드(목록)는 새로 만든다". 메멘토가 바깥에서 읽힌다는 점(불투명하지 않음)은 글이 밝히고 있으니 두고, 원하면 pitfall 한 줄 "C# 에서 완전히 숨기려면 중첩 클래스나 표지 인터페이스". 칸 1 의 깃발 기둥이 하린과 닿는 것은 조금 비킨다.',
+      CONSISTENCY,
+    ],
+  },
 ]

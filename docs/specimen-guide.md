@@ -46,6 +46,7 @@ src/shots/<id>/*.webp             node tools/gallery.mjs thumbs <id> 가 찍는�
   - 이벤트 구독은 자기 코어 객체의 이벤트라도 `OnEnable`/`OnDisable` 짝으로 한다. 두 기준 샘플이 같다.
   - 화면 반영은 **이벤트 핸들러 안에서 바로** 한다. 이벤트를 받아 플래그로 바꾼 뒤 `Update` 에서 다시 읽지 않는다 (그러면 이벤트를 쓰는 이유가 흐려지고, 해제를 빼먹었을 때의 증상도 사라진다). 위치처럼 매 프레임 바뀌는 값만 `Update` 에서 옮긴다.
   - 이벤트로만 맞추는 화면(색, Animator 상태)은 `OnEnable` 에서 지금 코어 상태로 한 번 다시 맞춘다. 오브젝트를 껐다 켜면 Animator 는 기본 상태로 돌아가지만 코어는 그대로다.
+  - Unity 직렬화(Inspector 칸, `JsonUtility`)에 대한 글은 매뉴얼의 Serialization rules 로 확인한다: public 이거나 `[SerializeField]` 인 필드가 담기고, readonly 필드와 `get` 만 있는 자동 속성의 숨은 필드는 담기지 않는다.
   - 인터페이스 형식의 `[SerializeField]` 칸은 Inspector 에 보이지 않는다 (`[SerializeReference]` 도 UnityEngine.Object 를 받지 못한다). 글에서 "Inspector 칸으로 인터페이스를 넘겨받는다" 고 쓰지 말고 구체 컴포넌트 칸이나 생성자로 쓴다.
   - 확인용 화면 글은 IMGUI(`OnGUI` 의 `GUI.Label`)로 둬도 된다 (UI 를 만드는 단계가 줄어든다). 그렇게 하면 pitfalls 에 "확인용, 실제 게임은 UGUI·TextMeshPro" 라고 밝힌다.
   - 거리·경계로 전이하는 코어는 Unity 의 연속 이동에서 경계 위를 오가며 매 프레임 전이할 수 있다 (웹 시나리오는 걸음 단위라 안 보인다). 들어가는 경계와 나가는 경계에 여유를 두거나, 적어도 pitfalls 에 원인과 해법을 적는다.
