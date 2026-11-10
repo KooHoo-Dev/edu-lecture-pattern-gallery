@@ -1,0 +1,45 @@
+# src 4b8f07cf9296
+# spatial-grid-detection missed-next-to-turret naive=0
+0.20 in wave
+0.20 ev D1 칸 (4,2) 에 등록 · 자리 (8.60, 4.40)
+0.20 ev D2 칸 (4,3) 에 등록 · 자리 (9.60, 7.60)
+0.20 ev D3 칸 (7,1) 에 등록 · 자리 (14.50, 2.00)
+0.50 st drones=3 checks=0 full=0 found=0 D1 x=9.05 y=4.40 cell=4,2 D2 x=9.60 y=7.15 cell=4,3 D3 x=14.23 y=2.36 cell=7,1
+0.75 ev D3 칸 (7,1) → (6,1) · 옛 칸에서 빼고 새 칸에 넣음
+0.80 in scan
+0.80 ev 탐지: 칸 12개 · 거리 검사 2회 (전체 검사면 3회) · 찾음 D1
+1.00 st drones=3 checks=2 full=3 found=1 D1 x=9.80 y=4.40 cell=4,2 D2 x=9.60 y=6.40 cell=4,3 D3 x=13.78 y=2.96 cell=6,1
+1.13 ev D1 칸 (4,2) → (5,2) · 옛 칸에서 빼고 새 칸에 넣음
+1.25 ev D2 칸 (4,3) → (4,2) · 옛 칸에서 빼고 새 칸에 넣음
+1.50 st drones=3 checks=2 full=3 found=1 D1 x=10.55 y=4.40 cell=5,2 D2 x=9.60 y=5.65 cell=4,2 D3 x=13.33 y=3.56 cell=6,1
+1.87 ev D3 칸 (6,1) → (6,2) · 옛 칸에서 빼고 새 칸에 넣음
+2.00 st drones=3 checks=2 full=3 found=1 D1 x=11.30 y=4.40 cell=5,2 D2 x=9.60 y=4.90 cell=4,2 D3 x=12.88 y=4.16 cell=6,2
+2.20 in scan
+2.20 ev 탐지: 칸 12개 · 거리 검사 2회 (전체 검사면 3회) · 찾음 D2
+2.47 ev D1 칸 (5,2) → (6,2) · 옛 칸에서 빼고 새 칸에 넣음
+2.50 st drones=3 checks=2 full=3 found=1 D1 x=12.05 y=4.40 cell=6,2 D2 x=9.60 y=4.15 cell=4,2 D3 x=12.43 y=4.76 cell=6,2
+2.58 ev D2 칸 (4,2) → (4,1) · 옛 칸에서 빼고 새 칸에 넣음
+2.97 ev D3 칸 (6,2) → (5,2) · 옛 칸에서 빼고 새 칸에 넣음
+3.00 st drones=3 checks=2 full=3 found=1 D1 x=12.80 y=4.40 cell=6,2 D2 x=9.60 y=3.40 cell=4,1 D3 x=11.98 y=5.36 cell=5,2
+3.50 st drones=3 checks=2 full=3 found=1 D1 x=13.55 y=4.40 cell=6,2 D2 x=9.60 y=2.65 cell=4,1 D3 x=11.53 y=5.96 cell=5,2
+3.53 ev D3 칸 (5,2) → (5,3) · 옛 칸에서 빼고 새 칸에 넣음
+3.80 ev D1 칸 (6,2) → (7,2) · 옛 칸에서 빼고 새 칸에 넣음
+3.92 ev D2 칸 (4,1) → (4,0) · 옛 칸에서 빼고 새 칸에 넣음
+4.00 st drones=3 checks=2 full=3 found=1 D1 x=14.30 y=4.40 cell=7,2 D2 x=9.60 y=1.90 cell=4,0 D3 x=11.08 y=6.56 cell=5,3
+4.00 in wave
+4.00 ev D4 칸 (3,2) 에 등록 · 자리 (7.60, 5.20)
+4.00 ev D5 칸 (0,3) 에 등록 · 자리 (1.20, 6.20)
+4.00 ev D6 칸 (7,3) 에 등록 · 자리 (14.80, 7.00)
+4.22 ev D5 칸 (0,3) → (0,2) · 옛 칸에서 빼고 새 칸에 넣음
+4.50 st drones=6 checks=2 full=3 found=1 D1 x=15.05 y=4.40 cell=7,2 D2 x=9.60 y=1.15 cell=4,0 D3 x=10.63 y=7.16 cell=5,3 D4 x=6.85 y=5.20 cell=3,2 D5 x=1.80 y=5.75 cell=0,2 D6 x=14.35 y=6.40 cell=7,3
+4.67 ev D5 칸 (0,2) → (1,2) · 옛 칸에서 빼고 새 칸에 넣음
+4.80 in scan
+4.80 ev 탐지: 칸 12개 · 거리 검사 2회 (전체 검사면 6회) · 찾음 D4
+4.83 ev D6 칸 (7,3) → (7,2) · 옛 칸에서 빼고 새 칸에 넣음
+4.88 ev D6 칸 (7,2) → (6,2) · 옛 칸에서 빼고 새 칸에 넣음
+5.00 st drones=6 checks=2 full=6 found=1 D1 x=15.80 y=4.40 cell=7,2 D2 x=9.60 y=0.40 cell=4,0 D3 x=10.18 y=7.76 cell=5,3 D4 x=6.10 y=5.20 cell=3,2 D5 x=2.40 y=5.30 cell=1,2 D6 x=13.90 y=5.80 cell=6,2
+5.05 ev D4 칸 (3,2) → (2,2) · 옛 칸에서 빼고 새 칸에 넣음
+5.18 ev D3 칸 (5,3) → (4,3) · 옛 칸에서 빼고 새 칸에 넣음
+5.20 ev D3 칸 (4,3) → (4,4) · 옛 칸에서 빼고 새 칸에 넣음
+5.50 st drones=6 checks=2 full=6 found=1 D1 x=15.45 y=4.40 cell=7,2 D2 x=9.60 y=0.35 cell=4,0 D3 x=9.73 y=8.36 cell=4,4 D4 x=5.35 y=5.20 cell=2,2 D5 x=3.00 y=4.85 cell=1,2 D6 x=13.45 y=5.20 cell=6,2
+end st drones=6 checks=2 full=6 found=1 D1 x=15.45 y=4.40 cell=7,2 D2 x=9.60 y=0.35 cell=4,0 D3 x=9.73 y=8.36 cell=4,4 D4 x=5.35 y=5.20 cell=2,2 D5 x=3.00 y=4.85 cell=1,2 D6 x=13.45 y=5.20 cell=6,2
