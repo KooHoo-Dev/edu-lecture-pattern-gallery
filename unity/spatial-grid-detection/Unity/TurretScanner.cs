@@ -187,22 +187,25 @@ namespace PatternGallery.SpatialGridDetection
             FieldSettings s = field != null ? field.Settings : new FieldSettings();
             float size = field != null ? field.Grid.CellSize : cellSize;
             if (size <= 0f) return;
-            Vector3 o = transform.position;
+            // 드론 화면이 이 오브젝트의 자식(로컬 좌표)이므로 Gizmos 도 이 오브젝트의 로컬 좌표로 그린다 (돌리거나 키워도 함께 따라간다)
+            Matrix4x4 before = Gizmos.matrix;
+            Gizmos.matrix = transform.localToWorldMatrix;
             if (turret != null && turret.Last != null)
             {
                 Gizmos.color = new Color(0.49f, 0.88f, 0.51f, 0.18f);
                 foreach (Cell c in turret.Last.Visited)
-                    Gizmos.DrawCube(o + new Vector3((c.X + 0.5f) * size, (c.Y + 0.5f) * size, 0f), new Vector3(size, size, 0.01f));
+                    Gizmos.DrawCube(new Vector3((c.X + 0.5f) * size, (c.Y + 0.5f) * size, 0f), new Vector3(size, size, 0.01f));
             }
             Gizmos.color = new Color(0.35f, 0.45f, 0.6f, 0.8f);
             for (int i = 0; i * size <= s.Width + 0.001f; i++)
-                Gizmos.DrawLine(o + new Vector3(i * size, 0f, 0f), o + new Vector3(i * size, s.Height, 0f));
+                Gizmos.DrawLine(new Vector3(i * size, 0f, 0f), new Vector3(i * size, s.Height, 0f));
             for (int j = 0; j * size <= s.Height + 0.001f; j++)
-                Gizmos.DrawLine(o + new Vector3(0f, j * size, 0f), o + new Vector3(s.Width, j * size, 0f));
+                Gizmos.DrawLine(new Vector3(0f, j * size, 0f), new Vector3(s.Width, j * size, 0f));
             // 구역 테두리 (칸 크기가 16·9 로 나누어떨어지지 않으면 오른쪽·위 끝 칸은 구역 밖으로 걸친다)
-            Gizmos.DrawWireCube(o + new Vector3(s.Width / 2f, s.Height / 2f, 0f), new Vector3(s.Width, s.Height, 0f));
+            Gizmos.DrawWireCube(new Vector3(s.Width / 2f, s.Height / 2f, 0f), new Vector3(s.Width, s.Height, 0f));
             Gizmos.color = new Color(0.36f, 0.78f, 1f);
-            Gizmos.DrawWireSphere(o + new Vector3(s.TurretX, s.TurretY, 0f), turret != null ? turret.Radius : scanRadius);
+            Gizmos.DrawWireSphere(new Vector3(s.TurretX, s.TurretY, 0f), turret != null ? turret.Radius : scanRadius);
+            Gizmos.matrix = before;
         }
     }
 }

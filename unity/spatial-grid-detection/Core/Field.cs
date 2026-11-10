@@ -76,6 +76,7 @@ namespace PatternGallery.SpatialGridDetection
 
         public void Add(Drone d)
         {
+            if (drones.Contains(d)) return; // 두 번 넣으면 격자 칸에도 두 번 들어가 탐지에 두 번 잡힌다
             d.Removed = false;
             drones.Add(d);
             Grid.Add(d); // [1] 나오는 순간 지금 칸에 등록한다
