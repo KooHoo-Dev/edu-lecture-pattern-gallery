@@ -1,0 +1,47 @@
+# src 4b8f07cf9296
+# spatial-grid-detection missed-next-to-turret naive=1
+0.20 in wave
+0.20 ev D1 칸 (4,2) 에 등록 · 자리 (8.60, 4.40)
+0.20 ev D2 칸 (4,3) 에 등록 · 자리 (9.60, 7.60)
+0.20 ev D3 칸 (7,1) 에 등록 · 자리 (14.50, 2.00)
+0.50 st drones=3 checks=0 found=0 missed=0 D1 x=9.05 y=4.40 cell=4,2 reg=4,2 D2 x=9.60 y=7.15 cell=4,3 reg=4,3 D3 x=14.23 y=2.36 cell=7,1 reg=7,1
+0.75 ev D3 실제 칸 (7,1) → (6,1) · 등록은 처음 칸 (7,1) 그대로
+0.80 in scan
+0.80 ev 탐지: 포탑 칸 (4,2) 만 · 거리 검사 1회 (전체 검사면 3회) · 찾음 D1
+1.00 st drones=3 checks=1 found=1 missed=0 D1 x=9.80 y=4.40 cell=4,2 reg=4,2 D2 x=9.60 y=6.40 cell=4,3 reg=4,3 D3 x=13.78 y=2.96 cell=6,1 reg=7,1
+1.13 ev D1 실제 칸 (4,2) → (5,2) · 등록은 처음 칸 (4,2) 그대로
+1.25 ev D2 실제 칸 (4,3) → (4,2) · 등록은 처음 칸 (4,3) 그대로
+1.50 st drones=3 checks=1 found=1 missed=0 D1 x=10.55 y=4.40 cell=5,2 reg=4,2 D2 x=9.60 y=5.65 cell=4,2 reg=4,3 D3 x=13.33 y=3.56 cell=6,1 reg=7,1
+1.87 ev D3 실제 칸 (6,1) → (6,2) · 등록은 처음 칸 (7,1) 그대로
+2.00 st drones=3 checks=1 found=1 missed=0 D1 x=11.30 y=4.40 cell=5,2 reg=4,2 D2 x=9.60 y=4.90 cell=4,2 reg=4,3 D3 x=12.88 y=4.16 cell=6,2 reg=7,1
+2.20 in scan
+2.20 ev 탐지: 포탑 칸 (4,2) 만 · 거리 검사 1회 (전체 검사면 3회) · 찾음 없음
+2.20 ev !탐지 누락: D2 거리 1.60 · 포탑 칸 (4,2) 에 왔는데 처음 칸 (4,3) 목록에만 있다
+2.47 ev D1 실제 칸 (5,2) → (6,2) · 등록은 처음 칸 (4,2) 그대로
+2.50 st drones=3 checks=1 found=0 missed=1 D1 x=12.05 y=4.40 cell=6,2 reg=4,2 D2 x=9.60 y=4.15 cell=4,2 reg=4,3 D3 x=12.43 y=4.76 cell=6,2 reg=7,1
+2.58 ev D2 실제 칸 (4,2) → (4,1) · 등록은 처음 칸 (4,3) 그대로
+2.97 ev D3 실제 칸 (6,2) → (5,2) · 등록은 처음 칸 (7,1) 그대로
+3.00 st drones=3 checks=1 found=0 missed=1 D1 x=12.80 y=4.40 cell=6,2 reg=4,2 D2 x=9.60 y=3.40 cell=4,1 reg=4,3 D3 x=11.98 y=5.36 cell=5,2 reg=7,1
+3.50 st drones=3 checks=1 found=0 missed=1 D1 x=13.55 y=4.40 cell=6,2 reg=4,2 D2 x=9.60 y=2.65 cell=4,1 reg=4,3 D3 x=11.53 y=5.96 cell=5,2 reg=7,1
+3.53 ev D3 실제 칸 (5,2) → (5,3) · 등록은 처음 칸 (7,1) 그대로
+3.80 ev D1 실제 칸 (6,2) → (7,2) · 등록은 처음 칸 (4,2) 그대로
+3.92 ev D2 실제 칸 (4,1) → (4,0) · 등록은 처음 칸 (4,3) 그대로
+4.00 st drones=3 checks=1 found=0 missed=1 D1 x=14.30 y=4.40 cell=7,2 reg=4,2 D2 x=9.60 y=1.90 cell=4,0 reg=4,3 D3 x=11.08 y=6.56 cell=5,3 reg=7,1
+4.00 in wave
+4.00 ev D4 칸 (3,2) 에 등록 · 자리 (7.60, 5.20)
+4.00 ev D5 칸 (0,3) 에 등록 · 자리 (1.20, 6.20)
+4.00 ev D6 칸 (7,3) 에 등록 · 자리 (14.80, 7.00)
+4.22 ev D5 실제 칸 (0,3) → (0,2) · 등록은 처음 칸 (0,3) 그대로
+4.50 st drones=6 checks=1 found=0 missed=1 D1 x=15.05 y=4.40 cell=7,2 reg=4,2 D2 x=9.60 y=1.15 cell=4,0 reg=4,3 D3 x=10.63 y=7.16 cell=5,3 reg=7,1 D4 x=6.85 y=5.20 cell=3,2 reg=3,2 D5 x=1.80 y=5.75 cell=0,2 reg=0,3 D6 x=14.35 y=6.40 cell=7,3 reg=7,3
+4.67 ev D5 실제 칸 (0,2) → (1,2) · 등록은 처음 칸 (0,3) 그대로
+4.80 in scan
+4.80 ev 탐지: 포탑 칸 (4,2) 만 · 거리 검사 1회 (전체 검사면 6회) · 찾음 없음
+4.80 ev !경계 누락: D4 거리 1.75 · 옆 칸 (3,2) 에 있어 보지 않았다 (등록은 맞다)
+4.83 ev D6 실제 칸 (7,3) → (7,2) · 등록은 처음 칸 (7,3) 그대로
+4.88 ev D6 실제 칸 (7,2) → (6,2) · 등록은 처음 칸 (7,3) 그대로
+5.00 st drones=6 checks=1 found=0 missed=1 D1 x=15.80 y=4.40 cell=7,2 reg=4,2 D2 x=9.60 y=0.40 cell=4,0 reg=4,3 D3 x=10.18 y=7.76 cell=5,3 reg=7,1 D4 x=6.10 y=5.20 cell=3,2 reg=3,2 D5 x=2.40 y=5.30 cell=1,2 reg=0,3 D6 x=13.90 y=5.80 cell=6,2 reg=7,3
+5.05 ev D4 실제 칸 (3,2) → (2,2) · 등록은 처음 칸 (3,2) 그대로
+5.18 ev D3 실제 칸 (5,3) → (4,3) · 등록은 처음 칸 (7,1) 그대로
+5.20 ev D3 실제 칸 (4,3) → (4,4) · 등록은 처음 칸 (7,1) 그대로
+5.50 st drones=6 checks=1 found=0 missed=1 D1 x=15.45 y=4.40 cell=7,2 reg=4,2 D2 x=9.60 y=0.35 cell=4,0 reg=4,3 D3 x=9.73 y=8.36 cell=4,4 reg=7,1 D4 x=5.35 y=5.20 cell=2,2 reg=3,2 D5 x=3.00 y=4.85 cell=1,2 reg=0,3 D6 x=13.45 y=5.20 cell=6,2 reg=7,3
+end st drones=6 checks=1 found=0 missed=1 D1 x=15.45 y=4.40 cell=7,2 reg=4,2 D2 x=9.60 y=0.35 cell=4,0 reg=4,3 D3 x=9.73 y=8.36 cell=4,4 reg=7,1 D4 x=5.35 y=5.20 cell=2,2 reg=3,2 D5 x=3.00 y=4.85 cell=1,2 reg=0,3 D6 x=13.45 y=5.20 cell=6,2 reg=7,3
