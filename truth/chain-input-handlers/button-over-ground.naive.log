@@ -1,0 +1,42 @@
+# src 7beba123e7d4
+# chain-input-handlers button-over-ground naive=1
+0.40 in tapGround
+0.40 ev 클릭 #1 빈 땅 (2.50, 2.00)
+0.40 ev 땅 이동: 하린 이동 명령 5.50 → 2.50
+0.50 st harin=5.20 target=2.50 popup=0 selected=0 eharin=5.20 clicks=1
+1.00 st harin=3.70 target=2.50 popup=0 selected=0 eharin=3.70 clicks=1
+1.30 in tapDrone
+1.30 ev 클릭 #2 드론 (11.50, 2.70)
+1.30 ev 드론 선택: 정비 드론 선택
+1.30 ev 땅 이동: 하린 이동 명령 2.80 → 11.50
+1.30 ev !두 번 처리: 드론 위 클릭 #2 에 드론 선택과 땅 이동이 함께 반응 → 하린 목표 11.50
+1.50 st harin=3.40 target=11.50 popup=0 selected=1 eharin=2.50 clicks=2
+2.00 st harin=4.90 target=11.50 popup=0 selected=1 eharin=2.50 clicks=2
+2.20 in tapButton
+2.20 ev 클릭 #3 정비 버튼 (14.15, 3.10)
+2.20 ev UI: 정비 창 열림
+2.20 ev 땅 이동: 하린 이동 명령 5.50 → 14.15
+2.20 ev !클릭 관통: 정비 버튼 위 클릭 #3 에 땅 이동도 반응 → 하린 목표 14.15
+2.50 st harin=6.40 target=14.15 popup=1 selected=1 eharin=2.50 clicks=3
+3.00 st harin=7.90 target=14.15 popup=1 selected=1 eharin=2.50 clicks=3
+3.10 in tapGround
+3.10 ev 클릭 #4 빈 땅 (2.50, 2.00)
+3.10 ev 땅 이동: 하린 이동 명령 8.20 → 2.50
+3.10 ev !클릭 관통: 정비 창이 열린 채 누른 클릭 #4 에 땅 이동도 반응 → 하린 목표 2.50
+3.50 st harin=7.00 target=2.50 popup=1 selected=1 eharin=2.50 clicks=4
+4.00 st harin=5.50 target=2.50 popup=1 selected=1 eharin=2.50 clicks=4
+4.00 in togglePopup
+4.00 ev 클릭 #5 팝업 ✕ (10.50, 6.10)
+4.00 ev UI: 정비 창 닫힘 (✕)
+4.00 ev 땅 이동: 하린 이동 명령 5.50 → 10.50
+4.00 ev !클릭 관통: 정비 창이 열린 채 누른 클릭 #5 에 땅 이동도 반응 → 하린 목표 10.50
+4.50 st harin=7.00 target=10.50 popup=0 selected=1 eharin=2.50 clicks=5
+4.90 in tapButton
+4.90 ev 클릭 #6 정비 버튼 (14.15, 3.10)
+4.90 ev UI: 정비 창 열림
+4.90 ev 땅 이동: 하린 이동 명령 8.20 → 14.15
+4.90 ev !클릭 관통: 정비 버튼 위 클릭 #6 에 땅 이동도 반응 → 하린 목표 14.15
+5.00 st harin=8.50 target=14.15 popup=1 selected=1 eharin=2.50 clicks=6
+5.50 st harin=10.00 target=14.15 popup=1 selected=1 eharin=2.50 clicks=6
+6.00 st harin=11.50 target=14.15 popup=1 selected=1 eharin=2.50 clicks=6
+end st harin=11.50 target=14.15 popup=1 selected=1 eharin=2.50 clicks=6
