@@ -1,0 +1,39 @@
+# src 7beba123e7d4
+# chain-input-handlers modal-popup naive=0
+0.30 in tapButton
+0.30 ev 클릭 #1 정비 버튼 (14.15, 3.10)
+0.30 ev #1 팝업 → 넘김
+0.30 ev 정비 창 열림
+0.30 ev #1 버튼 ● 소비
+0.50 st harin=5.50 target=5.50 popup=1 selected=0 clicks=1
+1.00 st harin=5.50 target=5.50 popup=1 selected=0 clicks=1
+1.00 in tapGround
+1.00 ev 클릭 #2 빈 땅 (2.50, 2.00)
+1.00 ev 정비 창(모달)이 창 밖 클릭을 막음
+1.00 ev #2 팝업 ● 소비
+1.50 st harin=5.50 target=5.50 popup=1 selected=0 clicks=2
+1.70 in tapDrone
+1.70 ev 클릭 #3 드론 (11.50, 2.70)
+1.70 ev 정비 창(모달)이 창 밖 클릭을 막음
+1.70 ev #3 팝업 ● 소비
+2.00 st harin=5.50 target=5.50 popup=1 selected=0 clicks=3
+2.40 in tapButton
+2.40 ev 클릭 #4 정비 버튼 (14.15, 3.10)
+2.40 ev 정비 창(모달)이 창 밖 클릭을 막음
+2.40 ev #4 팝업 ● 소비
+2.50 st harin=5.50 target=5.50 popup=1 selected=0 clicks=4
+3.00 st harin=5.50 target=5.50 popup=1 selected=0 clicks=4
+3.10 in togglePopup
+3.10 ev 클릭 #5 팝업 ✕ (10.50, 6.10)
+3.10 ev 정비 창 닫힘 (✕)
+3.10 ev #5 팝업 ● 소비
+3.50 st harin=5.50 target=5.50 popup=0 selected=0 clicks=5
+3.80 in tapDrone
+3.80 ev 클릭 #6 드론 (11.50, 2.70)
+3.80 ev #6 팝업 → 넘김
+3.80 ev #6 버튼 → 넘김
+3.80 ev 정비 드론 선택
+3.80 ev #6 드론 ● 소비
+4.00 st harin=5.50 target=5.50 popup=0 selected=1 clicks=6
+4.50 st harin=5.50 target=5.50 popup=0 selected=1 clicks=6
+end st harin=5.50 target=5.50 popup=0 selected=1 clicks=6

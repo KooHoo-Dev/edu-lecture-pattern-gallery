@@ -1,0 +1,32 @@
+# src 7beba123e7d4
+# chain-input-handlers wide-button-over-drone naive=0
+0.30 in tapDrone
+0.30 ev 클릭 #1 드론 (11.50, 2.70)
+0.30 ev #1 팝업 → 넘김
+0.30 ev 정비 창 열림
+0.30 ev #1 버튼 ● 소비
+0.50 st harin=5.50 target=5.50 popup=1 selected=0 clicks=1
+1.00 st harin=5.50 target=5.50 popup=1 selected=0 clicks=1
+1.10 in togglePopup
+1.10 ev 클릭 #2 팝업 ✕ (10.50, 6.10)
+1.10 ev 정비 창 닫힘 (✕)
+1.10 ev #2 팝업 ● 소비
+1.50 st harin=5.50 target=5.50 popup=0 selected=0 clicks=2
+1.80 in tapGround
+1.80 ev 클릭 #3 빈 땅 (2.50, 2.00)
+1.80 ev #3 팝업 → 넘김
+1.80 ev #3 버튼 → 넘김
+1.80 ev #3 드론 → 넘김
+1.80 ev 하린 이동 명령 5.50 → 2.50
+1.80 ev #3 땅 ● 소비
+2.00 st harin=4.90 target=2.50 popup=0 selected=0 clicks=3
+2.50 st harin=3.40 target=2.50 popup=0 selected=0 clicks=3
+2.60 in tapButton
+2.60 ev 클릭 #4 정비 버튼 (12.90, 3.10)
+2.60 ev #4 팝업 → 넘김
+2.60 ev 정비 창 열림
+2.60 ev #4 버튼 ● 소비
+2.78 ev 하린 도착 2.50
+3.00 st harin=2.50 target=2.50 popup=1 selected=0 clicks=4
+3.50 st harin=2.50 target=2.50 popup=1 selected=0 clicks=4
+end st harin=2.50 target=2.50 popup=1 selected=0 clicks=4
