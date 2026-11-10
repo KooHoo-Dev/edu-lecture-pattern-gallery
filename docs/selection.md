@@ -1,7 +1,7 @@
 # 표본 선정 (패턴 갤러리)
 
 - 작성: 2026-11-03. 개정: 2026-11-10 (묶음 6 구성: 게임 루프, 메멘토, 책임 연쇄, 공간 분할).
-- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 끝남, 배포 (2026-11-06, 3절 후보 다섯 모두). 묶음 5 끝남, 배포 (2026-11-08, 구독 워커). 묶음 6 확정 (Jay, 2026-11-10).**
+- 상태: 묶음 1 (파일럿 3개) 확정·배포. **묶음 2 끝남, 배포 (2026-11-03). 묶음 3 끝남, 배포 (2026-11-03). 묶음 4 끝남, 배포 (2026-11-06, 3절 후보 다섯 모두). 묶음 5 끝남, 배포 (2026-11-08, 구독 워커). 묶음 6 끝남, 배포 (2026-11-10).**
 - 형식은 kit `design.md` 6절 (Shader Gallery 의 `docs/shader-selection.md` 형식). 공통 규칙은 kit-guide.
 - 교안 분석: [`research/lecture-analysis.md`](research/lecture-analysis.md). 교안 = `3000-Unity-3D/Assets/19. Legacy/2. OOP And Design Pattern/` (OOP 기초 3편 + 생성 5, 구조 5, 행동 5). 표본은 교안을 그대로 옮기지 않는다 (Jay 확인). 교안의 강조점과 함정은 가져오고, 상황은 외곽 탐사대로, 글은 증상에서 시작한다.
 
@@ -29,10 +29,10 @@
 | B 연결 | `service-locator-audio` 서비스 로케이터: 소리 서비스와 널 객체 | 서비스 로케이터 (교안 밖, 싱글턴의 다음 편) | ★★ | **묶음 5 (배포)** |
 | D 최적화 | `flyweight-drone-types` 플라이웨이트: 드론 종류 데이터 공유 | 플라이웨이트·타입 객체 (교안 밖) | ★★ | **묶음 5 (배포)** |
 | D 최적화 | `dirty-flag-loadout` 더티 플래그: 장비 무게 다시 계산 | 더티 플래그 (교안 밖, 01 캡슐화) | ★★ | **묶음 5 (배포)** |
-| A 행동 | `game-loop-fixed-step` 게임 루프: 고정 시간 간격 | 게임 루프 (교안 밖) | ★★ | **묶음 6** |
-| B 연결 | `chain-input-handlers` 책임 연쇄 패턴: 클릭 처리 사슬 | 책임 연쇄 (교안 밖) | ★★ | **묶음 6** |
-| C 데이터 | `memento-checkpoint` 메멘토 패턴: 체크포인트 저장과 되살리기 | 메멘토 (교안 밖) | ★★ | **묶음 6** |
-| D 최적화 | `spatial-grid-detection` 공간 분할: 격자로 근처 적 찾기 | 공간 분할 (교안 밖) | ★★ | **묶음 6** |
+| A 행동 | `game-loop-fixed-step` 게임 루프: 고정 시간 간격 | 게임 루프 (교안 밖) | ★★ | **묶음 6 (배포)** |
+| B 연결 | `chain-input-handlers` 책임 연쇄 패턴: 클릭 처리 사슬 | 책임 연쇄 (교안 밖) | ★★ | **묶음 6 (배포)** |
+| C 데이터 | `memento-checkpoint` 메멘토 패턴: 체크포인트 저장과 되살리기 | 메멘토 (교안 밖) | ★★ | **묶음 6 (배포)** |
+| D 최적화 | `spatial-grid-detection` 공간 분할: 격자로 근처 적 찾기 | 공간 분할 (교안 밖) | ★★ | **묶음 6 (배포)** |
 
 묶음 2 를 마치면 교안의 생성·구조·행동 세 묶음에 모두 표본이 생긴다 (생성 2, 구조 1, 행동 4).
 
@@ -345,7 +345,7 @@
 | 3 | `factory-drone-spawner`, `facade-hit-resolution`, `state-drone-ai`, `object-pool-projectiles` | 끝남, 배포 (2026-11-03) |
 | 4 | `composite-drone-squads`, `abstract-factory-zone-themes`, `event-queue-sound`, `adapter-sensor-units`, `hierarchical-state-enemy` | 끝남, 배포 (2026-11-06). 회사 크레딧 남은 추정 $52.87 을 이 묶음에 썼다 (Jay 결정, 기록 약 $37.1) |
 | 5 | `flyweight-drone-types`, `service-locator-audio`, `dirty-flag-loadout`, `update-method-drone-list` | 끝남, 배포 (2026-11-08). 회사 크레딧이 거의 남지 않아 워커를 **구독 프로필(`sub`)** 로 돌린다 |
-| 6 | `game-loop-fixed-step`, `memento-checkpoint`, `chain-input-handlers`, `spatial-grid-detection` | **확정 (Jay, 2026-11-10)**. 남은 회사 크레딧(약 $15)을 먼저 쓰고 구독으로 넘어간다 (`profiles: ['org', 'sub']`) |
+| 6 | `game-loop-fixed-step`, `memento-checkpoint`, `chain-input-handlers`, `spatial-grid-detection` | 끝남, 배포 (2026-11-10). 남은 회사 크레딧을 먼저 쓰고 구독으로 넘어갔다 |
 
 묶음 2 를 이 넷으로 고른 이유: 넷 다 무대에서 버그가 바로 보이고, 교안의 생성·구조·행동을 고루 덮고, 교안 예제가 이미 게임 상황(타워 조준, 스탯 버프, 적 복제, 매니저)이라 수업 흐름에 바로 붙는다. 싱글턴만 코어가 얇은 위험이 있어 맨 뒤에 돌린다.
 
