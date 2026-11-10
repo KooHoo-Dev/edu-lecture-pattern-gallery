@@ -222,6 +222,7 @@ class Field {
   }
 
   Add(d: Drone) {
+    if (this.drones.includes(d)) return
     d.Removed = false
     this.drones.push(d)
     this.Grid.Add(d)
@@ -483,33 +484,59 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   }
 
   /** 드론과 이름(찾았으면 초록, 놓쳤으면 빨강), 마지막 탐지 순간의 자리 표시(초록 링 = 찾음, 빨간 링과 ✖ 글 = 놓침),
-   *  나쁜 예의 등록 칸 → 실제 자리 점선 */
-  const droneItems = (shown: Shown[], marks: Mark[]): WorldItem[] => {
+   *  나쁜 예의 등록 칸 → 실제 자리 점선. own 은 나쁜 예가 보는 포탑 칸 (패턴은 null) */
+  const droneItems = (shown: Shown[], marks: Mark[], own: Pair | null): WorldItem[] => {
     const arrows: WorldItem[] = []
     const rings: WorldItem[] = []
     const bodies: WorldItem[] = []
     const texts: WorldItem[] = []
+    /** 이번 탐지에서 ✖ 를 새로 쓴 드론 → 그 순간의 자리 */
+    const fresh = new Map<string, Mark>()
     for (const m of marks) {
       rings.push({ kind: 'ring', x: m.x, y: m.y, r: 0.42, color: m.bug ? RED : GREEN })
-      // ✖ 글은 링 왼쪽에 (드론 이름은 드론 오른쪽에 두어 막 움직인 드론과 겹치지 않게)
-      if (m.bug && m.fresh) texts.push({ kind: 'text', x: m.x - 0.5, y: m.y - 0.1, text: `✖ ${m.bug}`, size: 15, color: RED, align: 'right' })
+      if (!(m.bug && m.fresh)) continue
+      // ✖ 글은 링 위에 (포탑 상자와 겹치지 않고, 옆으로 가는 드론이 글 위를 지나지 않게). 드론 이름과 합쳐 한 줄
+      fresh.set(m.name, m)
+      texts.push({ kind: 'text', x: m.x, y: m.y + 0.55, text: `✖ ${m.name} ${m.bug}`, size: 15, color: RED, align: 'center' })
     }
+    const regDrawn = new Set<string>()
+    const far = scanRadius + cellSize
     for (const d of shown) {
       if (d.reg) {
-        const rx = (d.reg[0] + 0.5) * cellSize
-        const ry = (d.reg[1] + 0.5) * cellSize
-        arrows.push({ kind: 'box', x: rx - 0.08, y: ry - 0.08, w: 0.16, h: 0.16, fill: ORANGE })
-        arrows.push({ kind: 'arrow', x1: rx, y1: ry, x2: d.x, y2: d.y, color: ORANGE, dashed: true })
+        const actual: Pair = [Math.floor(d.x / cellSize), Math.floor(d.y / cellSize)]
+        // 점선은 ✖ 드론과 포탑 칸에 걸린 드론(등록 칸이나 실제 칸이 포탑 칸)에만. 나머지는 처음 칸에 남았다는 작은 주황 점만
+        const near = !!d.bug || (own !== null && (samePair(d.reg, own) || samePair(actual, own)))
+        if (near) {
+          const rx = (d.reg[0] + 0.5) * cellSize
+          const ry = (d.reg[1] + 0.5) * cellSize
+          if (!regDrawn.has(pairKey(d.reg))) {
+            regDrawn.add(pairKey(d.reg))
+            arrows.push({ kind: 'box', x: rx - 0.08, y: ry - 0.08, w: 0.16, h: 0.16, fill: ORANGE })
+          }
+          arrows.push({ kind: 'arrow', x1: rx, y1: ry, x2: d.x, y2: d.y, color: ORANGE, dashed: true })
+        } else arrows.push({ kind: 'box', x: d.x - 0.36, y: d.y + 0.2, w: 0.13, h: 0.13, fill: ORANGE })
       }
       bodies.push({ kind: 'actor', x: d.x, y: d.y - 0.27, role: 'enemy', scale: DRONE_SCALE })
-      texts.push({ kind: 'text', x: d.x + 0.3, y: d.y - 0.12, align: 'left', text: d.bug ? `${d.name} 놓침` : d.found ? `${d.name} 찾음` : d.name, size: 15, color: d.bug ? RED : d.found ? GREEN : '#e6edf7' })
+      const m = fresh.get(d.name)
+      // 새 ✖ 드론은 링 위의 ✖ 글이 이름표다. 링에서 멀어지면 다시 이름표를 단다
+      if (m && Math.hypot(d.x - m.x, d.y - m.y) < 1.1) continue
+      const quiet = !d.found && !d.bug && Math.hypot(d.x - 8, d.y - 4.5) > far
+      if (quiet) texts.push({ kind: 'text', x: d.x + 0.26, y: d.y - 0.1, align: 'left', text: d.name, size: 11, color: '#5d6b82' })
+      else texts.push({ kind: 'text', x: d.x + 0.3, y: d.y - 0.12, align: 'left', text: d.bug ? `${d.name} 놓침` : d.found ? `${d.name} 찾음` : d.name, size: 15, color: d.bug ? RED : d.found ? GREEN : '#e6edf7' })
     }
     return [...arrows, ...rings, ...bodies, ...texts]
   }
 
-  /** 왼쪽 위 글 두 줄 (뒤에 어두운 판을 깔아 격자와 드론 위에서도 읽히게) */
+  /** 화면에만: 글 폭 어림 (한글 한 자 = 글자 크기, 그 밖은 절반. 무대 1 단위 ≈ 글자 크기 59 px) */
+  const textWidth = (s: string, size: number) => {
+    let n = 0
+    for (const ch of s) n += /[ᄀ-ᇿ㄰-㆏가-힯✖·]/.test(ch) ? 1 : 0.5
+    return (n * size) / 59
+  }
+
+  /** 왼쪽 위 글 두 줄. 드론보다 먼저 그리고, 판은 반투명에 폭을 글에 맞춰 위쪽 드론을 가리지 않게 */
   const header = (line1: string, color1: string, line2: string, color2: string): WorldItem[] => [
-    { kind: 'box', x: 0.1, y: 7.15, w: 11.6, h: 1.7, fill: 'rgba(11, 17, 28, 0.82)' },
+    { kind: 'box', x: 0.1, y: 7.15, w: Math.min(15.8, Math.max(textWidth(line1, 21), textWidth(line2, 16)) + 0.55), h: 1.7, fill: 'rgba(11, 17, 28, 0.5)' },
     { kind: 'text', x: 0.35, y: 8.3, text: line1, align: 'left', size: 21, color: color1 },
     { kind: 'text', x: 0.35, y: 7.6, text: line2, align: 'left', size: 16, color: color2 },
   ]
@@ -552,7 +579,6 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       view(): SimView {
         const r = turret.Last
         const world = ground(r ? r.Visited : [])
-        world.push(...droneItems(field.Drones.map(d => ({ name: d.Name, x: d.X, y: d.Y, found: !!r && r.Found.includes(d) })), marks))
         world.push(
           ...header(
             r ? `거리 검사 ${r.Checks} 회 (전체 검사면 ${r.FullChecks} 회) · 찾은 드론 ${r.Found.length}` : `아직 탐지 전 · 드론 ${field.Drones.length} 대`,
@@ -561,6 +587,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
             DIM,
           ),
         )
+        world.push(...droneItems(field.Drones.map(d => ({ name: d.Name, x: d.X, y: d.Y, found: !!r && r.Found.includes(d) })), marks, null))
         const active: string[] = []
         if (clock - at.wave < GLOW) active.push('scanner', 'scanner-field', 'field', 'field-grid', 'grid')
         if (clock - at.move < GLOW) active.push('field', 'field-drone', 'field-grid', 'grid')
@@ -675,7 +702,6 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         }
         return s
       })
-      world.push(...droneItems(shown, marks))
       const shadowFound = turret.Last?.Found.length ?? 0
       world.push(
         ...header(
@@ -683,10 +709,11 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
           ORANGE,
           scanned
             ? `포탑 칸 ${pairText(own)} 만 봄 · 처음 칸에 남은 드론 ${stale} · 못 찾음 ${missed.size} (같은 입력의 패턴은 ${shadowFound} 찾음)`
-            : `포탑 칸 ${pairText(own)} 만 봄 · 처음 칸에 남은 드론 ${stale} (주황 점선: 등록 칸 → 실제 자리)`,
+            : `포탑 칸 ${pairText(own)} 만 봄 · 처음 칸에 남은 드론 ${stale}${stale > 0 ? ' (주황 점선: 등록 칸 → 실제 자리)' : ''}`,
           missed.size > 0 ? RED : DIM,
         ),
       )
+      world.push(...droneItems(shown, marks, own))
       const active: string[] = []
       if (clock - at.wave < GLOW) active.push('nturret', 'nturret-ncells', 'ncells')
       if (clock - atNaive.stale < GLOW) active.push('nturret-ndrone', 'ndrone')

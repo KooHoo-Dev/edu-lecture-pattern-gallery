@@ -15,6 +15,7 @@ namespace PatternGallery.SpatialGridDetection
         Renderer body;
         Vector3 baseScale;
         bool found;
+        MaterialPropertyBlock block;
 
         public Drone Drone => drone;
 
@@ -46,12 +47,23 @@ namespace PatternGallery.SpatialGridDetection
             if (drone != null) transform.localPosition = new Vector3(drone.X, drone.Y, 0f);
         }
 
+        /// <summary>스프라이트면 SpriteRenderer.color, 아니면 MaterialPropertyBlock 으로 _BaseColor(URP Lit)와 _Color(Built-in) 에 넣는다.
+        /// body.material 을 쓰면 드론마다 머티리얼 사본이 생기고, 드론을 Destroy 해도 사본은 남는다</summary>
         void Apply()
         {
             transform.localScale = found ? baseScale * foundScale : baseScale;
             Color c = found ? foundColor : normalColor;
-            if (body is SpriteRenderer sprite) sprite.color = c;
-            else if (body != null) body.material.color = c; // 3D: 이 오브젝트만의 머티리얼 사본을 만든다
+            if (body is SpriteRenderer sprite)
+            {
+                sprite.color = c;
+                return;
+            }
+            if (body == null) return;
+            block ??= new MaterialPropertyBlock();
+            body.GetPropertyBlock(block);
+            block.SetColor("_BaseColor", c);
+            block.SetColor("_Color", c);
+            body.SetPropertyBlock(block);
         }
     }
 }
