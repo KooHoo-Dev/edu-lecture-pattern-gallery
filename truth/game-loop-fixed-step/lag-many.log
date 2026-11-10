@@ -1,0 +1,72 @@
+# src 9d5dc5d98eed
+# game-loop-fixed-step lag-many naive=0
+0.20 in dash
+0.20 ev 144fps 돌진
+0.22 ev 30fps 돌진
+0.22 ev 60fps 돌진
+0.25 in lag
+0.50 st f30.x=6.30 f30.y=0.00 f30.frames=7 f30.steps=11 f30.dropped=0.00 f60.x=6.60 f60.y=0.00 f60.frames=15 f60.steps=12 f60.dropped=0.00 f144.x=6.90 f144.y=0.00 f144.frames=36 f144.steps=12 f144.dropped=0.00
+0.52 ev 30fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+0.52 ev 30fps 상한 5단계 · 0.21초 버림
+0.53 ev 60fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+0.53 ev 60fps 상한 5단계 · 0.21초 버림
+0.53 ev 144fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+0.53 ev 144fps 상한 5단계 · 0.21초 버림
+0.58 ev 144fps 돌진 끝 · 3.00m
+0.60 ev 60fps 돌진 끝 · 3.00m
+0.62 ev 30fps 돌진 끝 · 3.00m
+1.00 st f30.x=9.00 f30.y=0.00 f30.frames=22 f30.steps=39 f30.dropped=0.21 f60.x=9.00 f60.y=0.00 f60.frames=43 f60.steps=39 f60.dropped=0.21 f144.x=9.00 f144.y=0.00 f144.frames=101 f144.steps=39 f144.dropped=0.21
+1.00 in lag
+1.28 ev 30fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+1.28 ev 30fps 상한 5단계 · 0.21초 버림
+1.28 ev 60fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+1.28 ev 60fps 상한 5단계 · 0.21초 버림
+1.28 ev 144fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+1.28 ev 144fps 상한 5단계 · 0.20초 버림
+1.50 st f30.x=9.00 f30.y=0.00 f30.frames=29 f30.steps=54 f30.dropped=0.42 f60.x=9.00 f60.y=0.00 f60.frames=56 f60.steps=54 f60.dropped=0.42 f144.x=9.00 f144.y=0.00 f144.frames=131 f144.steps=54 f144.dropped=0.41
+1.50 in lag
+1.78 ev 30fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+1.78 ev 30fps 상한 5단계 · 0.20초 버림
+1.78 ev 60fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+1.78 ev 60fps 상한 5단계 · 0.20초 버림
+1.78 ev 144fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+1.78 ev 144fps 상한 5단계 · 0.20초 버림
+2.00 st f30.x=9.00 f30.y=0.00 f30.frames=36 f30.steps=69 f30.dropped=0.62 f60.x=9.00 f60.y=0.00 f60.frames=69 f60.steps=69 f60.dropped=0.62 f144.x=9.00 f144.y=0.00 f144.frames=161 f144.steps=69 f144.dropped=0.62
+2.20 in jump
+2.22 ev 30fps 점프
+2.22 ev 60fps 점프
+2.22 ev 144fps 점프
+2.30 in lag
+2.50 st f30.x=9.00 f30.y=0.56 f30.frames=45 f30.steps=84 f30.dropped=0.62 f60.x=9.00 f60.y=0.56 f60.frames=87 f60.steps=84 f60.dropped=0.62 f144.x=9.00 f144.y=0.48 f144.frames=204 f144.steps=83 f144.dropped=0.62
+2.58 ev 30fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+2.58 ev 30fps 상한 5단계 · 0.20초 버림
+2.58 ev 60fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+2.58 ev 60fps 상한 5단계 · 0.20초 버림
+2.58 ev 144fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+2.58 ev 144fps 상한 5단계 · 0.22초 버림
+2.60 ev 최고 높이 30fps 0.72 · 60fps 0.72 · 144fps 0.72 (같다)
+2.77 ev 60fps 착지 · 점프 뒤 18단계 (0.36초)
+2.78 ev 30fps 착지 · 점프 뒤 18단계 (0.36초)
+2.78 ev 144fps 착지 · 점프 뒤 18단계 (0.36초)
+3.00 st f30.x=9.00 f30.y=0.00 f30.frames=58 f30.steps=109 f30.dropped=0.82 f60.x=9.00 f60.y=0.00 f60.frames=112 f60.steps=109 f60.dropped=0.82 f144.x=9.00 f144.y=0.00 f144.frames=263 f144.steps=108 f144.dropped=0.84
+3.40 in dash
+3.40 ev 144fps 돌진
+3.42 ev 30fps 돌진
+3.42 ev 60fps 돌진
+3.45 in lag
+3.50 st f30.x=9.30 f30.y=0.00 f30.frames=71 f30.steps=130 f30.dropped=0.82 f60.x=9.60 f60.y=0.00 f60.frames=139 f60.steps=131 f60.dropped=0.82 f144.x=9.90 f144.y=0.00 f144.frames=328 f144.steps=130 f144.dropped=0.84
+3.72 ev 30fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+3.72 ev 30fps 상한 5단계 · 0.21초 버림
+3.73 ev 60fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+3.73 ev 60fps 상한 5단계 · 0.21초 버림
+3.73 ev 144fps 렉 프레임 0.30초 → Advance 에 그대로 쌓음
+3.73 ev 144fps 상한 5단계 · 0.21초 버림
+3.77 ev 144fps 벽에 막힘 · x 11.70
+3.77 ev 144fps 돌진 끝 · 2.70m
+3.78 ev 30fps 벽에 막힘 · x 11.70
+3.78 ev 30fps 돌진 끝 · 2.70m
+3.78 ev 60fps 벽에 막힘 · x 11.70
+3.78 ev 60fps 돌진 끝 · 2.70m
+4.00 st f30.x=11.70 f30.y=0.00 f30.frames=80 f30.steps=148 f30.dropped=1.03 f60.x=11.70 f60.y=0.00 f60.frames=155 f60.steps=148 f60.dropped=1.03 f144.x=11.70 f144.y=0.00 f144.frames=365 f144.steps=147 f144.dropped=1.05
+4.50 st f30.x=11.70 f30.y=0.00 f30.frames=95 f30.steps=173 f30.dropped=1.03 f60.x=11.70 f60.y=0.00 f60.frames=185 f60.steps=173 f60.dropped=1.03 f144.x=11.70 f144.y=0.00 f144.frames=437 f144.steps=172 f144.dropped=1.05
+end st f30.x=11.70 f30.y=0.00 f30.frames=95 f30.steps=173 f30.dropped=1.03 f60.x=11.70 f60.y=0.00 f60.frames=185 f60.steps=173 f60.dropped=1.03 f144.x=11.70 f144.y=0.00 f144.frames=437 f144.steps=172 f144.dropped=1.05

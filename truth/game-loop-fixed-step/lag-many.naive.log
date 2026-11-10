@@ -1,0 +1,57 @@
+# src 9d5dc5d98eed
+# game-loop-fixed-step lag-many naive=1
+0.20 in dash
+0.20 ev 60fps 돌진
+0.20 ev 144fps 돌진
+0.22 ev 30fps 돌진
+0.25 in lag
+0.50 st f30.x=6.50 f30.y=0.00 f30.frames=7 f60.x=6.75 f60.y=0.00 f60.frames=15 f144.x=6.83 f144.y=0.00 f144.frames=36
+0.52 ev 30fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+0.52 ev 30fps 돌진 끝 · 5.00m
+0.53 ev 60fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+0.53 ev 60fps 돌진 끝 · 5.25m
+0.53 ev 144fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+0.53 ev 144fps 돌진 끝 · 5.33m
+1.00 st f30.x=11.00 f30.y=0.00 f30.frames=22 f60.x=11.25 f60.y=0.00 f60.frames=43 f144.x=11.33 f144.y=0.00 f144.frames=101
+1.00 in lag
+1.28 ev 30fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+1.28 ev 60fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+1.28 ev 144fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+1.50 st f30.x=11.00 f30.y=0.00 f30.frames=29 f60.x=11.25 f60.y=0.00 f60.frames=56 f144.x=11.33 f144.y=0.00 f144.frames=131
+1.50 in lag
+1.78 ev 30fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+1.78 ev 60fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+1.78 ev 144fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+2.00 st f30.x=11.00 f30.y=0.00 f30.frames=36 f60.x=11.25 f60.y=0.00 f60.frames=69 f144.x=11.33 f144.y=0.00 f144.frames=161
+2.20 in jump
+2.20 ev 60fps 점프
+2.20 ev 144fps 점프
+2.22 ev 30fps 점프
+2.30 in lag
+2.50 st f30.x=11.00 f30.y=0.53 f30.frames=45 f60.x=11.25 f60.y=0.57 f60.frames=87 f144.x=11.33 f144.y=0.58 f144.frames=204
+2.58 ev 30fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+2.58 ev 30fps 착지 · 점프 뒤 0.37초
+2.58 ev 60fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+2.58 ev 60fps 착지 · 점프 뒤 0.38초
+2.58 ev 144fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+2.58 ev 144fps 착지 · 점프 뒤 0.39초
+2.58 ev !프레임마다 다른 점프: 최고 높이 30fps 0.53 · 60fps 0.57 · 144fps 0.58
+3.00 st f30.x=11.00 f30.y=0.00 f30.frames=58 f60.x=11.25 f60.y=0.00 f60.frames=112 f144.x=11.33 f144.y=0.00 f144.frames=263
+3.40 in dash
+3.40 ev 60fps 돌진
+3.40 ev 144fps 돌진
+3.42 ev 30fps 돌진
+3.42 ev 60fps 벽에 막힘 · x 11.70
+3.42 ev 60fps 돌진 끝 · 0.45m
+3.42 ev 144fps 벽에 막힘 · x 11.70
+3.42 ev 144fps 돌진 끝 · 0.37m
+3.45 in lag
+3.50 st f30.x=11.50 f30.y=0.00 f30.frames=71 f60.x=11.70 f60.y=0.00 f60.frames=139 f144.x=11.70 f144.y=0.00 f144.frames=328
+3.72 ev 30fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+3.72 ev !렉에 벽 통과: 30fps dt 0.30초 한 프레임에 x 11.50 → 16.00
+3.72 ev 30fps 돌진 끝 · 5.00m
+3.73 ev 60fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+3.73 ev 144fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+4.00 st f30.x=16.00 f30.y=0.00 f30.frames=80 f60.x=11.70 f60.y=0.00 f60.frames=155 f144.x=11.70 f144.y=0.00 f144.frames=365
+4.50 st f30.x=16.00 f30.y=0.00 f30.frames=95 f60.x=11.70 f60.y=0.00 f60.frames=185 f144.x=11.70 f144.y=0.00 f144.frames=437
+end st f30.x=16.00 f30.y=0.00 f30.frames=95 f60.x=11.70 f60.y=0.00 f60.frames=185 f144.x=11.70 f144.y=0.00 f144.frames=437
