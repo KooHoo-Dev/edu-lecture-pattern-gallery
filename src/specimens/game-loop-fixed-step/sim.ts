@@ -6,6 +6,12 @@ import type { PatternSim, SimFactory, SimView, WorldItem } from '../../stage/typ
 
 const f = Math.fround
 
+/** C# Math.Round (기본 MidpointRounding.ToEven): 양수의 .5 는 짝수 쪽으로 */
+const roundEven = (v: number) => {
+  const r = Math.round(v)
+  return v % 1 === 0.5 && r % 2 !== 0 ? r - 1 : r
+}
+
 /** C# event 흉내: 붙은 순서대로 부르고, -= 는 뒤에서부터 하나를 뺀다 */
 class Event<T extends unknown[]> {
   private list: ((...args: T) => void)[] = []
@@ -80,7 +86,7 @@ class RunnerSettings {
   JumpSpeed = f(8)
   Gravity = f(40)
   DashSpeed = f(15)
-  DashTime = f(0.19)
+  DashTime = f(0.2)
   StartX = f(6)
   WallX = f(12)
   WallThickness = f(0.2)
@@ -92,7 +98,7 @@ class Runner {
   X = 0
   Y = 0
   VelocityY = 0
-  DashTimer = 0
+  DashStepsLeft = 0
   PrevX = 0
   PrevY = 0
   Peak = 0
@@ -128,7 +134,7 @@ class Runner {
     this.X = this.PrevX = this.Settings.StartX
     this.Y = this.PrevY = 0
     this.VelocityY = 0
-    this.DashTimer = 0
+    this.DashStepsLeft = 0
     this.Peak = 0
     this.Rising = false
     this.jumpRequested = false
@@ -150,7 +156,7 @@ class Runner {
     }
     if (this.dashRequested) {
       this.dashRequested = false
-      this.DashTimer = s.DashTime
+      this.DashStepsLeft = Math.max(1, roundEven(f(s.DashTime / step)))
       this.dashStartX = this.X
       this.Dashed.invoke()
     }
@@ -169,16 +175,16 @@ class Runner {
       if (wasInAir) this.Landed.invoke()
     }
 
-    if (this.DashTimer <= 0) return
+    if (this.DashStepsLeft <= 0) return
     this.X = f(this.X + f(s.DashSpeed * step))
-    this.DashTimer = f(this.DashTimer - step)
+    this.DashStepsLeft--
     const hit = f(this.X + s.HalfWidth) > s.WallX && f(this.X - s.HalfWidth) < f(s.WallX + s.WallThickness)
     if (hit) {
       this.X = f(s.WallX - s.HalfWidth)
-      this.DashTimer = 0
+      this.DashStepsLeft = 0
       this.WallHit.invoke(this.X)
     }
-    if (this.DashTimer <= 0) this.DashEnded.invoke(f(this.X - this.dashStartX))
+    if (this.DashStepsLeft === 0) this.DashEnded.invoke(f(this.X - this.dashStartX))
   }
 }
 
@@ -188,7 +194,7 @@ class NaiveRunner {
   jumpSpeed = f(8)
   gravity = f(40)
   dashSpeed = f(15)
-  dashTime = f(0.19)
+  dashTime = f(0.2)
   wallX = f(12)
   wallThickness = f(0.2)
   halfWidth = f(0.3)
@@ -293,6 +299,20 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
   let lastMoveInputAt = -9
   let lastLagInputAt = -9
   let lastDropAt = -9
+  let lastStepUseAt = -9
+  let lastGhostAt = -9
+
+  // 무대 그림만 쓰는 값: 같은 조절 값의 패턴(고정 간격 코어)이 뛰는 최고 높이. 나쁜 예 줄에 회색 기준선으로 긋는다
+  const patternPeak = (() => {
+    const s = new RunnerSettings()
+    s.JumpSpeed = jumpSpeed
+    const r = new Runner(s)
+    let peak = -1
+    r.PeakReached.add((p) => (peak = p))
+    r.RequestJump()
+    for (let i = 0; i < 1000 && peak < 0; i++) r.Step(fixedStep)
+    return peak
+  })()
 
   for (const fps of FPS) {
     const lane: Lane = {
@@ -333,13 +353,17 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       lane.JumpStep = s.TotalSteps
       events.push(`${name} 점프`)
       lane.view.jumpX = r.X
+      lastStepUseAt = clock
     })
     r.PeakReached.add((peak) => lane.Peaks.push(peak))
     r.Landed.add(() => {
       const n = s.TotalSteps - lane.JumpStep
       events.push(`${name} 착지 · 점프 뒤 ${n}단계 (${F2(f(n * s.FixedStep))}초)`)
     })
-    r.Dashed.add(() => events.push(`${name} 돌진`))
+    r.Dashed.add(() => {
+      events.push(`${name} 돌진`)
+      lastStepUseAt = clock
+    })
     r.WallHit.add((x) => events.push(`${name} 벽에 막힘 · x ${F2(x)}`))
     r.DashEnded.add((d) => {
       events.push(`${name} 돌진 끝 · ${F2(d)}m`)
@@ -453,7 +477,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
       const a = lane.Stepper.Alpha
       x = r.PrevX + (r.X - r.PrevX) * a
       y = r.PrevY + (r.Y - r.PrevY) * a
-      pose = r.Y > 0 ? 'jump' : r.DashTimer > 0 ? 'run' : 'idle'
+      pose = r.Y > 0 ? 'jump' : r.DashStepsLeft > 0 ? 'run' : 'idle'
     } else {
       x = n!.x
       y = n!.y
@@ -464,7 +488,7 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
     const peakColor = naive ? (lane.view.heightBad ? RED : ORANGE) : GREEN
     const items: WorldItem[] = [
       { kind: 'box', x: 0, y: LANE_Y[i], w: 16, h: GROUND_H, fill: '#22314a' },
-      { kind: 'box', x: 12, y: gy, w: 0.2, h: 1.5, fill: '#5a6b86', label: i === 0 ? '벽' : undefined },
+      { kind: 'box', x: 12, y: gy, w: 0.2, h: 1.5, fill: '#5a6b86' },
       { kind: 'text', x: 0.3, y: gy + 1.95, text: d.Name, align: 'left', size: 22, color: '#e6edf7' },
       {
         kind: 'text',
@@ -494,20 +518,40 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         color: GRAY,
       },
     ]
+    // 벽 이름은 벽 위에 둔다 (벽 앞 x 11.70 에 막힌 하린과 겹치지 않게)
+    if (i === 0) items.push({ kind: 'text', x: 12.1, y: gy + 1.62, text: '벽', align: 'center', size: 18, color: '#e6edf7' })
     if (lastPeak >= 0 && lane.view.jumpX >= 0) {
+      // 높이 선은 하린 옆에 짧게 긋는다 (하린, 하린 이름표, 줄 왼쪽 글, 벽 글자와 겹치지 않게).
+      // 벽에서 먼 점프는 하린 오른쪽, 벽 가까이나 벽 너머의 점프는 왼쪽에 둔다
       const jx = Math.min(lane.view.jumpX, 15.2)
+      const right = jx < 10
+      const x0 = right ? jx + 0.35 : jx - 1.25
+      if (n && patternPeak > 0) {
+        // 나쁜 예 줄: 같은 조절 값의 패턴이 뛰는 높이를 회색 기준선으로 (높이 차가 눈에 보이게)
+        items.push(
+          { kind: 'box', x: x0 - 0.1, y: gy + patternPeak, w: 1.1, h: 0.03, fill: GRAY },
+          { kind: 'text', x: x0 - 0.2, y: gy + patternPeak - 0.08, text: `패턴 ${F2(patternPeak)}m`, align: 'right', size: 13, color: GRAY },
+        )
+      }
       items.push(
-        { kind: 'box', x: jx - 0.55, y: gy + lastPeak, w: 1.1, h: 0.04, fill: peakColor },
-        { kind: 'text', x: jx - 0.65, y: gy + lastPeak, text: `${F2(lastPeak)}m`, align: 'right', size: 15, color: peakColor },
+        { kind: 'box', x: x0, y: gy + lastPeak, w: 0.9, h: 0.04, fill: peakColor },
+        { kind: 'text', x: x0 + 0.45, y: gy + lastPeak + 0.1, text: `${F2(lastPeak)}m`, align: 'center', size: 15, color: peakColor },
       )
     }
+    if (r && i === 2 && Math.abs(r.X - x) + Math.abs(r.Y - y) > 0.02) {
+      // 144fps 줄: 규칙 위치(마지막 고정 단계)를 흐리게. 화면은 보간해 그 뒤를 따라간다
+      lastGhostAt = clock
+      items.push({ kind: 'actor', x: Math.min(r.X, 15.55), y: gy + r.Y, role: 'ally', pose, facing: 1, scale: ACTOR_SCALE, alpha: 0.35 })
+    }
+    if (r && i === 2 && clock - lastGhostAt < 0.6)
+      items.push({ kind: 'text', x: 15.8, y: gy + 1.95, text: '흐린 하린 = 규칙 위치 (보간 전)', align: 'right', size: 14, color: GRAY })
     if (n && lane.Passed) {
       items.push(
         { kind: 'arrow', x1: lane.view.passFrom, y1: gy + 0.35, x2: drawX - 0.3, y2: gy + 0.35, color: RED, dashed: true },
         { kind: 'text', x: drawX, y: gy + 1.55, text: x > 15.55 ? `✖ 벽 통과 x ${F2(x)}→` : '✖ 벽 통과', align: 'right', size: 16, color: RED },
       )
     }
-    items.push({ kind: 'actor', x: drawX, y: gy + y, role: 'ally', label: i === 2 ? '하린' : undefined, pose, facing: 1, scale: ACTOR_SCALE })
+    items.push({ kind: 'actor', x: drawX, y: gy + y, role: 'ally', label: i === 2 && pose === 'idle' ? '하린' : undefined, pose, facing: 1, scale: ACTOR_SCALE })
     if (d.LagNext) items.push({ kind: 'text', x: 9, y: gy + 1.95, text: `렉: 화면 프레임 하나가 ${F2(lagSpike)}초 걸리는 중`, align: 'center', size: 16, color: ORANGE })
     else if (clock - lane.view.lagEndAt < 0.8) items.push({ kind: 'text', x: 9, y: gy + 1.95, text: lane.view.lagText, align: 'center', size: 16, color: naive ? RED : ORANGE })
     return items
@@ -563,6 +607,8 @@ export const createSim: SimFactory = (values: ParamValues, naive: boolean): Patt
         if (clock - lastMoveInputAt < 0.3) active.push('loop', 'loop-runner')
         if (clock - lastLagInputAt < 0.3 || lanes.some((l) => l.Device.LagNext)) active.push('frame', 'frame-loop', 'loop-stepper')
         if (clock - lastDropAt < 0.4) active.push('dropped', 'stepper-dropped')
+        if (clock - lastStepUseAt < 0.3) active.push('step', 'stepper-step', 'step-runner')
+        if (clock - lastGhostAt < 0.1) active.push('view', 'runner-view')
       }
       return { world, active }
     },

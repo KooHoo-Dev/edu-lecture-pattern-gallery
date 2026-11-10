@@ -1,4 +1,4 @@
-# src 9d5dc5d98eed
+# src 109d4f8bbbc5
 # game-loop-fixed-step coarse-step naive=1
 0.30 in jump
 0.30 ev 60fps 점프
@@ -14,27 +14,27 @@
 1.30 ev 60fps 돌진
 1.30 ev 144fps 돌진
 1.32 ev 30fps 돌진
-1.48 ev 30fps 돌진 끝 · 3.00m
-1.48 ev 60fps 돌진 끝 · 3.00m
-1.48 ev 144fps 돌진 끝 · 2.92m
-1.50 st f30.x=9.00 f30.y=0.00 f30.frames=45 f60.x=9.00 f60.y=0.00 f60.frames=90 f144.x=8.92 f144.y=0.00 f144.frames=216
-2.00 st f30.x=9.00 f30.y=0.00 f30.frames=60 f60.x=9.00 f60.y=0.00 f60.frames=120 f144.x=8.92 f144.y=0.00 f144.frames=288
+1.48 ev 144fps 돌진 끝 · 3.02m
+1.50 st f30.x=9.00 f30.y=0.00 f30.frames=45 f60.x=9.00 f60.y=0.00 f60.frames=90 f144.x=9.02 f144.y=0.00 f144.frames=216
+1.50 ev 60fps 돌진 끝 · 3.25m
+1.52 ev 30fps 돌진 끝 · 3.50m
+2.00 st f30.x=9.50 f30.y=0.00 f30.frames=60 f60.x=9.25 f60.y=0.00 f60.frames=120 f144.x=9.02 f144.y=0.00 f144.frames=288
 2.20 in dash
 2.20 ev 60fps 돌진
 2.20 ev 144fps 돌진
 2.22 ev 30fps 돌진
 2.30 in lag
 2.43 ev 30fps 렉 프레임 0.15초 → Update(dt) 한 번에 적분
-2.43 ev !렉에 벽 통과: 30fps dt 0.15초 한 프레임에 x 10.50 → 12.75
+2.43 ev !렉에 벽 통과: 30fps dt 0.15초 한 프레임에 x 11.00 → 13.25
 2.43 ev 30fps 돌진 끝 · 3.75m
 2.43 ev 60fps 렉 프레임 0.15초 → Update(dt) 한 번에 적분
-2.43 ev !렉에 벽 통과: 60fps dt 0.15초 한 프레임에 x 10.50 → 12.75
+2.43 ev !렉에 벽 통과: 60fps dt 0.15초 한 프레임에 x 10.75 → 13.00
 2.43 ev 60fps 돌진 끝 · 3.75m
 2.43 ev 144fps 렉 프레임 0.15초 → Update(dt) 한 번에 적분
-2.43 ev !렉에 벽 통과: 144fps dt 0.15초 한 프레임에 x 10.48 → 12.73
+2.43 ev !렉에 벽 통과: 144fps dt 0.15초 한 프레임에 x 10.58 → 12.83
 2.43 ev 144fps 돌진 끝 · 3.81m
-2.50 st f30.x=12.75 f30.y=0.00 f30.frames=71 f60.x=12.75 f60.y=0.00 f60.frames=142 f144.x=12.73 f144.y=0.00 f144.frames=339
-3.00 st f30.x=12.75 f30.y=0.00 f30.frames=86 f60.x=12.75 f60.y=0.00 f60.frames=172 f144.x=12.73 f144.y=0.00 f144.frames=411
+2.50 st f30.x=13.25 f30.y=0.00 f30.frames=71 f60.x=13.00 f60.y=0.00 f60.frames=142 f144.x=12.83 f144.y=0.00 f144.frames=339
+3.00 st f30.x=13.25 f30.y=0.00 f30.frames=86 f60.x=13.00 f60.y=0.00 f60.frames=172 f144.x=12.83 f144.y=0.00 f144.frames=411
 3.00 in jump
 3.00 ev 30fps 점프
 3.00 ev 60fps 점프
@@ -43,6 +43,6 @@
 3.43 ev 30fps 착지 · 점프 뒤 0.43초
 3.48 ev 60fps 착지 · 점프 뒤 0.48초
 3.48 ev 144fps 착지 · 점프 뒤 0.49초
-3.50 st f30.x=12.75 f30.y=0.00 f30.frames=101 f60.x=12.75 f60.y=0.00 f60.frames=202 f144.x=12.73 f144.y=0.00 f144.frames=483
-4.00 st f30.x=12.75 f30.y=0.00 f30.frames=116 f60.x=12.75 f60.y=0.00 f60.frames=232 f144.x=12.73 f144.y=0.00 f144.frames=555
-end st f30.x=12.75 f30.y=0.00 f30.frames=116 f60.x=12.75 f60.y=0.00 f60.frames=232 f144.x=12.73 f144.y=0.00 f144.frames=555
+3.50 st f30.x=13.25 f30.y=0.00 f30.frames=101 f60.x=13.00 f60.y=0.00 f60.frames=202 f144.x=12.83 f144.y=0.00 f144.frames=483
+4.00 st f30.x=13.25 f30.y=0.00 f30.frames=116 f60.x=13.00 f60.y=0.00 f60.frames=232 f144.x=12.83 f144.y=0.00 f144.frames=555
+end st f30.x=13.25 f30.y=0.00 f30.frames=116 f60.x=13.00 f60.y=0.00 f60.frames=232 f144.x=12.83 f144.y=0.00 f144.frames=555

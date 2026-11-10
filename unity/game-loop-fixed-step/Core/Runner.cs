@@ -9,7 +9,8 @@ namespace PatternGallery.GameLoopFixedStep
         public float JumpSpeed = 8f;
         public float Gravity = 40f;
         public float DashSpeed = 15f;
-        public float DashTime = 0.19f;
+        /// <summary>돌진 시간 (초). 돌진을 시작할 때 고정 단계 수로 바꿔 센다 (0.02초 간격이면 10단계)</summary>
+        public float DashTime = 0.2f;
         public float StartX = 6f;
         /// <summary>벽의 왼쪽 면</summary>
         public float WallX = 12f;
@@ -24,7 +25,8 @@ namespace PatternGallery.GameLoopFixedStep
         public float X;
         public float Y;
         public float VelocityY;
-        public float DashTimer;
+        /// <summary>돌진이 남은 고정 단계 수. float 타이머를 빼며 세면 간격에 따라 한 단계 더 돌거나 덜 돌아, 정수로 센다</summary>
+        public int DashStepsLeft;
         /// <summary>직전 고정 단계가 끝났을 때의 위치. 화면이 두 단계 사이를 보간할 때 쓴다</summary>
         public float PrevX;
         public float PrevY;
@@ -66,7 +68,7 @@ namespace PatternGallery.GameLoopFixedStep
             X = PrevX = Settings.StartX;
             Y = PrevY = 0f;
             VelocityY = 0f;
-            DashTimer = 0f;
+            DashStepsLeft = 0;
             Peak = 0f;
             Rising = false;
             jumpRequested = false;
@@ -92,7 +94,7 @@ namespace PatternGallery.GameLoopFixedStep
             if (dashRequested)
             {
                 dashRequested = false;
-                DashTimer = Settings.DashTime;
+                DashStepsLeft = Math.Max(1, (int)Math.Round(Settings.DashTime / step)); // [2] 돌진 시간을 고정 단계 수로 바꿔 둔다
                 dashStartX = X;
                 Dashed?.Invoke();
             }
@@ -113,17 +115,17 @@ namespace PatternGallery.GameLoopFixedStep
                 if (wasInAir) Landed?.Invoke();
             }
 
-            if (DashTimer <= 0f) return;
+            if (DashStepsLeft <= 0) return;
             X += Settings.DashSpeed * step; // [2] 한 단계에 DashSpeed × step 보다 멀리 가지 않는다
-            DashTimer -= step;
+            DashStepsLeft--;
             bool hit = X + Settings.HalfWidth > Settings.WallX && X - Settings.HalfWidth < Settings.WallX + Settings.WallThickness;
             if (hit)
             {
                 X = Settings.WallX - Settings.HalfWidth;
-                DashTimer = 0f;
+                DashStepsLeft = 0;
                 WallHit?.Invoke(X);
             }
-            if (DashTimer <= 0f) DashEnded?.Invoke(X - dashStartX);
+            if (DashStepsLeft == 0) DashEnded?.Invoke(X - dashStartX);
         }
     }
 }
