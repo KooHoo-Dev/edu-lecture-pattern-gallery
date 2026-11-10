@@ -56,6 +56,10 @@ export default async function checkDomain({ project, ids, err, warn }) {
     // 패턴 필터: meta.pattern 이 갤러리 설정의 facet.options 에 있어야 필터 칩에 나온다 (묶음 2 에서 넷이 빠졌다)
     const config = readFileSync(join(root, 'src', 'gallery.config.tsx'), 'utf8')
     if (meta.pattern && !config.includes(`value: '${meta.pattern}'`)) err(`${id}: 패턴 '${meta.pattern}' 이 src/gallery.config.tsx 의 facet.options 에 없다 (구독 세션에 요청한다)`)
+    // 제목: src/registry.ts PLANNED 의 제목과 같아야 한다 (카드·프롬프트·Skill 이 같은 이름을 쓴다. 묶음 6 에서 갈라졌다)
+    const reg = readFileSync(join(root, 'src', 'registry.ts'), 'utf8')
+    const planned = new RegExp("id: '" + id + "', title: '([^']+)'").exec(reg)?.[1]
+    if (planned && meta.title !== planned) err(`${id}: 제목 '${meta.title}' 이 src/registry.ts PLANNED 의 '${planned}' 와 다르다`)
     const src = sourceHash(root, id)
     let compared = 0
     // 나쁜 예의 버그(! 줄)는 모두 첫 시나리오(자동 데모)에도 나와야 한다 (가이드 8절)

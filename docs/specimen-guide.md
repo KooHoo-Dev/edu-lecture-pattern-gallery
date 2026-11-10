@@ -119,7 +119,7 @@ kit-guide 2절의 공통 필드에 더해:
 | `scenarios` | 1~4개. **첫 번째가 자동 데모**이고 6초 안팎에 핵심 버그가 모두 나와야 한다. 나머지는 단계, 효과 끄기, 조절 값이 다른 경로를 하나씩 덮는다. `values` 로 조절 값을 바꿀 수 있다 |
 | `diagram` | 노드(클래스, 인터페이스는 `kind: 'interface'`)와 화살표(`call`, `ref`, `subscribe`, `implements`). 좌표는 0~100. 노드 폭은 무대 폭의 31% 라 한 줄에 셋까지. 클라이언트 → 인터페이스 화살표는 Unity/ 코드의 필드 형식과 같게 한다 (그림은 인터페이스를 가리키는데 코드는 구체 클래스를 들면 패턴의 핵심이 코드에서 안 보인다). 같은 두 노드 사이에 화살표를 둘 그리면 겹친다 |
 | `naiveDiagram` | 나쁜 예의 구조. 버그를 일으키는 값(플래그)이나 직접 참조를 노드로 |
-| `steps` | 입력 하나가 처리되는 흐름을 2~4단계로. `target` 은 강조할 노드·화살표 id (쉼표로 여럿) |
+| `steps` | 입력 하나가 처리되는 흐름을 2~4단계로. `target` 은 강조할 노드·화살표 id (쉼표로 여럿)  모든 단계가 어떤 시나리오에서 한 번은 화면에 보여야 한다 (보이지 않는 단계는 글로만 남는다). |
 | `unity.setup` | 넣는 순서. `Core/`, `Unity/` 를 `Assets/Patterns/<id>/` 에 두는 단계로 시작한다. 컴포넌트를 붙이면 `Reset` 이 넣는 기본 키를 적는다. 수업 프로젝트는 **2D 템플릿과 Universal 3D 템플릿** 둘 다라, 메뉴는 양쪽에 있는 것을 쓰거나 둘 다 적는다 (`GameObject > 2D Object > Sprites` 는 2D Sprite 패키지가 있어야 보인다). 카메라에 무엇이 보여야 하는지(위치나 Orthographic Size)도 적는다. UI 를 여러 개 만들면 겹치지 않게 위치(Pos X·Y)를 적는다. **메뉴와 Inspector 칸 이름은 6000.3 매뉴얼에서 확인한다**: UI 메뉴는 `GameObject > UI (Canvas) > …`, AudioSource 의 첫 칸은 `Audio Generator` (이전 버전의 `Audio Resource` 가 아니다. 클립을 넣는 칸이다) |
 
 나쁜 예의 증상은 웹 무대뿐 아니라 **Unity 에서 실제로 보이는 모습**으로도 적는다. 둘이 다르면 offNote 와 `mistakes` 에 둘 다 쓴다 (예: UGUI `Image.fillAmount` 는 0~1 로 잘려, 넘친 값이 '틀 밖으로' 가 아니라 '늘 꽉 참' 으로 보인다).
