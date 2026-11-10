@@ -1,4 +1,4 @@
-// 드론 어댑터: Input System 입력을 명령 객체(MoveCommand)로 바꿔 CommandHistory 에 넘기고, 드론의 격자 좌표를 Transform 에 옮긴다.
+// 드론 연결 컴포넌트: Input System 입력을 명령 객체(MoveCommand)로 바꿔 CommandHistory 에 넘기고, 드론의 격자 좌표를 Transform 에 옮긴다.
 // 게임 규칙은 여기 없다. 되돌리기와 리플레이 규칙을 바꾸려면 Core/ 의 CommandHistory 와 MoveCommand 를 고친다.
 using System.Collections.Generic;
 using System.Text;

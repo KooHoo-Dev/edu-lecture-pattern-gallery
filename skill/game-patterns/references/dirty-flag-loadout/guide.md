@@ -10,13 +10,11 @@
 - `Unity/HarinMover.cs`
 - `Unity/LoadoutInput.cs`
 
-모두 프로젝트의 `Assets/Patterns/dirty-flag-loadout/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/dirty-flag-loadout/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다.
-2. 하린을 만든다. Universal 3D 템플릿은 `GameObject > 3D Object > Capsule`, 2D 템플릿은 `GameObject > 2D Object > Sprites > Capsule` (2D Sprite 패키지, 2D 템플릿에 들어 있다). 이름을 Harin, Position 을 (0, 0, 0) 으로 둔다. 기본 카메라(2D 템플릿은 Orthographic Size 5, Universal 3D 는 (0, 1, −10) 원근)에 x −6 ~ 6 이 모두 보인다.
-3. Harin 에 `LoadoutInput` 을 붙인다. 붙이는 순간 `Reset` 이 시연 키(Q 냉각 셀 줍기, W 마지막 칸 버리기, E 수리 키트 쓰기, R 산소 캔 합금)를 넣는다.
-4. 같은 Harin 에 `HarinMover` 를 붙인다. `Reset` 이 같은 오브젝트의 `LoadoutInput` 을 `Loadout Input` 칸에 넣는다. `[RequireComponent]` 라 `LoadoutInput` 이 없으면 함께 붙지만, 위 순서대로 먼저 붙여 두는 편이 확실하다 (칸이 비어 있으면 Harin 의 `LoadoutInput` 을 끌어 넣는다). Left X −6, Right X 6 사이를 걷는다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/dirty-flag-loadout/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+2. 하린을 만든다. Universal 3D 템플릿은 `GameObject > 3D Object > Capsule`, 2D 템플릿은 `GameObject > 2D Object > Sprites > Capsule` (2D Sprite 패키지, 2D 템플릿에 들어 있다). 이름을 Harin, Position 을 (0, 0, 0) 으로 둔다. 기본 카메라(2D 템플릿은 Orthographic Size 5, Universal 3D 는 (0, 1, -10) 원근)에 x -6 ~ 6 이 모두 보인다.
+3. Harin 에 `LoadoutInput` 을 붙인다. 붙이는 순간 `Reset` 이 기본 키(Q 냉각 셀 줍기, W 마지막 칸 버리기, E 수리 키트 쓰기, R 산소 캔 합금)를 넣는다.
+4. 같은 Harin 에 `HarinMover` 를 붙인다. `Reset` 이 같은 오브젝트의 `LoadoutInput` 을 `Loadout Input` 칸에 넣는다. `[RequireComponent]` 라 `LoadoutInput` 이 없으면 함께 붙지만, 위 순서대로 먼저 붙여 두는 편이 확실하다 (칸이 비어 있으면 Harin 의 `LoadoutInput` 을 끌어 넣는다). Left X -6, Right X 6 사이를 걷는다.
 5. Play 하면 화면 왼쪽 위에 "다시 계산 1회 · 총 무게 11.0 / 30 · 속도 2.53" 과 칸 목록이 보인다. Q 로 셀을 줍고 E 로 수리 키트를 써 본다.
 
 ## 확인
@@ -36,7 +34,7 @@ E 로 수리 키트를 쓰는 순간 무게 글이 줄고 하린이 빨라지며
 4. **바뀌지 않았으면 캐시를 그대로 쓴다**: 하린은 매 프레임 속도를 읽지만 표시가 꺼져 있으면 캐시를 돌려줄 뿐이다. 자동 데모 6초 동안 왼쪽 위 "속도 읽기" 는 360회까지 늘지만 "다시 계산" 은 처음 한 번과 입력 수만큼이다 (매 프레임 계산하던 코드라면 360번). 책의 예는 씬 그래프다: 부모가 움직이면 자식들의 월드 변환을 바로 다시 계산하지 않고 표시만 해 두었다가, 그릴 때 한 번 계산한다. Unity 물리도 같은 생각이다: Transform 을 바꿔도 물리에 바로 맞추지 않고 모아 두었다가, 다음 물리 단계 전이나 `Physics.SyncTransforms` 를 부를 때 한꺼번에 맞춘다.
 
 ## 주의할 점
-- 무게 글은 `LoadoutInput` 의 `OnGUI` 로 그리는 확인용 화면이다 (IMGUI). 실제 게임은 UGUI·TextMeshPro 로 만들고, 같은 `Recalculated` 핸들러에서 글을 고친다.
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다. 무게 글은 같은 `Recalculated` 핸들러에서 고친다.
 - 무게는 읽을 때 계산된다. `HarinMover` 를 빼면 아무도 `Speed` 를 읽지 않아 다시 계산도 무게 글 갱신도 일어나지 않는다. 화면에만 쓰는 값이면 `CountChanged` 핸들러에서 `TotalWeight` 를 한 번 읽어도 된다 (그러면 바뀔 때마다 계산한다).
 - Play 중 Inspector 에서 `kitWeight`, `cellWeight` 를 바꾸면 `OnValidate` 가 `SetUnitWeight` 로 들고 있는 칸에도 넣는다. 그 이름의 칸을 들고 있어 값이 실제로 바뀔 때만 표시를 켜므로, 그때만 다시 계산 횟수가 하나 는다 (다 쓴 수리 키트의 무게를 바꾸면 늘지 않는다).
 - `HarinMover` 는 `transform.position` 을 고쳐 걷는다 (물리가 없는 확인용). Rigidbody 를 붙이면 `FixedUpdate` 에서 `MovePosition` 으로 바꾼다.

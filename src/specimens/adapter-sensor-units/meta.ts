@@ -6,7 +6,7 @@ export const meta: PatternMeta = {
   titleEn: 'Adapter Pattern: Sensor Units',
   pattern: '어댑터 패턴',
   group: 'F',
-  order: 4,
+  order: 1,
   oneLiner: '장비마다 다른 API 와 단위를 어댑터 한 곳에서 우리 모양으로 바꿔, 화면과 경보는 한 모양만 안다',
   goals: [
     'B 구역 장비를 신형으로 바꾸자 막대가 틀 밖으로 뻗고 경보가 안 울리는 이유를, HUD 의 두 곳이 장비 API 를 각자 부르며 단위를 따로 바꾼 구조에서 찾을 수 있다.',
@@ -134,7 +134,7 @@ export const meta: PatternMeta = {
     { n: 3, label: '어댑터가 단위를 0~1 float 로 바꾼다', body: '`GeigerXAdapter` 가 `percent / 100f` 로 75 를 0.75 로 바꾼다. 변환은 이 한 줄뿐이고, `100f` 라서 실수 나눗셈이다 (`/ 100` 이면 75 / 100 = 0). 기존 장비 어댑터는 이미 0~1 이라 이름만 맞춘다.', target: 'geiger-adapter,sensor,geiger-adapter-sensor' },
     { n: 4, label: 'HUD 가 막대와 경보를 같은 값으로 정한다', body: '받은 `level` 하나로 막대(`LevelShown`)를 채우고 `level >= AlarmLevel` 로 경보등(`AlarmChanged`)을 정한다. 두 판단이 같은 값을 쓰므로 막대가 경보 눈금을 넘었는데 경보등이 꺼진 일이 생기지 않는다.', target: 'hud' },
   ],
-  offNote: 'B 구역 장비를 신형으로 바꿨더니 막대가 화면 밖으로 뻗고, 방사선이 위험 수준인데 경보가 안 울린다. Unity 에서 막대를 RectTransform 의 Scale X(너비)로 그리면 이 무대처럼 틀 밖으로 뻗고, Filled Image 의 fillAmount 에 넣으면 0~1 로 잘려 B 막대가 늘 꽉 찬 채로 보인다 (0.01 이어도 꽉 참). HUD 가 장비를 직접 아는 흔한 코드다. `DrawBars` 와 `CheckAlarm` 이 각자 `if (s is LegacyProbe) … else if (s is GeigerX) …` 로 장비 API 를 부른다. 신형을 들이면서 `DrawBars` 는 `ReadPercent()` 의 0~100 을 그대로 막대에 넣었고 (✖ 막대 넘침, 0.50 이 50.00 이 된다), `CheckAlarm` 은 변환을 넣었지만 `ReadPercent() / 100` 이 정수 나눗셈이라 100 미만이면 0 이다 (✖ 경보 누락, 빨간 `75 / 100 = 0`). 두 버그는 서로 다른 줄의 실수라 하나를 고쳐도 다른 하나는 남는다. 어느 순서로 누르든 같다: B 가 신형인 동안 방사선이 0 보다 크면 B 막대가 넘치고, 경보 기준 이상이면 B 경보만 꺼져 있다. 기존 장비로 되돌리면 둘 다 사라진다 (기존 장비 분기는 맞다). 방사선이 1.00 이면 100 / 100 = 1 이라 경보가 켜져 두 번째 버그가 가려진다.',
+  offNote: 'B 구역 장비를 신형으로 바꿨더니 막대가 틀 밖으로 뻗고, 방사선이 위험 수준인데 경보가 안 울린다. HUD 의 `DrawBars` 와 `CheckAlarm` 이 각자 `if (s is LegacyProbe) … else if (s is GeigerX) …` 로 장비 API 를 부르는 흔한 코드다. `DrawBars` 는 `ReadPercent()` 의 0~100 을 그대로 막대에 넣었고 (막대 넘침, 0.50 이 50.00), `CheckAlarm` 의 `ReadPercent() / 100` 은 정수 나눗셈이라 100 미만이면 0 이다 (경보 누락). 서로 다른 줄의 실수라 하나를 고쳐도 다른 하나가 남고, 방사선이 1.00 이면 100 / 100 = 1 이라 경보 버그가 가려진다. Unity 에서 Filled Image 의 fillAmount 로 그리면 0~1 로 잘려 B 막대가 늘 꽉 찬 채로 보인다.',
   mistakes: [
     { title: '신형 장비로 바꾸자 막대가 틀 밖으로 뻗는다 (Filled Image 면 늘 꽉 찬다)', body: '막대를 RectTransform 의 Scale X(너비)로 그리면 50 이 들어가 틀 밖으로 뻗는다. Filled Image 의 fillAmount 에 넣으면 0~1 로 잘려 B 막대가 늘 꽉 찬 채로 보인다 (방사선이 0.01 이어도 꽉 참). 외부 SDK 를 쓰는 곳(막대 그리기, 경보 판단, 기록 저장…)마다 장비를 직접 부르고 단위를 따로 바꿨고, 한 곳이 변환을 빠뜨렸다. 쓰는 곳이 늘수록 빠뜨릴 자리도 는다. 장비마다 어댑터를 하나 두고 변환을 그 안 한 곳에서 한다. 쓰는 곳은 `Level01` 만 부른다.' },
     { title: '방사선이 위험 수준인데 신형 장비 구역만 경보가 안 울린다', body: '`ReadPercent() / 100` 은 `int / int` 라 정수 나눗셈이다. 75 / 100 은 0.75 가 아니라 0 이고, 결과를 `float` 에 넣어도 이미 0 이다. 한쪽을 실수로 만든다: `/ 100f` 나 `(float)percent / 100`. 이 표본은 `GeigerXAdapter` 한 곳에서 `percent / 100f` 로 한다.' },
@@ -144,7 +144,7 @@ export const meta: PatternMeta = {
   ],
   unity: {
     setup: [
-      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/adapter-sensor-units/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Core/VendorDevices.cs` 는 장비 SDK 흉내다. 실제 프로젝트에서는 업체가 준 패키지가 그 자리이고, 고치지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
+      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/adapter-sensor-units/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Core/VendorDevices.cs` 는 장비 SDK 흉내다. 실제 프로젝트에서는 업체가 준 패키지가 그 자리이고, 고치지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
       '`GameObject > UI (Canvas) > Image` 로 Image 를 하나 만든다 (Canvas 와 EventSystem 이 함께 생긴다). 이름을 `BarA` 로 바꾸고 Rect Transform 을 Pos X 0, Pos Y 120, Width 400, Height 30 으로 둔다. Source Image 에 스프라이트(기본 `UISprite` 도 된다)를 넣어야 Image Type 칸이 보인다. Image Type 을 Filled, Fill Method 를 Horizontal, Fill Origin 을 Left 로 둔다.',
       '`BarA` 를 선택하고 `Ctrl+D` 로 복제해 이름을 `BarB`, Pos Y 를 60 으로 바꾼다. 같은 메뉴로 Image 를 둘 더 만들어 `LampA` (Pos X -240, Pos Y 120, Width 30, Height 30), `LampB` (Pos X -240, Pos Y 60, Width 30, Height 30) 로 둔다. 경보등은 Filled 가 아니어도 된다. Canvas 는 Screen Space - Overlay 그대로라 카메라 위치와 상관없이 Game 뷰에 보인다.',
       'Canvas 오브젝트에 `SensorStation` 을 붙인다. 붙이는 순간 `Reset` 이 기본 키(Q 오름, W 내림, E B 구역 장비 바꾸기)를 넣는다. `Bar A`, `Bar B`, `Lamp A`, `Lamp B` 칸에 위 Image 넷을 끌어 넣는다.',
@@ -156,7 +156,7 @@ export const meta: PatternMeta = {
       '이 표본의 HUD 는 오름·내림·교체 입력이 있을 때만 장비를 다시 읽는다 (`RadiationSite.Rise`, `Fall`, `SwapB` 가 `Hud.Refresh` 나 `Hud.Attach` 를 부른다). 실제 장비 SDK 가 값을 스스로 바꾸면 `Update` 에서 0.2초 같은 간격으로 `Site.Hud.Refresh()` 를 부른다. 그때마다 `LevelShown` 이 불리므로 Console 기록은 꺼 둔다 (`Log Events` 칸).',
       'Play 중에 Inspector 에서 `alarmLevel`, `riseStep` 을 바꾸면 `OnValidate` 가 코어에 넣고 `Site.Hud.Refresh()` 로 두 구역을 바로 다시 그린다. 그래서 경보 기준을 바꾸는 순간 A, B 경보등이 함께 새 기준을 따른다 (다시 그리지 않으면 옛 기준이 남았다가, 교체(E) 때 B 만 다시 읽혀 A, B 가 어긋난다). `riseStep` 은 다음 오름·내림부터 쓴다. 슬라이더를 끄는 동안 Refresh 마다 Console 에 막대 줄이 남는다. 방사선 값과 B 구역 장비 상태는 처음 만든 코어에 남으므로 처음부터 하려면 Play 를 다시 누른다.',
       '`RadiationField` 는 방사선 값을 1% 단위 정수로 든다. float 로 0.10 을 더하고 빼면 0.70 이 0.69999993 이 되어, 0~1 을 그대로 쓰는 `LegacyProbe` 구역은 기준 0.7 미만으로 꺼지고 반올림하는 `GeigerX` 구역은 70 → 0.70 으로 켜진다. 어댑터 탓이 아니라 시연용 값의 오차이므로, 시연 값은 정수로 들어 두 장비가 늘 같은 float 를 받게 했다.',
-      '왼쪽 위 글(실제 방사선, 구역마다 장비 이름과 값)은 IMGUI(`OnGUI`)로 그리는 확인용이다. 실제 게임은 UGUI·TextMeshPro 로 그린다. 글은 이벤트 핸들러에서 만들고 `OnGUI` 는 그리기만 한다.',
+      '왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.',
       '경보등은 색(초록 ↔ 빨강)만 바꾸고 깜빡이지 않는다. 깜빡이게 하려면 1초에 3번을 넘지 않게 하고, 색만으로 알리지 않게 왼쪽 위 글처럼 "경보 켜짐" 글을 함께 둔다.',
     ],
   },

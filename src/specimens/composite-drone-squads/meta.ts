@@ -6,7 +6,7 @@ export const meta: PatternMeta = {
   titleEn: 'Composite Pattern: Drone Squad Orders',
   pattern: '컴포지트 패턴',
   group: 'F',
-  order: 3,
+  order: 4,
   oneLiner: '드론 하나와 편대를 같은 인터페이스로 다뤄, 편대 안 편대까지 명령 한 번이 끝까지 닿는다',
   goals: [
     '지원 편대를 합류시킨 뒤 귀환 명령이 그 편대에만 닿지 않는 이유를, 드론 목록과 편대 목록을 따로 들고 두 단계만 도는 지휘 코드에서 찾을 수 있다.',
@@ -70,7 +70,7 @@ export const meta: PatternMeta = {
   ],
   diagram: {
     nodes: [
-      { id: 'input', label: 'SquadCommandInput', sub: '연결 컴포넌트 · IUnit Root 에 명령', x: 50, y: 8 },
+      { id: 'input', label: 'SquadCommandInput', sub: 'MonoBehaviour · IUnit Root 에 명령', x: 50, y: 8 },
       { id: 'iunit', label: 'IUnit', sub: 'Sortie · Recall · CountDrones', x: 42, y: 38, kind: 'interface' },
       { id: 'drone', label: 'Drone', sub: '잎 · Tick 으로 날고 Arrived', x: 18, y: 88 },
       { id: 'squad', label: 'Squad', sub: '가지 · 자식마다 같은 메서드', x: 56, y: 88 },
@@ -105,7 +105,7 @@ export const meta: PatternMeta = {
     { n: 3, label: '하위 편대도 같은 일을 되풀이한다', body: '자식이 편대 B 면 `B.Recall` 이 다시 D2, D3, C 마다 부르고, C 가 또 D4, D5 에 부른다. 같은 메서드가 잎까지 스스로 내려가므로 세 단계든 열 단계든 지휘 코드는 그대로다. `CountDrones` 와 `Tick` 도 같은 길로 내려간다. Unity 쪽도 같은 컴포지트다: `SquadNode` 는 자식 오브젝트가 드론인지 편대인지 `is` 로 묻지 않고 `IUnitNode.Build` 하나만 불러, 자식 편대가 다시 자기 자식을 넣으며 Hierarchy 를 내려가 트리를 만든다. 합류는 `B.Add(C)` 한 번이고, 자기 자신·조상·이미 소속이 있는 편대는 받지 않는다 (`JoinRejected`).', target: 'children,children-iunit,iunit,squad-iunit' },
     { n: 4, label: '잎이 실제로 날고 도착을 알린다', body: '움직이는 것은 `Drone.Tick` 뿐이다. `flySpeed` 로 목적지(정찰 지점이나 기지 자리)를 향해 날고, 닿으면 `Arrived` 를 알린다. 편대가 자식의 이벤트를 위로 올려 본대 구독자 하나가 모두 듣는다. Unity 에서는 `DroneUnit.Update` 가 코어 위치를 transform 에 옮긴다.', target: 'drone,drone-iunit' },
   ],
-  offNote: '지원 편대를 합류시킨 뒤 귀환 명령을 내렸더니 그 편대만 밖에 남는다. 드론 목록(`drones`)과 편대 목록(`squads`)을 따로 들고 지휘 코드가 `foreach` 를 두 단계로 겹쳐 도는 흔한 코드다. 하위 편대가 없던 시절에 쓴 `RecallAll` 은 `root.drones` 와 `root.squads` 의 각 `drones` 까지만 돈다. 합류로 C 가 B 의 `squads` 에 들어가면 귀환 명령이 D4, D5 에 닿지 않고 (✖ 귀환 누락, 빨간 `명령 못 받음`), 같은 두 단계로 세는 `CountDrones` 는 5대를 3대로 센다 (✖ 수 오산, `(실제 5)`). 그래서 D1~D3 이 돌아오면 화면은 `기지 도착 3 / 전체 3` 으로 다 돌아왔다고 보인다. `SortieAll` 도 같은 두 단계라 합류 뒤 출격도 D4, D5 에 닿지 않지만, C 는 처음부터 나가 있어 위치는 같다 (무대는 회색 `출격 못 받음` 과 점선 `D4 –` 칩으로만 표시하고, 결과가 같아 ✖ 로 세지 않는다). 같은 코드를 Unity 에 두면 합류 뒤 귀환했을 때 IMGUI 화면 왼쪽 위에 `편대 드론 수 3`, `기지 도착 3 / 전체 3` 이 보이고 Game 뷰 오른쪽에 D4, D5 만 떠 있다 (빨간 표시는 없다). 어느 순서로 누르든 같다: 합류하지 않으면 나쁜 예도 맞고, 합류하는 순간 수가 틀리고, 합류한 뒤 귀환할 때마다 C 가 남는다. 세 번째 `foreach` 를 덧대면 네 단계가 생길 때 또 빠진다. 개별과 묶음을 다르게 다루면 중첩될수록 분기가 감당이 안 된다.',
+  offNote: '지원 편대를 합류시킨 뒤 귀환 명령을 내렸더니 그 편대만 밖에 남는다. 드론 목록(`drones`)과 편대 목록(`squads`)을 따로 들고 `foreach` 를 두 단계로 겹쳐 도는 흔한 지휘 코드다. 합류로 C 가 B 의 `squads` 에 들어가면 세 번째 단계가 생겨, `RecallAll` 이 D4, D5 에 닿지 않고 (귀환 누락) 같은 두 단계로 세는 `CountDrones` 는 5대를 3대로 센다 (수 오산). 그래서 D1~D3 이 돌아오면 화면 글은 `기지 도착 3 / 전체 3` 인데, Unity 의 Game 뷰 오른쪽에는 D4, D5 가 떠 있다. 합류하지 않으면 나쁜 예도 맞고, `foreach` 를 하나 더 덧대도 네 단계가 생기면 또 빠진다.',
   mistakes: [
     { title: '지원 편대를 합류시켰더니 귀환 명령이 그 편대에만 닿지 않는다', body: '지휘 코드가 `foreach (d in root.drones)` 와 `foreach (s in root.squads) foreach (d in s.drones)` 처럼 정해진 단계만 돈다. 편대 안에 편대가 생기면 세 번째 단계의 드론은 아무도 부르지 않는다. 드론 수를 세는 코드도 같은 모양이라 함께 틀린다. Unity 에서는 왼쪽 위 글이 `편대 드론 수 3`, `기지 도착 3 / 전체 3` 으로 다 돌아온 것처럼 보이고, Game 뷰 오른쪽에 D4, D5 만 떠 있다. 편대가 자식마다 같은 메서드를 부르게 하면(`child.Recall()`) 단계 수를 코드에 적을 일이 없다.' },
     { title: '편대 안 편대를 처리하려고 `is Squad` 분기를 넣었더니 명령마다 if 가 늘어난다', body: '`if (u is Drone d) d.Recall(); else if (u is Squad s) …` 를 출격, 귀환, 수 세기마다 쓰면 새 종류(수송 드론 묶음 등)를 더할 때 모든 곳을 고쳐야 하고, 한 곳을 빠뜨리면 그 명령만 안 닿는다. 공통 명령은 `IUnit` 에 두고 각자 구현한다. 편대에만 있는 `Add` 는 이 표본처럼 `Squad` 에만 두거나(안전성: 드론에 넣는 코드를 컴파일이 막는다), `IUnit` 에 두고 `Drone.Add` 가 예외를 던지게 한다(투명성: 쓰는 쪽이 종류를 몰라도 된다). 어느 쪽이든 `Sortie`, `Recall` 에는 분기가 없어야 한다.' },
@@ -115,8 +115,8 @@ export const meta: PatternMeta = {
   ],
   unity: {
     setup: [
-      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/composite-drone-squads/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
-      'Main Camera 를 Position (7.5, 3, -10), Projection `Orthographic`, Size 4.5 로 둔다 (2D 템플릿은 이미 Orthographic 이다). 16:9 Game 뷰에서 가로 -0.5~15.5, 세로 -1.5~7.5 가 보인다.',
+      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/composite-drone-squads/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
+      '`Main Camera` 를 Position (7.5, 3, -10) 에 두고 Projection 을 `Orthographic`, Size 를 4.5 로 한다 (2D 템플릿은 처음부터 Orthographic 이다). 16:9 Game 뷰에서 가로 -0.5~15.5, 세로 -1.5~7.5 가 보인다.',
       '`GameObject > Create Empty` 로 `본대` 를 만들고 Position 을 (0, 0, 0) 으로 둔다. Hierarchy 에서 `본대` 를 오른쪽 클릭해 `Create Empty` 로 자식 `B` 를 만든다. 빈 곳을 오른쪽 클릭해 `Create Empty` 로 본대 밖에 `C` 를 만든다. 셋 다 Position (0, 0, 0) 이고, 이름은 사건 기록과 같게 `본대`, `B`, `C` 로 짓는다.',
       '드론 다섯을 만든다. 부모를 오른쪽 클릭해 2D 템플릿은 `2D Object > Sprites > Capsule`, Universal 3D 템플릿은 `3D Object > Capsule` 을 고르면 그 아래 자식으로 생긴다. Scale 은 (0.4, 0.4, 0.4). `D1` 은 `본대` 아래 Position (0.7, 1, 0), `D2` (1.6, 1, 0) 와 `D3` (2.5, 1, 0) 은 `B` 아래, `D4` (3.4, 1, 0) 와 `D5` (4.3, 1, 0) 는 `C` 아래에 둔다. 부모가 모두 (0, 0, 0) 이라 이 값이 월드 위치이고, Play 할 때의 이 자리가 기지 자리가 된다.',
       '`D1`~`D5` 에 `DroneUnit` 을 붙인다. Patrol Height 를 D1 2, D2 1, D3 3, D4 1, D5 2.4 로 넣고, `D4` 와 `D5` 는 Extra Reach 를 3 과 3.8 로, Start On Patrol 을 켠다. `본대`, `B`, `C` 에는 `SquadNode` 를 붙인다.',
@@ -130,7 +130,7 @@ export const meta: PatternMeta = {
       '`SetParent(transform, true)` 의 두 번째 값 `worldPositionStays` 가 true 면 C 오브젝트의 월드 위치를 그대로 두고 부모만 바꾼다. false 면 local 위치를 그대로 두어 월드 위치가 B 기준으로 바뀐다. 이 표본은 B 와 C 가 모두 (0, 0, 0) 이라 어느 쪽이든 C 가 움직이지 않고, 드론은 `DroneUnit.Update` 가 월드 위치를 넣어 튀지 않는다. 편대 오브젝트를 다른 자리에 두거나 C 에 깃발 같은 표시물을 달았다면 true 여야 한다.',
       '본대의 `Tick` 하나가 트리 안 드론만 움직인다. 합류 전의 C 는 아무도 Tick 하지 않지만 명령을 받을 길도 없어 정찰 지점에 떠 있기만 한다. 합류 전에도 C 를 따로 움직이려면 C 에 자기 지휘 컴포넌트를 두고, 합류할 때 그쪽 Tick 을 멈춘다 (두 곳에서 Tick 하면 두 배로 빠르다).',
       'Play 중 Inspector 에서 `flySpeed` 를 바꾸면 `OnValidate` 가 코어에 넣어 바로 빨라진다. `patrolDistance` 를 바꾸면 정찰 지점으로 나는 중인 드론은 곧바로 새 지점으로 방향을 틀고, 이미 정찰 지점에 떠 있는 드론은 다음 명령까지 그 자리에 있다 (`Drone.Tick` 은 나는 중일 때만 움직인다). C 의 처음 자리는 트리를 만들 때의 값으로 정해진다.',
-      '왼쪽 위 글은 IMGUI(`OnGUI`)로 그리는 확인용이다. 실제 게임은 UGUI·TextMeshPro 로 그린다. 글은 코어 이벤트 핸들러에서 만들고 `OnGUI` 는 그리기만 한다. `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다.',
+      '왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.',
     ],
   },
   prompt: {

@@ -1,4 +1,4 @@
-// 무기 출력 어댑터: Input System 입력을 코어(BuffSet)에 넘기고, 출력이 바뀌면(PowerChanged) 그 자리에서 UGUI 에 옮긴다.
+// 무기 출력 연결 컴포넌트: Input System 입력을 코어(BuffSet)에 넘기고, 출력이 바뀌면(PowerChanged) 그 자리에서 UGUI 에 옮긴다.
 // 버프 지속 시간은 코루틴이 아니라 코어의 Tick 이 센다. 그래서 StopCoroutine 으로 끝 처리(빼기)를 건너뛰는 일이 생기지 않는다.
 // 게임 규칙은 여기 없다. 층 순서나 갱신 규칙을 바꾸려면 Core/BuffSet.cs 를 고친다.
 using UnityEngine;

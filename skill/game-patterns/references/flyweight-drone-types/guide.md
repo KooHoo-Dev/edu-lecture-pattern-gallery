@@ -2,7 +2,7 @@
 
 종류마다 같은 값은 한 객체를 모든 드론이 함께 쓰고, 드론마다 다른 값은 드론이 든다
 
-패턴: 플라이웨이트. 난이도 2/3. 주제: 플라이웨이트, 타입 객체, ScriptableObject, 공유 데이터, 내재·외재 상태.
+패턴: 플라이웨이트. 난이도 2/3. 주제: 타입 객체, ScriptableObject, 공유 데이터, 내재·외재 상태.
 
 ## 파일
 - `Core/Drone.cs`
@@ -11,8 +11,6 @@
 - `Unity/DroneTypeAsset.cs`
 - `Unity/DroneView.cs`
 - `Unity/SquadInput.cs`
-
-모두 프로젝트의 `Assets/Patterns/flyweight-drone-types/` 아래에 같은 하위 폴더로 복사한다.
 
 ## 넣는 순서
 1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/flyweight-drone-types/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
@@ -44,8 +42,7 @@ Q 로 S1 을 때리면 S1 의 HP 막대만 줄고 S2, S3 은 그대로이며, R 
 - `Scout Count` 와 두 에셋의 값은 Play 를 시작할 때 한 번만 읽는다. `Damage`, `Patch Hp` 는 Play 중에 바꿔도 `OnValidate` 가 코어에 넣어 다음 입력부터 쓴다. Play 중에 에셋의 Max Hp 를 Inspector 에서 바꿔도 이미 만든 `DroneType` 에는 들어가지 않는다 (R 로 바꾼다).
 - HP 막대는 `Bar Full Hp`(기본 10)를 꽉 찬 값으로 그린다. 종류마다 최대 HP 로 나누면 중장갑과 정찰형의 막대가 같은 길이로 보이고, 밸런스 수정 뒤에도 막대가 그대로라 반영이 안 보인다. 최대 HP 가 이 값을 넘으면 막대가 꽉 찬 채로 보인다.
 - 밸런스 수정 이벤트(`TypePatched`)는 종류 하나만 알린다. 코어 값은 공유라 바로 바뀌지만, 화면의 막대(Transform 크기)는 그렸을 때 그대로라 `SquadInput.OnTypePatched` 가 그 종류를 가리키는 드론 뷰를 모두 다시 그린다. 이것을 빼면 다음 피해 때 맞은 드론의 최대 HP 막대만 늘어난다.
-- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. 실제 게임은 UGUI 나 TextMeshPro 로 만든다.
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 두 번 맞는다.
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
 
 ## 흔한 실수
 - **드론 한 대를 때렸는데 같은 종류가 모두 같이 깎인다**: 지금 HP 를 종류 데이터(`ScriptableObject` 에셋)에 두었다. 에셋은 프로젝트에 하나뿐이고 그 종류의 드론이 모두 같은 에셋을 가리키므로, 지금 HP 도 하나를 함께 쓴다. 종류마다 같은 값(최대 HP, 속도, 색)만 종류 데이터에 두고, 드론마다 다른 값(지금 HP, 위치, 표적)은 드론 쪽(`Drone` 객체나 드론의 컴포넌트 필드)에 둔다. 새로 나온 드론이 다친 채 나오는 것도 같은 원인이다.

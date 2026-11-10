@@ -21,11 +21,11 @@ namespace PatternGallery.ObjectPoolProjectiles
         /// <summary>한 번 쓰고 돌아온 탄을 다시 빌려 준 횟수 (그만큼 Instantiate 를 아꼈다)</summary>
         public int ReuseCount { get; private set; }
 
-        /// <summary>탄을 새로 만들었을 때. Unity 어댑터가 여기서 한 번만 Instantiate 한다 (createFunc 자리)</summary>
+        /// <summary>탄을 새로 만들었을 때. 연결 컴포넌트가 여기서 한 번만 Instantiate 한다 (createFunc 자리)</summary>
         public event Action<Projectile> Created;
-        /// <summary>탄을 빌려 줬을 때 (탄, 한 번 쓰고 돌아온 탄인가). Unity 어댑터가 SetActive(true) 한다 (actionOnGet 자리. 발사 값은 Get 다음에 Launch 가 넣는다)</summary>
+        /// <summary>탄을 빌려 줬을 때 (탄, 한 번 쓰고 돌아온 탄인가). 연결 컴포넌트가 SetActive(true) 한다 (actionOnGet 자리. 발사 값은 Get 다음에 Launch 가 넣는다)</summary>
         public event Action<Projectile, bool> Taken;
-        /// <summary>탄을 돌려받았을 때. Unity 어댑터가 SetActive(false) 한다 (actionOnRelease 자리)</summary>
+        /// <summary>탄을 돌려받았을 때. 연결 컴포넌트가 SetActive(false) 한다 (actionOnRelease 자리)</summary>
         public event Action<Projectile> Returned;
         /// <summary>이미 대기 중인 탄을 또 돌려주려 했을 때. 받지 않는다 (collectionCheck 자리)</summary>
         public event Action<Projectile> ReleaseRejected;

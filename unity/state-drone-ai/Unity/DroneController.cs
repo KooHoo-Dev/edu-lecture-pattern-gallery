@@ -1,4 +1,4 @@
-// 드론 어댑터: 대상(플레이어) Transform 의 x 를 코어(Drone)에 넘기고, 코어의 x 와 상태를 Transform, 색, Animator, 화면 글에 옮긴다.
+// 드론 연결 컴포넌트: 대상(플레이어) Transform 의 x 를 코어(Drone)에 넘기고, 코어의 x 와 상태를 Transform, 색, Animator, 화면 글에 옮긴다.
 // 게임 규칙은 여기 없다. 순찰·추격·공격·파괴의 규칙을 바꾸려면 Core/ 의 상태 클래스를 고친다.
 using UnityEngine;
 using UnityEngine.InputSystem;

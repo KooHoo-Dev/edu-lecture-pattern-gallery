@@ -19,7 +19,7 @@
 
 ```text
 unity/<id>/Core/*.cs              순수 C# 코어. UnityEngine 을 참조하지 않는다. 원본이다
-unity/<id>/Unity/*.cs             MonoBehaviour 어댑터. 입력(Input System), 수명, 화면만 맡는다
+unity/<id>/Unity/*.cs             MonoBehaviour 연결 컴포넌트. 입력(Input System), 수명, 화면만 맡는다
 unity/<id>/Naive/*.cs             나쁜 예. 문제 줄 끝에 // [!] (설명)
 truth/<id>/Target.cs              하네스 어댑터 [SimTarget("<id>")]. 코어와 나쁜 예를 입력으로 돌리고 사건과 상태를 글로 꺼낸다
 truth/<id>/*.log                  node tools/truth.mjs <id> 가 만든 기록 (생성물, 커밋)

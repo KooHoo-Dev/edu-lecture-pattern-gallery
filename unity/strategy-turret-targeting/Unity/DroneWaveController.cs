@@ -1,4 +1,4 @@
-// 드론 웨이브 어댑터: 코어 DroneWave 하나를 만들어 시간을 흘리고, 코어 드론을 드론 오브젝트로 보인다.
+// 드론 웨이브 연결 컴포넌트: 코어 DroneWave 하나를 만들어 시간을 흘리고, 코어 드론을 드론 오브젝트로 보인다.
 // 씬에 하나만 두고 포탑(TurretController) 여러 대가 이 웨이브를 나눠 쓴다. 포탑마다 웨이브를 만들면 드론도 두 벌이 된다.
 using System.Collections.Generic;
 using UnityEngine;

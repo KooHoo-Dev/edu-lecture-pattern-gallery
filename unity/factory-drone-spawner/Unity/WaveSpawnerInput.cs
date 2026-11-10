@@ -1,4 +1,4 @@
-// 웨이브 스포너 어댑터: Input System 입력을 WaveDirector, 스포너, 포탑에 넘기고, 스포너가 드론을 내보내면 그 칸의 프리팹을 Instantiate 해 코어 드론과 짝짓는다.
+// 웨이브 스포너 연결 컴포넌트: Input System 입력을 WaveDirector, 스포너, 포탑에 넘기고, 스포너가 드론을 내보내면 그 칸의 프리팹을 Instantiate 해 코어 드론과 짝짓는다.
 // 스포너 목록의 i 번째와 Spawner Slots 의 i 번째 칸(프리팹, 키)이 한 쌍이고, 구독은 반복문 하나로 한다. 종류마다 핸들러나 += 줄을 따로 두지 않는다.
 // 레이더 수와 웨이브 끝은 Radar 의 이벤트 핸들러에서 바로 화면 글에 옮긴다. 만드는 규칙은 여기 없다 (Core/ 의 DroneSpawner 자식들).
 using System;

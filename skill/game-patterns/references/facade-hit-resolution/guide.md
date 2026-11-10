@@ -14,13 +14,11 @@
 - `Unity/ShockDroneInput.cs`
 - `Unity/TrapZone.cs`
 
-모두 프로젝트의 `Assets/Patterns/facade-hit-resolution/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/facade-hit-resolution/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/facade-hit-resolution/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
 2. 드론 셋과 하린을 만든다. 2D 프로젝트면 `GameObject > 2D Object > Sprites > Triangle`, Universal 3D 프로젝트면 `GameObject > 3D Object > Cube` 를 세 번 만들어 이름을 `D1`, `D2`, `D3`, Position 을 (1, 0, 0), (3, 0, 0), (5, 0, 0) 으로 둔다. 하린은 2D 는 `Sprites > Capsule`, 3D 는 `3D Object > Capsule` 로 (-4, 0, 0) 에 둔다 (Sprites 메뉴는 2D Sprite 패키지가 있어야 보인다). 드론에는 스크립트를 붙이지 않는다 (하린에는 4단계에서 `GunInput`).
 3. 빈 오브젝트(`GameObject > Create Empty`)의 이름을 `CombatHub` 로 바꾸고 `CombatHub` 컴포넌트를 붙인다. `Drone Objects` 칸(크기 3)의 Element 0, 1, 2 에 D1, D2, D3 을 차례로 끌어 넣는다. 파괴 처리된 드론은 이 오브젝트가 꺼진다. 창구는 이 컴포넌트 하나이고 싱글턴이 아니다.
-4. 하린에 `GunInput` 을, `CombatHub` 오브젝트에 `TrapZone` 과 `ShockDroneInput` 을 붙인다. 붙이는 순간 `Reset` 이 기본 키(Q 총, W 함정, E 전기 충격)를 넣는다. 셋의 `Hub` 칸에 `CombatHub` 오브젝트를 끌어 넣는다. 함정은 이 어댑터에서 웹 무대와 같게 키로 터뜨리고, 맞는 드론은 코어가 정한 함정 자리(D1)라 `TrapZone` 을 D1 발밑에 두지 않아도 되고 Collider 도 없어도 된다.
+4. 하린에 `GunInput` 을, `CombatHub` 오브젝트에 `TrapZone` 과 `ShockDroneInput` 을 붙인다. 붙이는 순간 `Reset` 이 기본 키(Q 총, W 함정, E 전기 충격)를 넣는다. 셋의 `Hub` 칸에 `CombatHub` 오브젝트를 끌어 넣는다. 함정은 이 연결 컴포넌트에서 웹 무대와 같게 키로 터뜨리고, 맞는 드론은 코어가 정한 함정 자리(D1)라 `TrapZone` 을 D1 발밑에 두지 않아도 되고 Collider 도 없어도 된다.
 5. `Main Camera` 를 Position (0.5, 1, -10) 에 두고 Projection 을 `Orthographic`, Size 를 4 로 한다 (2D 템플릿은 처음부터 Orthographic 이다). 하린(x -4)부터 D3(x 5)까지 보인다. 피해 숫자는 `Camera.main` 으로 자리를 잡으므로 카메라의 Tag 는 `MainCamera` 그대로 둔다.
 6. Play 하고 Q 를 두 번, W 를 한 번 누른다. 맞은 드론 위에 피해 숫자가 잠깐 뜨고, Game 뷰 왼쪽 위의 마지막 명중이 `Trap → D1: 계산 5-0=5 ✓ 표시 ✓ 적용 ✓ 알림 ✓ 파괴 ✓` 가 되며 D1 이 꺼지고 크레딧이 10 이 된다. 이어서 E 를 누르면 D3 이 HP 10/10 에서 6/10 이 된다. Console 에는 `[Combat] Trap → 창구 Hit(D1, 기본 5)`, `[Combat] 파괴 D1 (화면에서 뺀다)` 처럼 웹의 사건 기록과 같은 줄이 차례로 남는다.
 
@@ -43,10 +41,10 @@ W(함정)로 D1 을 마무리해도 D1 오브젝트가 꺼지고 크레딧이 10
 ## 주의할 점
 - `CombatHub` 의 `Combat` 과 `Field` 는 처음 읽을 때 만든다 (`??=`). 공격 컴포넌트는 키를 누를 때 처음 읽으므로 오브젝트 사이의 `Awake` 순서와 상관없다. `Hub` 칸이 비어 있으면 공격 컴포넌트가 `OnEnable` 에서 오류를 남기고 스스로 꺼진다.
 - 창구를 싱글턴으로 만들지 않고 Inspector 칸으로 연결했다. 공격 컴포넌트마다 다른 Hub 를 넣으면 (`CombatHub` 를 둘 두고 나눠 넣으면) 창구가 둘이 되어 드론 HP 와 크레딧이 두 벌로 갈라진다. 창구는 하나만 두고 모든 공격 컴포넌트의 `Hub` 칸에 같은 오브젝트를 넣는다.
-- 이 어댑터의 함정은 키로 터지고 물리 트리거가 없다. 드론이 걸어 들어오는 함정이 필요하면 함정에 Collider 를 Is Trigger 로 두고 2D 는 `OnTriggerEnter2D`, 3D 는 `OnTriggerEnter` 에서 `Drone d = hub.DroneOf(other.gameObject);` 로 들어온 오브젝트를 코어 드론으로 바꾸고, `d` 가 null 이 아니면 같은 `hub.Combat.Hit("Trap", d, trapDamage)` 한 줄을 부른다. `DroneOf` 는 `Drone Objects` 칸에 넣은 오브젝트로 찾으므로 Collider 는 드론 오브젝트 자신에 둔다 (자식에 두면 `other.gameObject` 가 달라 null 이다). 드론이 함정 경계 위를 오가면 들어올 때마다 맞으므로, 한 번만 맞게 하려면 맞힌 드론을 기억하거나 재사용 대기 시간을 둔다. 두 콜라이더 중 하나에 Rigidbody(2D 는 Rigidbody 2D)가 있어야 콜백이 불린다.
+- 이 연결 컴포넌트의 함정은 키로 터지고 물리 트리거가 없다. 드론이 걸어 들어오는 함정이 필요하면 함정에 Collider 를 Is Trigger 로 두고 2D 는 `OnTriggerEnter2D`, 3D 는 `OnTriggerEnter` 에서 `Drone d = hub.DroneOf(other.gameObject);` 로 들어온 오브젝트를 코어 드론으로 바꾸고, `d` 가 null 이 아니면 같은 `hub.Combat.Hit("Trap", d, trapDamage)` 한 줄을 부른다. `DroneOf` 는 `Drone Objects` 칸에 넣은 오브젝트로 찾으므로 Collider 는 드론 오브젝트 자신에 둔다 (자식에 두면 `other.gameObject` 가 달라 null 이다). 드론이 함정 경계 위를 오가면 들어올 때마다 맞으므로, 한 번만 맞게 하려면 맞힌 드론을 기억하거나 재사용 대기 시간을 둔다. 두 콜라이더 중 하나에 Rigidbody(2D 는 Rigidbody 2D)가 있어야 콜백이 불린다.
 - 파괴된 드론은 `Destroy` 하지 않고 `SetActive(false)` 로 끈다. 창구가 오브젝트가 아니라 코어 드론의 `IsDestroyed` 를 보고 다음 명중을 받지 않으므로, 꺼진 드론을 노린 전기 충격은 Console 에 `[Combat] ShockDrone → 창구: D3 이미 파괴됨, 받지 않는다` 로 남는다. `CombatHub` 를 껐다 켜면 `OnEnable` 이 지금 코어 상태로 글과 드론 오브젝트를 한 번 다시 맞춘다 (꺼진 동안 파괴된 드론은 `Destroyed` 를 듣지 못해 켜진 채 남기 때문이다).
 - `armor`, `trapDamage`, `shockDamage`, `gunDamage` 는 Play 중에 Inspector 에서 바꾸면 `OnValidate` 가 코어에 넣는다. `GunInput` 의 `gunDamage` 는 웹 갤러리에는 없는 Unity 전용 칸이다 (웹은 4 고정). 드론 HP 와 크레딧은 처음 만든 코어에 남으므로 처음부터 다시 하려면 Play 를 다시 누른다.
-- 피해 숫자와 왼쪽 위 글은 IMGUI(`OnGUI`)로 그리는 확인용이다. 실제 게임은 UGUI·TextMeshPro 로 그린다: `Feed.DamageShown` 을 구독하는 컴포넌트가 TextMeshPro 숫자를 띄우면 된다. 그렇게 바꿔도 창구와 공격 코드는 그대로다.
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다. 피해 숫자도 같은 IMGUI 다. `Feed.DamageShown` 을 구독하는 컴포넌트가 TextMeshPro 숫자를 띄우면 되고, 그렇게 바꿔도 창구와 공격 코드는 그대로다.
 
 ## 흔한 실수
 - **함정으로 쓰러뜨린 드론만 HP 0 인 채 서 있다**: 공격 코드마다 명중 처리 절차를 복사했고, 한 곳(함정)이 마지막 파괴 단계를 빠뜨렸다. 복사본은 처음에 맞아도 고칠 때마다 갈라진다. 다섯 단계를 `CombatSystem.Hit` 한 곳에 두고 공격하는 쪽은 `combat.Hit(...)` 한 줄만 부른다. 그러면 새 공격(독가스, 폭발)을 더해도 파괴를 빠뜨릴 자리가 없다.

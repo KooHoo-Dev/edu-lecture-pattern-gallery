@@ -14,7 +14,7 @@ export const meta: PatternMeta = {
     '드론이 자기를 만든 공장을 기억하게 해, 나중에 만드는 제품(투사체)도 같은 세트로 맞출 수 있다.',
     '새 세트(구역)는 공장 클래스 하나로 끝나지만 새 제품은 모든 공장을 고쳐야 한다는 장단점과 팩토리 메서드와의 차이를 말하고, Unity 에서는 세트의 겉모습을 ScriptableObject 에셋 하나에 묶을 수 있다.',
   ],
-  tags: ['생성', '제품 세트', '테마 교체', 'ScriptableObject'],
+  tags: ['제품 세트', '테마 교체', 'ScriptableObject'],
   difficulty: 2,
   params: [
     {
@@ -162,7 +162,7 @@ export const meta: PatternMeta = {
       target: 'ice,i-ice,ice-products,input-pick',
     },
   ],
-  offNote: '`string zone` 하나를 두고 테마를 쓰는 곳(`SetGround`, `SpawnDrone`, `MakeProjectile`)마다 `switch (zone)` 을 둔 흔한 코드다. (1) `FireAll` 이 드론마다 `MakeProjectile(zone)` 에 **지금** 구역을 넘겨, 구역을 옮기면 남아 있던 드론이 새 구역 투사체를 쏜다(구역 섞임: 용암에서 덩굴 드론이 화염탄). (2) 빙하를 더할 때 `MakeProjectile` 에만 `case "ice"` 를 빠뜨려 `default` 의 화염탄이 나온다(분기 누락: 빙하에서 서리 드론이 화염탄). 그래서 빙하 구역에서는 어느 드론이든 화염탄을 쏘고, 화염 드론만 우연히 맞는다. 기록은 드론의 세트가 지금 구역과 다르면 구역 섞임, 같은데 투사체가 다르면 분기 누락으로 적고, 드론마다 어긋나기 시작한 순간 한 번만 ✖ 를 적는다. 어긋난 드론 위의 빨간 글은 어긋남이 이어지는 동안 남는다. Unity 에서 이 코드를 돌리면 초록 큐브(덩굴 드론)가 용암에서 주황 구(화염탄)를, 하늘색 큐브(서리 드론)가 빙하에서 주황 구를 쏘고, Console 에는 아무 오류도 없다.',
+  offNote: '`string zone` 하나를 두고 테마를 쓰는 곳(`SetGround`, `SpawnDrone`, `MakeProjectile`)마다 `switch (zone)` 을 둔 흔한 코드다. `FireAll` 이 드론마다 **지금** 구역을 넘겨, 구역을 옮기면 남아 있던 드론이 새 구역 투사체를 쏜다 (구역 섞임: 용암에서 덩굴 드론이 화염탄). 빙하를 더할 때 `MakeProjectile` 에만 `case "ice"` 를 빠뜨려 `default` 의 화염탄이 나온다 (분기 누락: 빙하에서 서리 드론이 화염탄). Unity 에서는 초록 큐브가 용암에서, 하늘색 큐브가 빙하에서 주황 구를 쏘고 Console 에는 아무 오류도 없다.',
   mistakes: [
     {
       title: '구역을 옮기자 남아 있던 드론이 새 구역 투사체를 쏜다',
@@ -200,8 +200,8 @@ export const meta: PatternMeta = {
       '`Zones` 목록의 `+` 는 마지막 칸(빙하)을 Art 와 키(E) 바인딩째 복사한다. 그대로 두면 한 키에 두 칸이 붙고 같은 Theme 이 두 칸에 생겨 `OnEnable` 이 오류를 남긴다. 칸을 더하면 Art 와 함께 Enter Action 키도 바꾼다.',
       '`Start Zone` 오타(`Ice`, `lava ` 처럼 대소문자·공백이 다른 것)면 Console 에 `[Zone] Start Zone … 과 Theme 이 같은 공장이 없다` 오류를 남기고 첫 공장(forest)으로 시작한다. 숲에서 시작했다면 Console 을 먼저 본다. `Start Zone` 은 코어를 처음 만들 때(Play 직후) 한 번만 읽어, Play 중에 바꿔도 지금 구역은 그대로다. `Projectile Speed` 와 `Max Drones` 는 Play 중에 바꾸면 `OnValidate` 가 코어에 넣고 왼쪽 위 글도 다시 만든다: 속도는 날고 있는 투사체에도 바로 적용되고, 자리 수를 지금 드론 수보다 줄여도 이미 나온 드론은 남고 다음 출격부터 거절된다.',
       '구역을 옮겨도 이미 나온 드론은 남고 자리를 계속 차지한다. 자리가 모두 차면 새 구역의 드론은 나오지 않고 Console 에 `[Zone] 출격 거절: 자리 4개가 모두 찼다` 가 남는다. 이 표본에는 드론을 없애는 기능이 없다 (Play 를 다시 시작한다).',
-      '기본 도형의 색은 `MaterialPropertyBlock` 으로 `_BaseColor`(URP Lit)와 `_Color`(Built-in) 에 함께 넣어 머티리얼 사본을 만들지 않는다. 스프라이트면 `SpriteRenderer.color` 를 쓴다. 프리팹을 넣으면 프리팹의 겉모습 그대로이고 칠하지 않는다. 왼쪽 위 상태 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 띄운다. 글은 `OnEnable` 과 코어 이벤트 핸들러에서 바로 다시 만든다.',
-      '`InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 드론이 둘 나온다. 구역 칸의 키는 반복문이 람다로 붙이므로, 붙인 람다를 목록에 저장해 `OnDisable` 에서 그대로 뗀다 (`foreach` 변수는 C# 5 부터 반복마다 새것이라 람다에 잡으려고 따로 복사하지 않는다). 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.',
+      '기본 도형의 색은 `MaterialPropertyBlock` 으로 `_BaseColor`(URP Lit)와 `_Color`(Built-in) 에 함께 넣어 머티리얼 사본을 만들지 않는다. 스프라이트면 `SpriteRenderer.color` 를 쓴다. 프리팹을 넣으면 프리팹의 겉모습 그대로이고 칠하지 않는다. 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.',
+      '구역 칸의 키는 반복문이 람다로 붙이므로, 붙인 람다를 목록에 저장해 `OnDisable` 에서 그대로 뗀다 (`foreach` 변수는 C# 5 부터 반복마다 새것이라 람다에 잡으려고 따로 복사하지 않는다).',
     ],
   },
   prompt: {

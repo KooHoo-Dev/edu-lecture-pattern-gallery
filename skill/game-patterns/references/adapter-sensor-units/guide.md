@@ -13,10 +13,8 @@
 - `Core/VendorDevices.cs`
 - `Unity/SensorStation.cs`
 
-모두 프로젝트의 `Assets/Patterns/adapter-sensor-units/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/adapter-sensor-units/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Core/VendorDevices.cs` 는 장비 SDK 흉내다. 실제 프로젝트에서는 업체가 준 패키지가 그 자리이고, 고치지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/adapter-sensor-units/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Core/VendorDevices.cs` 는 장비 SDK 흉내다. 실제 프로젝트에서는 업체가 준 패키지가 그 자리이고, 고치지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
 2. `GameObject > UI (Canvas) > Image` 로 Image 를 하나 만든다 (Canvas 와 EventSystem 이 함께 생긴다). 이름을 `BarA` 로 바꾸고 Rect Transform 을 Pos X 0, Pos Y 120, Width 400, Height 30 으로 둔다. Source Image 에 스프라이트(기본 `UISprite` 도 된다)를 넣어야 Image Type 칸이 보인다. Image Type 을 Filled, Fill Method 를 Horizontal, Fill Origin 을 Left 로 둔다.
 3. `BarA` 를 선택하고 `Ctrl+D` 로 복제해 이름을 `BarB`, Pos Y 를 60 으로 바꾼다. 같은 메뉴로 Image 를 둘 더 만들어 `LampA` (Pos X -240, Pos Y 120, Width 30, Height 30), `LampB` (Pos X -240, Pos Y 60, Width 30, Height 30) 로 둔다. 경보등은 Filled 가 아니어도 된다. Canvas 는 Screen Space - Overlay 그대로라 카메라 위치와 상관없이 Game 뷰에 보인다.
 4. Canvas 오브젝트에 `SensorStation` 을 붙인다. 붙이는 순간 `Reset` 이 기본 키(Q 오름, W 내림, E B 구역 장비 바꾸기)를 넣는다. `Bar A`, `Bar B`, `Lamp A`, `Lamp B` 칸에 위 Image 넷을 끌어 넣는다.
@@ -42,7 +40,7 @@ E 로 B 구역 장비를 GeigerX 로 바꿔도 B 막대가 A 막대와 같은 �
 - 이 표본의 HUD 는 오름·내림·교체 입력이 있을 때만 장비를 다시 읽는다 (`RadiationSite.Rise`, `Fall`, `SwapB` 가 `Hud.Refresh` 나 `Hud.Attach` 를 부른다). 실제 장비 SDK 가 값을 스스로 바꾸면 `Update` 에서 0.2초 같은 간격으로 `Site.Hud.Refresh()` 를 부른다. 그때마다 `LevelShown` 이 불리므로 Console 기록은 꺼 둔다 (`Log Events` 칸).
 - Play 중에 Inspector 에서 `alarmLevel`, `riseStep` 을 바꾸면 `OnValidate` 가 코어에 넣고 `Site.Hud.Refresh()` 로 두 구역을 바로 다시 그린다. 그래서 경보 기준을 바꾸는 순간 A, B 경보등이 함께 새 기준을 따른다 (다시 그리지 않으면 옛 기준이 남았다가, 교체(E) 때 B 만 다시 읽혀 A, B 가 어긋난다). `riseStep` 은 다음 오름·내림부터 쓴다. 슬라이더를 끄는 동안 Refresh 마다 Console 에 막대 줄이 남는다. 방사선 값과 B 구역 장비 상태는 처음 만든 코어에 남으므로 처음부터 하려면 Play 를 다시 누른다.
 - `RadiationField` 는 방사선 값을 1% 단위 정수로 든다. float 로 0.10 을 더하고 빼면 0.70 이 0.69999993 이 되어, 0~1 을 그대로 쓰는 `LegacyProbe` 구역은 기준 0.7 미만으로 꺼지고 반올림하는 `GeigerX` 구역은 70 → 0.70 으로 켜진다. 어댑터 탓이 아니라 시연용 값의 오차이므로, 시연 값은 정수로 들어 두 장비가 늘 같은 float 를 받게 했다.
-- 왼쪽 위 글(실제 방사선, 구역마다 장비 이름과 값)은 IMGUI(`OnGUI`)로 그리는 확인용이다. 실제 게임은 UGUI·TextMeshPro 로 그린다. 글은 이벤트 핸들러에서 만들고 `OnGUI` 는 그리기만 한다.
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
 - 경보등은 색(초록 ↔ 빨강)만 바꾸고 깜빡이지 않는다. 깜빡이게 하려면 1초에 3번을 넘지 않게 하고, 색만으로 알리지 않게 왼쪽 위 글처럼 "경보 켜짐" 글을 함께 둔다.
 
 ## 흔한 실수

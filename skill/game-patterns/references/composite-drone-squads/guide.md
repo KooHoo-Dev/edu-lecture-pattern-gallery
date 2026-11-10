@@ -13,11 +13,9 @@
 - `Unity/SquadCommandInput.cs`
 - `Unity/SquadNode.cs`
 
-모두 프로젝트의 `Assets/Patterns/composite-drone-squads/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/composite-drone-squads/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
-2. Main Camera 를 Position (7.5, 3, -10), Projection `Orthographic`, Size 4.5 로 둔다 (2D 템플릿은 이미 Orthographic 이다). 16:9 Game 뷰에서 가로 -0.5~15.5, 세로 -1.5~7.5 가 보인다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/composite-drone-squads/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+2. `Main Camera` 를 Position (7.5, 3, -10) 에 두고 Projection 을 `Orthographic`, Size 를 4.5 로 한다 (2D 템플릿은 처음부터 Orthographic 이다). 16:9 Game 뷰에서 가로 -0.5~15.5, 세로 -1.5~7.5 가 보인다.
 3. `GameObject > Create Empty` 로 `본대` 를 만들고 Position 을 (0, 0, 0) 으로 둔다. Hierarchy 에서 `본대` 를 오른쪽 클릭해 `Create Empty` 로 자식 `B` 를 만든다. 빈 곳을 오른쪽 클릭해 `Create Empty` 로 본대 밖에 `C` 를 만든다. 셋 다 Position (0, 0, 0) 이고, 이름은 사건 기록과 같게 `본대`, `B`, `C` 로 짓는다.
 4. 드론 다섯을 만든다. 부모를 오른쪽 클릭해 2D 템플릿은 `2D Object > Sprites > Capsule`, Universal 3D 템플릿은 `3D Object > Capsule` 을 고르면 그 아래 자식으로 생긴다. Scale 은 (0.4, 0.4, 0.4). `D1` 은 `본대` 아래 Position (0.7, 1, 0), `D2` (1.6, 1, 0) 와 `D3` (2.5, 1, 0) 은 `B` 아래, `D4` (3.4, 1, 0) 와 `D5` (4.3, 1, 0) 는 `C` 아래에 둔다. 부모가 모두 (0, 0, 0) 이라 이 값이 월드 위치이고, Play 할 때의 이 자리가 기지 자리가 된다.
 5. `D1`~`D5` 에 `DroneUnit` 을 붙인다. Patrol Height 를 D1 2, D2 1, D3 3, D4 1, D5 2.4 로 넣고, `D4` 와 `D5` 는 Extra Reach 를 3 과 3.8 로, Start On Patrol 을 켠다. `본대`, `B`, `C` 에는 `SquadNode` 를 붙인다.
@@ -45,7 +43,7 @@ E 로 C 를 합류시킨 뒤 W 를 누르면 D4, D5 까지 다섯 대가 모두 
 - `SetParent(transform, true)` 의 두 번째 값 `worldPositionStays` 가 true 면 C 오브젝트의 월드 위치를 그대로 두고 부모만 바꾼다. false 면 local 위치를 그대로 두어 월드 위치가 B 기준으로 바뀐다. 이 표본은 B 와 C 가 모두 (0, 0, 0) 이라 어느 쪽이든 C 가 움직이지 않고, 드론은 `DroneUnit.Update` 가 월드 위치를 넣어 튀지 않는다. 편대 오브젝트를 다른 자리에 두거나 C 에 깃발 같은 표시물을 달았다면 true 여야 한다.
 - 본대의 `Tick` 하나가 트리 안 드론만 움직인다. 합류 전의 C 는 아무도 Tick 하지 않지만 명령을 받을 길도 없어 정찰 지점에 떠 있기만 한다. 합류 전에도 C 를 따로 움직이려면 C 에 자기 지휘 컴포넌트를 두고, 합류할 때 그쪽 Tick 을 멈춘다 (두 곳에서 Tick 하면 두 배로 빠르다).
 - Play 중 Inspector 에서 `flySpeed` 를 바꾸면 `OnValidate` 가 코어에 넣어 바로 빨라진다. `patrolDistance` 를 바꾸면 정찰 지점으로 나는 중인 드론은 곧바로 새 지점으로 방향을 틀고, 이미 정찰 지점에 떠 있는 드론은 다음 명령까지 그 자리에 있다 (`Drone.Tick` 은 나는 중일 때만 움직인다). C 의 처음 자리는 트리를 만들 때의 값으로 정해진다.
-- 왼쪽 위 글은 IMGUI(`OnGUI`)로 그리는 확인용이다. 실제 게임은 UGUI·TextMeshPro 로 그린다. 글은 코어 이벤트 핸들러에서 만들고 `OnGUI` 는 그리기만 한다. `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다.
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
 
 ## 흔한 실수
 - **지원 편대를 합류시켰더니 귀환 명령이 그 편대에만 닿지 않는다**: 지휘 코드가 `foreach (d in root.drones)` 와 `foreach (s in root.squads) foreach (d in s.drones)` 처럼 정해진 단계만 돈다. 편대 안에 편대가 생기면 세 번째 단계의 드론은 아무도 부르지 않는다. 드론 수를 세는 코드도 같은 모양이라 함께 틀린다. Unity 에서는 왼쪽 위 글이 `편대 드론 수 3`, `기지 도착 3 / 전체 3` 으로 다 돌아온 것처럼 보이고, Game 뷰 오른쪽에 D4, D5 만 떠 있다. 편대가 자식마다 같은 메서드를 부르게 하면(`child.Recall()`) 단계 수를 코드에 적을 일이 없다.

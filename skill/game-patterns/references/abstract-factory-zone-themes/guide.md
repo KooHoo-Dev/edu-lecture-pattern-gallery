@@ -2,7 +2,7 @@
 
 구역마다 드론·투사체·바닥을 한 공장이 세트로 만들어, 다른 구역 것이 섞이지 않는다
 
-패턴: 추상 팩토리. 난이도 2/3. 주제: 생성, 제품 세트, 테마 교체, ScriptableObject.
+패턴: 추상 팩토리. 난이도 2/3. 주제: 제품 세트, 테마 교체, ScriptableObject.
 
 ## 파일
 - `Core/ZoneDirector.cs`
@@ -10,8 +10,6 @@
 - `Core/ZoneProducts.cs`
 - `Unity/ZoneArtSet.cs`
 - `Unity/ZoneDirectorInput.cs`
-
-모두 프로젝트의 `Assets/Patterns/abstract-factory-zone-themes/` 아래에 같은 하위 폴더로 복사한다.
 
 ## 넣는 순서
 1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/abstract-factory-zone-themes/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
@@ -42,8 +40,8 @@
 - `Zones` 목록의 `+` 는 마지막 칸(빙하)을 Art 와 키(E) 바인딩째 복사한다. 그대로 두면 한 키에 두 칸이 붙고 같은 Theme 이 두 칸에 생겨 `OnEnable` 이 오류를 남긴다. 칸을 더하면 Art 와 함께 Enter Action 키도 바꾼다.
 - `Start Zone` 오타(`Ice`, `lava ` 처럼 대소문자·공백이 다른 것)면 Console 에 `[Zone] Start Zone … 과 Theme 이 같은 공장이 없다` 오류를 남기고 첫 공장(forest)으로 시작한다. 숲에서 시작했다면 Console 을 먼저 본다. `Start Zone` 은 코어를 처음 만들 때(Play 직후) 한 번만 읽어, Play 중에 바꿔도 지금 구역은 그대로다. `Projectile Speed` 와 `Max Drones` 는 Play 중에 바꾸면 `OnValidate` 가 코어에 넣고 왼쪽 위 글도 다시 만든다: 속도는 날고 있는 투사체에도 바로 적용되고, 자리 수를 지금 드론 수보다 줄여도 이미 나온 드론은 남고 다음 출격부터 거절된다.
 - 구역을 옮겨도 이미 나온 드론은 남고 자리를 계속 차지한다. 자리가 모두 차면 새 구역의 드론은 나오지 않고 Console 에 `[Zone] 출격 거절: 자리 4개가 모두 찼다` 가 남는다. 이 표본에는 드론을 없애는 기능이 없다 (Play 를 다시 시작한다).
-- 기본 도형의 색은 `MaterialPropertyBlock` 으로 `_BaseColor`(URP Lit)와 `_Color`(Built-in) 에 함께 넣어 머티리얼 사본을 만들지 않는다. 스프라이트면 `SpriteRenderer.color` 를 쓴다. 프리팹을 넣으면 프리팹의 겉모습 그대로이고 칠하지 않는다. 왼쪽 위 상태 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 띄운다. 글은 `OnEnable` 과 코어 이벤트 핸들러에서 바로 다시 만든다.
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 드론이 둘 나온다. 구역 칸의 키는 반복문이 람다로 붙이므로, 붙인 람다를 목록에 저장해 `OnDisable` 에서 그대로 뗀다 (`foreach` 변수는 C# 5 부터 반복마다 새것이라 람다에 잡으려고 따로 복사하지 않는다). 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.
+- 기본 도형의 색은 `MaterialPropertyBlock` 으로 `_BaseColor`(URP Lit)와 `_Color`(Built-in) 에 함께 넣어 머티리얼 사본을 만들지 않는다. 스프라이트면 `SpriteRenderer.color` 를 쓴다. 프리팹을 넣으면 프리팹의 겉모습 그대로이고 칠하지 않는다. 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
+- 구역 칸의 키는 반복문이 람다로 붙이므로, 붙인 람다를 목록에 저장해 `OnDisable` 에서 그대로 뗀다 (`foreach` 변수는 C# 5 부터 반복마다 새것이라 람다에 잡으려고 따로 복사하지 않는다).
 
 ## 흔한 실수
 - **구역을 옮기자 남아 있던 드론이 새 구역 투사체를 쏜다**: 쏘는 순간 `MakeProjectile(currentZone)` 처럼 지금 구역 전역 값을 다시 읽었다. 드론이 나온 뒤 구역이 바뀌면 드론과 투사체의 세트가 갈린다 (Unity 화면에서는 초록 큐브가 주황 구를 쏜다). 드론을 만들 때 그 공장을 드론에 쥐여 주고(`Remember`), 쏠 때는 드론이 자기 공장의 `CreateProjectile()` 을 부르게 한다. 이 표본의 `Drone.Fire` 가 그렇다.

@@ -122,7 +122,7 @@ export const meta: PatternMeta = {
     { n: 3, label: '씬 종속 매니저는 OnDestroy 에서 자리를 비운다', body: '`ExpeditionManager` 는 `DontDestroyOnLoad` 를 하지 않아 탐사 구역 씬과 함께 파괴되고, `OnDestroy` 에서 `Release` 로 자리를 비운다. 그래서 기지에서 `ExpeditionManager.Instance` 는 파괴된 매니저가 아니라 `null` 이다. 주인이 아닌 복제본의 `Release` 는 아무것도 하지 않는다. 정산하지 않은 조각은 이때 매니저와 함께 사라진다. 이번 탐사의 수치라 의도된 동작이고, 버그로 오해하지 않게 `OnDestroy` 에서 "정산하지 않은 회로 조각 N개 사라짐" 을 남긴다.', target: 'scene,scene-slot,expedition' },
     { n: 4, label: '부르는 쪽은 자리가 비어 있으면 부르지 않는다', body: '정산 입력은 `ExpeditionManager.Instance` 가 `null` 이면 `Settlement.Settle` 에 `null` 을 넘기고, 정산은 받지 않은 채 `Refused` 로 "탐사 구역에서만 정산" 을 알린다. 줍기도 자리가 비어 있으면 부르지 않는다.', target: 'caller,caller-instance,instance-slot' },
   ],
-  offNote: '`Awake` 에서 `Instance = this; DontDestroyOnLoad(gameObject);` 만 하는 흔한 매니저다. 기지로 돌아오면 기지 씬에 놓인 `SoundManager` 와 `CreditBank` 가 또 생기는데 중복 검사가 없어 둘 다 살아남는다. BGM 이 두 겹이 되고, `Instance` 는 새로 생긴 은행을 가리켜 번 크레딧이 사라진 것처럼 시작 값(0)으로 보인다. 크레딧은 옛 은행에 그대로 있다. `ExpeditionManager` 는 `OnDestroy` 에서 `Instance` 를 비우지 않아, 기지에서 정산하면 탐사 구역과 함께 파괴된 매니저를 부른다. 파괴된 매니저를 static 참조로 부르는 것만으로는 예외가 나지 않는다. 정산 메서드 안의 조각 수 Text 를 갱신하는 줄(`countLabel.text = …`)이 함께 파괴된 Text 를 건드려 `MissingReferenceException` 이 나고, 입금 줄은 실행되지 않는다. 그 줄이 없으면 실제 Unity 에서는 예외 없이 지난 탐사의 조각이 새 은행에 조용히 들어간다. 탐사 구역에 한 번도 가지 않고 정산하면 `Instance` 가 아직 `null` 이라 `NullReferenceException` 이 난다.',
+  offNote: '`Awake` 에서 `Instance = this; DontDestroyOnLoad(gameObject);` 만 하는 흔한 매니저다. 기지로 돌아오면 기지 씬의 `SoundManager` 와 `CreditBank` 가 또 생기는데 중복 검사가 없어 둘 다 살아남는다. BGM 이 두 겹이 되고, `Instance` 는 새 은행을 가리켜 번 크레딧이 0 으로 보인다 (크레딧은 옛 은행에 그대로 있다). `ExpeditionManager` 는 `OnDestroy` 에서 `Instance` 를 비우지 않아, 기지에서 정산하면 파괴된 매니저를 부른다. 그 안의 조각 수 Text 갱신 줄(`countLabel.text = …`)이 파괴된 Text 를 건드려 `MissingReferenceException` 이 나고 입금 줄은 실행되지 않는다 (그 줄이 없으면 예외 없이 지난 탐사의 조각이 조용히 입금된다). 탐사 구역에 가지 않고 정산하면 `Instance` 가 `null` 이라 `NullReferenceException` 이 난다.',
   mistakes: [
     { title: '기지로 돌아오면 BGM 이 두 겹이고 크레딧이 0 이다', body: '매니저가 놓인 씬을 다시 열면 그 씬의 매니저가 또 생긴다. `Awake` 에서 `Instance = this` 만 하면 새 것이 `Instance` 를 가져가고, `DontDestroyOnLoad` 한 옛 것도 남아 둘이 된다. 이미 주인이 있으면 늦게 온 쪽이 `Destroy(gameObject)` 하고 `return` 한다. 이 표본의 `SingleSlot.TryClaim` 이 그 규칙이다. 첫 씬에만 두는 부트 씬을 따로 만들면 다시 열리지 않아 더 단순하다.' },
     { title: '두 번째 탐사에서 지난 탐사의 회로 조각이 남아 있다', body: '씬과 함께 사라져야 할 `ExpeditionManager` 를 `PersistentSingleton` 으로 만들었다. 첫 탐사의 매니저가 `DontDestroyOnLoad` 로 남고, 다음 탐사에서 생긴 매니저는 복제본으로 파괴되어 지난 조각이 그대로 남는다. (중복 검사 없이 `Instance = this` 와 `DontDestroyOnLoad` 만 붙였다면 반대로 새 매니저가 `Instance` 를 가져가 조각이 0 으로 보이고, 옛 매니저만 쌓인다.) 매니저를 만들 때 "씬을 넘어 살아야 하나" 를 먼저 묻는다. BGM, 크레딧은 유지, 이번 탐사의 수치는 씬 종속이다. 씬 종속 매니저는 `SceneSingleton` 처럼 `OnDestroy` 에서 자리를 비운다.' },
@@ -132,7 +132,7 @@ export const meta: PatternMeta = {
   ],
   unity: {
     setup: [
-      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/singleton-scene-managers/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다.',
+      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/singleton-scene-managers/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
       '`File > New Scene` 으로 씬 둘을 만들어 `Base`, `Field` 로 저장한다. 두 씬을 차례로 열어 `File > Build Profiles` 창의 Scene List 에서 `Add Open Scenes` 로 넣고, `Base` 를 맨 위에 둔다 (목록에 없는 씬은 `LoadScene` 으로 열리지 않는다).',
       '`Base` 씬의 루트에 빈 오브젝트(`GameObject > Create Empty`) 둘을 만들어 각각 `SoundManager`, `CreditBank` 를 붙인다. `SoundManager` 와 같이 붙는 AudioSource 의 첫 칸 `Audio Generator` 에 BGM 클립을 넣고 `Play On Awake` 는 끈다 (Loop 는 코드가 켠다).',
       '`Field` 씬의 루트에 빈 오브젝트를 만들어 `ExpeditionManager` 를 붙인다.',
@@ -170,5 +170,6 @@ export const meta: PatternMeta = {
   ],
   related: [
     { id: 'observer-health-events', why: '파괴된 컴포넌트를 부를 때의 예외를 같은 방식(표시 필드)으로 흉내 낸다. 씬을 넘는 매니저에 씬의 UI 가 구독할 때의 해제도 이어서 본다' },
+    { id: 'service-locator-audio', why: '다음 편. 전역 접근은 같지만 서비스를 바깥에서 바꿔 끼우고, 없으면 null 대신 아무것도 하지 않는 널 객체를 준다' },
   ],
 }

@@ -2,15 +2,13 @@
 
 효과음을 바로 틀지 않고 큐에 모아, 같은 프레임의 같은 소리는 합치고 빈 채널이 나면 차례로 튼다
 
-패턴: 이벤트 큐. 난이도 2/3. 주제: 이벤트 큐, 오디오, 링 버퍼, 요청 합치기.
+패턴: 이벤트 큐. 난이도 2/3. 주제: 효과음, 링 버퍼, 요청 합치기.
 
 ## 파일
 - `Core/DroneLine.cs`
 - `Core/SoundQueue.cs`
 - `Unity/DroneLineInput.cs`
 - `Unity/SoundQueuePlayer.cs`
-
-모두 프로젝트의 `Assets/Patterns/event-queue-sound/` 아래에 같은 하위 폴더로 복사한다.
 
 ## 넣는 순서
 1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/event-queue-sound/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
@@ -41,8 +39,7 @@ Q 로 단발을 쏘고 소리가 끝난 뒤 W 로 일제 사격하면 Console �
 - 코어는 클립 길이를 모르고 `soundLength` 동안 채널이 찬 것으로 본다. 클립이 더 길면 그 채널에 다음 소리가 들어올 때 `Play()` 가 앞 소리를 끊고, 더 짧으면 소리가 끝난 뒤에도 요청이 기다린다. 클립 길이가 제각각이면 요청에 길이를 넣거나 `OnPlayed` 에서 `clip.length` 를 코어 채널에 넣도록 고친다. `maxVoices` 와 `queueSize` 는 Play 를 시작할 때만 읽고, `soundLength` 는 `OnValidate` 가 넣어 다음 재생부터 쓴다.
 - 코어 시간은 `Tick(Time.deltaTime)` 으로 받는다. `Time.timeScale` 이 0(일시정지)이면 채널 시간이 줄지 않아 큐가 멈춘다 (이미 울리는 AudioSource 는 timeScale 과 상관없이 끝까지 난다). 일시정지 메뉴 소리도 이 큐로 내려면 `Time.unscaledDeltaTime` 으로 Tick 한다. `SoundQueuePlayer` 를 끄면 `Update` 가 멈춰 재생도 멈추지만 `Request` 는 계속 받아, 다시 켜면 쌓인 요청이 그때 한꺼번에 난다.
 - 요청에 곧 파괴될 드론의 `Transform` 이나 컴포넌트를 넣으면, 큐에서 꺼낼 때는 그 드론이 이미 파괴돼 소리가 엉뚱한 곳에서 나거나 `MissingReferenceException` 이 날 수 있다. 요청에는 값만 넣는다: 소리 id, 음량, 필요하면 파괴 순간의 위치(`Vector3`). 이 표본의 `SoundRequest` 는 id, 음량, 합친 수만 담는 struct 다.
-- Game 뷰 왼쪽 위의 상태 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. 실제 게임의 화면 글은 UGUI·TextMeshPro 로 만든다. 글은 큐 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 두 번 쏜다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다 (기본값 Value 는 다시 켤 때 눌려 있던 키를 바로 처리한다).
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
 
 ## 흔한 실수
 - **큐를 만들었는데 일제 사격 때 여전히 폭발음이 겹쳐 터진다**: `Request` 안에서 바로 빈 채널을 찾아 틀었거나 같은 소리 합치기를 빼먹었다. 안에서 바로 틀면 이름만 큐이고 나쁜 예와 같다. `Request` 는 넣기만 하고 재생은 `Tick` 에서만 하며, 넣을 때 같은 id 가 대기 중이면 칸을 늘리지 말고 합친다 (이 표본의 `Merged`). Unity 에서는 같은 폭발 클립이 같은 순간 여러 AudioSource 에서 시작돼 한 소리가 몇 배로 커져 찢어지듯 들린다.

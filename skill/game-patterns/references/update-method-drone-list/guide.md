@@ -2,14 +2,12 @@
 
 매니저가 드론 목록을 돌며 하나씩 업데이트하되, 도는 중에 생기고 사라지는 드론은 루프 밖에서 정리한다
 
-패턴: 업데이트 메서드. 난이도 2/3. 주제: 업데이트 메서드, 게임 루프, 컬렉션 수정, 생성과 파괴.
+패턴: 업데이트 메서드. 난이도 2/3. 주제: 게임 루프, 컬렉션 수정, 생성과 파괴.
 
 ## 파일
 - `Core/Drone.cs`
 - `Core/DroneSwarm.cs`
 - `Unity/SwarmRunner.cs`
-
-모두 프로젝트의 `Assets/Patterns/update-method-drone-list/` 아래에 같은 하위 폴더로 복사한다.
 
 ## 넣는 순서
 1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/update-method-drone-list/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
@@ -39,8 +37,7 @@
 - Unity 의 `MonoBehaviour.Update` 자체가 업데이트 메서드 패턴이다: 엔진이 켜진 컴포넌트를 돌며 `Update` 를 부르고, 그 도중의 `Destroy` 는 그 프레임의 Update 가 끝날 때까지 미룬다. 드론마다 `Update` 를 두는 대신 이 표본처럼 매니저 하나가 목록을 돌면, 수백 대일 때 엔진이 스크립트의 `Update` 를 부르는 횟수가 드론 수에서 한 번으로 줄고, 도는 순서와 생기고 사라지는 시점도 코드에 드러난다.
 - 코어 시간은 `Tick(Time.deltaTime)` 으로 받는다. `Time.timeScale` 이 0(일시정지)이어도 `SwarmRunner.Update` 는 불려 `Tick(0)` 이 돈다: 드론은 멈추지만 업데이트 횟수(u)는 계속 오르고, EMP 로 HP 0 이 된 드론은 그대로 빠진다. 일시정지 중에 드론을 아예 멈추려면 `Time.deltaTime` 이 0 일 때 `Tick` 을 부르지 않는다.
 - Play 중에 바꾼 `Move Speed`, `Split Delay`, `Split Count` 는 `OnValidate` 가 코어 설정에 넣어 다음 프레임부터 쓴다. `Lane Gap` 은 위치를 옮길 때마다 읽어 바로 반영되고, `Splitter Scale` 은 다음에 나오는 분열 드론부터 쓴다.
-- Game 뷰 왼쪽 위의 상태 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. 실제 게임은 UGUI·TextMeshPro 로 만든다. 합침·지움 숫자는 마지막 프레임의 루프가 끝난 뒤 합치고 지운 수라, 분열이나 파괴가 있던 한 프레임에만 0 이 아니다 (웹 무대는 보이게 0.4초 남긴다).
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 드론이 두 대 나온다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다 (기본값 Value 는 다시 켤 때 눌려 있던 키를 바로 처리한다).
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다. 합침·지움 숫자는 마지막 프레임의 루프가 끝난 뒤 합치고 지운 수라, 분열이나 파괴가 있던 한 프레임에만 0 이 아니다 (웹 무대는 보이게 0.4초 남긴다).
 
 ## 흔한 실수
 - **적 여럿이 한꺼번에 죽은 프레임에 살아남은 적 하나가 한 박자 늦게 움직인다**: 목록을 `for` 로 도는 중에 `Remove` 했다. 지운 칸 뒤가 한 칸씩 당겨지는데 `i++` 는 그대로라 바로 다음 원소를 건너뛴다. 빠질 것은 표시(`IsDead`)만 하고 루프가 끝난 뒤 `RemoveAll(d => d.IsDead)` 로 한꺼번에 지운다. `RemoveAt` 은 지운 칸 뒤를 매번 당기지만 `RemoveAll` 은 한 번 훑으며 남길 것만 앞으로 모은다.

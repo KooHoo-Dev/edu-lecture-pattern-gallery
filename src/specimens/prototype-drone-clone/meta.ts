@@ -144,7 +144,7 @@ export const meta: PatternMeta = {
       '`Instantiate` 는 Unity 가 직렬화하는 필드(`[SerializeField]`, public)를 복제하고, 직렬화된 `List` 는 새 목록으로 만든다. 직렬화되지 않는 필드(순수 C# 객체를 담은 private 필드 등)는 복제되지 않고 필드 초기값으로 시작한다. 그래서 이 표본은 코어 드론을 `ScoutDrone.Clone()` 으로 따로 복제하고 `Instantiate` 한 뷰와 짝짓는다.',
       '`Max Clones`, `Damage Amount`, `Upgrade Speed`, `Module Name` 은 Play 중에 바꿔도 `OnValidate` 가 코어에 넣는다 (`Module Name` 은 다음 장착부터). 견본의 이름, HP, 속도, 모듈은 Play 를 시작할 때 한 번만 읽는다. 견본을 한 번 설정해 두는 것이 이 패턴의 출발점이다.',
       '컴포넌트가 꺼진 동안에는 `Hangar` 의 이벤트를 듣지 않는다. 그동안 다른 스크립트가 `Hangar` 로 복제하거나 피해를 주면, 다시 켤 때 `OnEnable` 이 `Clones` 를 돌며 빠진 뷰(없거나 파괴된 것)를 만들고 모두 코어 값으로 다시 그린다.',
-      '`InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 두 대가 복제된다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.',
+      '왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.',
     ],
   },
   prompt: {
@@ -166,5 +166,6 @@ export const meta: PatternMeta = {
   related: [
     { id: 'command-undo-replay', why: '이동 명령이 이전 위치를 int 값으로 복사해 두기 때문에, 드론이 그 뒤에 움직여도 되돌릴 위치가 바뀌지 않는다. 값 복사가 안전한 이유가 이 표본과 같다' },
     { id: 'observer-health-events', why: '체력 변화를 readonly struct 값으로 넘겨, 구독자가 받은 값을 고쳐도 체력 자체는 바뀌지 않는다' },
+    { id: 'flyweight-drone-types', why: '같은 질문의 반대쪽이다. 프로토타입은 복제본끼리 섞이지 않게 참조 필드를 새로 만들고, 플라이웨이트는 종류 데이터를 일부러 함께 쓴다' },
   ],
 }

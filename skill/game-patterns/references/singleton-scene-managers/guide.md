@@ -14,10 +14,8 @@
 - `Unity/SceneSingleton.cs`
 - `Unity/SoundManager.cs`
 
-모두 프로젝트의 `Assets/Patterns/singleton-scene-managers/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/singleton-scene-managers/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/singleton-scene-managers/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
 2. `File > New Scene` 으로 씬 둘을 만들어 `Base`, `Field` 로 저장한다. 두 씬을 차례로 열어 `File > Build Profiles` 창의 Scene List 에서 `Add Open Scenes` 로 넣고, `Base` 를 맨 위에 둔다 (목록에 없는 씬은 `LoadScene` 으로 열리지 않는다).
 3. `Base` 씬의 루트에 빈 오브젝트(`GameObject > Create Empty`) 둘을 만들어 각각 `SoundManager`, `CreditBank` 를 붙인다. `SoundManager` 와 같이 붙는 AudioSource 의 첫 칸 `Audio Generator` 에 BGM 클립을 넣고 `Play On Awake` 는 끈다 (Loop 는 코드가 켠다).
 4. `Field` 씬의 루트에 빈 오브젝트를 만들어 `ExpeditionManager` 를 붙인다.

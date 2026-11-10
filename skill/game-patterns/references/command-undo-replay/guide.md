@@ -10,14 +10,12 @@
 - `Core/Drone.cs`
 - `Unity/DroneCommander.cs`
 
-모두 프로젝트의 `Assets/Patterns/command-undo-replay/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/command-undo-replay/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/command-undo-replay/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
 2. 드론 오브젝트를 만든다. 2D 프로젝트면 `GameObject > 2D Object > Sprites > Square`, Universal 3D 프로젝트면 `GameObject > 3D Object > Cube` 다 (Sprites 메뉴는 2D Sprite 패키지가 있어야 보인다). 이름을 `Drone` 으로 바꾸고 Position 을 (0, 0, 0) 에 둔 뒤 `DroneCommander` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(W/A/S/D 와 방향키 이동, Z 되돌리기, Y 다시 하기, R 리플레이, 패드는 십자키, West, North, Start)를 넣는다. 웹 갤러리 무대의 T/F/G/H 는 갤러리 단축키를 피한 것이라 Unity 와 다르다.
 3. `Use Default Layout` 이 켜져 있으면 코드의 기본 배치(12 x 6 칸, 벽 8칸, 출발 (1, 1))를 쓴다. 끄면 `Grid Size`, `Start Cell`, `Walls` 칸의 값을 쓴다. Play 할 때의 드론 자리가 출발 칸이 되고, 격자는 XY 평면에 `Cell Size` 간격으로 놓인다. 드론을 (0, 0, 0) 에 두면 격자는 x -1~10, y -1~4 에 놓인다.
-4. 격자 전체가 보이게 `Main Camera` 를 옮긴다. 드론이 (0, 0, 0) 이고 `Cell Size` 가 1 이면 Position (4.5, 1.5, -10), Rotation (0, 0, 0) 에 두고, Projection 을 `Orthographic`, Size 를 4 로 한다 (2D 템플릿은 처음부터 Orthographic 이다. 3D 템플릿은 Projection 을 바꾼다).
-5. 벽을 화면에 보이려면 벽 모양 프리팹을 `Wall Prefab` 칸에 넣는다. 2D 프로젝트면 `2D Object > Sprites > Square`, 3D 프로젝트면 `3D Object > Cube` 를 하나 만들어 회색으로 칠하고(2D 는 Sprite Renderer 의 Color, 3D 는 회색 Material) Project 창으로 끌어 프리팹으로 만든 뒤 씬의 것은 지운다. Play 하면 벽 칸마다 하나씩 만든다.
+4. 격자 전체가 보이게 `Main Camera` 를 옮긴다. 드론이 (0, 0, 0) 이고 `Cell Size` 가 1 이면 Position (4.5, 1.5, -10), Rotation (0, 0, 0) 에 두고, Projection 을 `Orthographic`, Size 를 4 로 한다 (2D 템플릿은 처음부터 Orthographic 이다. Universal 3D 템플릿은 Projection 을 바꾼다).
+5. 벽을 화면에 보이려면 벽 모양 프리팹을 `Wall Prefab` 칸에 넣는다. 2D 프로젝트면 `2D Object > Sprites > Square`, Universal 3D 프로젝트면 `3D Object > Cube` 를 하나 만들어 회색으로 칠하고(2D 는 Sprite Renderer 의 Color, 3D 는 회색 Material) Project 창으로 끌어 프리팹으로 만든 뒤 씬의 것은 지운다. Play 하면 벽 칸마다 하나씩 만든다.
 6. Play 하고 W 와 D 로 벽 쪽으로 몇 번 움직인 뒤(막혀도 한 번 더 누른다) Z 를 여러 번, Y 를 한 번, R 을 눌러 본다. Game 뷰 왼쪽 위에 기록이 보이고, Console 에 `[Drone] 실행 → 벽에 막힘` 같은 줄이 남는다.
 
 ## 확인
@@ -39,7 +37,7 @@
 ## 주의할 점
 - 이 표본은 원리를 보이려고 `transform.position` 을 직접 옮기고 벽은 코어의 격자로 판정한다. `Move Duration` 은 `Update` 의 연출일 뿐 규칙에 영향이 없다. Rigidbody 로 움직이는 게임이라면 명령이 이전 위치와 속도를 함께 저장해야 정확히 되돌릴 수 있다.
 - 리플레이는 같은 명령을 다시 실행하면 같은 결과가 나온다는 가정에 기댄다. 난수나 `Time.deltaTime` 처럼 실행할 때마다 달라지는 값을 명령 안에서 읽으면 리플레이가 갈라진다. 그런 값은 명령을 만들 때 정해 명령 안에 저장한다.
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 명령이 두 개 생긴다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
 - 이 표본은 벽에 막혀 제자리였던 명령도 기록한다. 그래서 되돌리기 한 번이 아무 변화가 없을 수 있고, 되돌린 뒤 벽 쪽을 누르면 움직이지 않았어도 새 명령이라 다시 하기 목록이 지워진다. 막힌 이동을 기록할지는 선택이다: `Execute` 가 움직였는지를 돌려주게 하고 안 움직였으면 `CommandHistory` 가 기록하지 않으면 된다. 그래도 "반대 동작" 으로 되돌리는 방식은 상자 밀기, 문, 미끄러운 바닥처럼 되돌림이 단순한 반대가 아닌 곳에서 또 어긋나므로, 이전 상태를 저장해 되살리는 `Undo` 는 그대로 둔다.
 - `History Limit` 을 Play 중에 줄이면 다음 명령이 들어갈 때 넘친 만큼 오래된 명령을 버린다. 기록은 메모리에만 있어 씬을 다시 열면 사라진다. 저장하려면 명령을 (방향, 이전 위치) 같은 값으로 바꿔 직렬화한다.
 

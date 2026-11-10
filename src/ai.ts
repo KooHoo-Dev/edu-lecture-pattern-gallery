@@ -15,6 +15,7 @@ export const FIXED_RULES = [
   '- 입력은 새 Input System 으로만 받는다. `Input.GetKey` 같은 구 Input Manager API, `FindObjectOfType`, `Rigidbody.velocity` 는 쓰지 않는다.',
   '- 형식은 파일에 있는 `namespace PatternGallery.…` 블록 안에 둔다. Unity 6 은 C# 9 라 `namespace X;` 한 줄 형식, `record struct` 같은 C# 10 이상 문법은 쓰지 않는다.',
   '- 외부 패키지(DOTween, UniRx 등)는 쓰지 않는다. 각 파일 맨 위에 무엇을 하는지 한국어 주석을 둔다.',
+  '- 코드에서 만드는 `InputAction` 은 `InputActionType.Button` 으로 만들고, `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다 (떼지 않으면 다시 켤 때 한 번 누를 때 두 번 처리된다).',
   '- `// [1]` 같은 줄 끝 표시는 웹 갤러리의 단계 보기에 쓰는 것이다. Unity 에서는 아무 일도 하지 않으므로 그대로 두어도 되고 지워도 된다.',
 ].join('\n')
 
@@ -68,7 +69,7 @@ export const ai: AiConfig<PatternSpecimen> = {
       build: (s, values) =>
         promptDoc(`Unity 패턴 추가: ${s.meta.title}`, `${s.meta.prompt.goal} (${s.meta.pattern})`, [
           ['환경', ENVIRONMENT],
-          ['할 일', numbered([`아래 파일을 \`Assets/Patterns/${s.meta.id}/\` 아래 같은 하위 폴더에 그대로 만든다. 코드는 바꾸지 않는다.`, ...s.meta.unity.setup.map(richToMarkdown), `확인: ${richToMarkdown(s.meta.unity.verify)}`])],
+          ['할 일', numbered(['아래 파일은 코드를 바꾸지 않고 그대로 만든다.', ...s.meta.unity.setup.map(richToMarkdown), `확인: ${richToMarkdown(s.meta.unity.verify)}`])],
           ['Inspector 값', inspector(s, values)],
           ['지킬 것', FIXED_RULES],
           ['주의할 점', bullets(s.meta.unity.pitfalls.map(richToMarkdown))],
@@ -129,10 +130,10 @@ export const ai: AiConfig<PatternSpecimen> = {
   skill: {
     name: 'game-patterns',
     description: all =>
-      `Unity 에 게임 프로그래밍 패턴(상태, 관찰자, 명령 등)을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 연결 컴포넌트)과 넣는 순서가 들어 있다. 다루는 패턴: ${patternList(all)}. 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다.`,
+      `Unity 에 게임 프로그래밍 패턴을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 연결 컴포넌트)과 넣는 순서가 들어 있다. 다루는 패턴: ${patternList(all)}. 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다.`,
     compatibility: 'Unity 6.3 LTS (6000.3), C# 9, Input System',
     title: 'Pattern Gallery',
-    intro: '사용자가 Unity 에서 상태 관리, 이벤트 알림, 되돌리기 같은 구조를 요청하면 아래 목록에서 가장 가까운 표본을 고르고, 그 표본의 `references/<id>/guide.md` 만 읽는다. 다른 표본의 자료는 읽지 않는다.',
+    intro: '사용자가 Unity 에서 상태 관리, 이벤트 알림, 되돌리기, 객체 재사용, 생성 관리 같은 구조를 요청하면 아래 목록에서 가장 가까운 표본을 고르고, 그 표본의 `references/<id>/guide.md` 만 읽는다. 다른 표본의 자료는 읽지 않는다.',
     kindOf: s => s.meta.pattern,
     steps: [
       '`references/<id>/guide.md` 를 읽는다.',
@@ -151,7 +152,7 @@ export const ai: AiConfig<PatternSpecimen> = {
           `# ${m.title} (${m.titleEn})`,
           m.oneLiner,
           `패턴: ${m.pattern}. 난이도 ${m.difficulty}/3. 주제: ${m.tags.join(', ')}.`,
-          `## 파일\n${list(installFiles(s).map(f => `\`${relPath(s, f)}\``))}\n\n모두 프로젝트의 \`Assets/Patterns/${m.id}/\` 아래에 같은 하위 폴더로 복사한다.`,
+          `## 파일\n${list(installFiles(s).map(f => `\`${relPath(s, f)}\``))}`,
           `## 넣는 순서\n${numbered(m.unity.setup.map(richToMarkdown))}`,
           `## 확인\n${richToMarkdown(m.unity.verify)}`,
           `## 기본 Inspector 값\n${valueTable(m.params, defaults(s), ['필드', '뜻', '값'])}`,

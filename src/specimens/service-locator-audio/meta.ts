@@ -84,7 +84,7 @@ export const meta: PatternMeta = {
   diagram: {
     nodes: [
       { id: 'game', label: 'Turret · DroneField · RepairBay', sub: '게임 코드 · 찾아서 부르기만', x: 18, y: 12 },
-      { id: 'host', label: 'AudioServiceHost', sub: '연결 컴포넌트 · OnEnable/OnDisable', x: 82, y: 12 },
+      { id: 'host', label: 'AudioServiceHost', sub: 'MonoBehaviour · OnEnable/OnDisable', x: 82, y: 12 },
       { id: 'services', label: 'Services', sub: 'static Audio · 없으면 널 객체', x: 50, y: 40 },
       { id: 'iface', label: 'IAudioService', sub: 'Play(clip)', x: 50, y: 66, kind: 'interface' },
       { id: 'real', label: 'AudioService', sub: 'Played → PlayOneShot', x: 18, y: 90 },
@@ -129,7 +129,7 @@ export const meta: PatternMeta = {
   ],
   unity: {
     setup: [
-      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/service-locator-audio/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다.',
+      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/service-locator-audio/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
       '`GameObject > Create Empty` 로 빈 오브젝트를 만들어 이름을 `Audio Service` 로 바꾸고 `AudioServiceHost` 를 붙인다. AudioSource 가 같이 붙는다. AudioSource 의 첫 칸 `Audio Generator` 는 비워 두고 `Play On Awake` 를 끈다 (`PlayOneShot` 이 클립을 직접 받는다).',
       '`AudioServiceHost` 의 `Clips` 표에 이미 있는 세 줄(fire, drone-down, repair-done)의 `Clip` 칸에 발사음, 파괴음, 완료음 클립을 넣는다. 비워 둔 줄은 처음 울릴 때 Console 에 오류를 한 번 남기고 소리 없이 넘어간다.',
       '빈 오브젝트를 하나 더 만들어 `MaintenanceBase` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(Q 포탑 발사, W 드론 파괴, E 정비 완료, R 소리 서비스 빼기·넣기)를 넣는다. `Audio Host` 칸에 2단계의 `Audio Service` 오브젝트를 넣는다.',
@@ -138,7 +138,7 @@ export const meta: PatternMeta = {
     ],
     verify: 'R 로 소리 서비스를 빼면 화면 글이 `Services.Audio → NullAudioService (무음)` 으로 바뀌고, 그 상태에서 W 를 눌러도 Console 에 예외 없이 크레딧이 보상만큼 오른다. 다시 R 로 넣고 W 를 누르면 파괴음이 난다.',
     pitfalls: [
-      '왼쪽 위 글은 확인용 IMGUI(`OnGUI`)다. 실제 게임의 화면 글은 UGUI·TextMeshPro 로 만든다.',
+      '왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.',
       '`Services.Audio` 를 `Awake` 에서 필드에 담아 두지 않는다. 담아 둔 뒤에는 서비스를 빼고 넣은 것이 반영되지 않고, 파괴된 연결 컴포넌트의 서비스를 계속 부른다. 이 표본의 게임 코드는 부를 때마다 `Services.Audio` 로 찾는다.',
       '오브젝트 사이의 `Awake`, `OnEnable` 순서는 정해져 있지 않다. 다른 오브젝트의 `Awake`·`OnEnable` 에서 낸 첫 소리는 `AudioServiceHost.OnEnable` 보다 먼저 와 무음(널 객체)일 수 있다. 예외는 나지 않는다. 시작 소리는 `Start` 이후에 낸다 (씬의 모든 `OnEnable` 이 `Start` 보다 먼저 돈다).',
       '`ResetStatics` 의 `[RuntimeInitializeOnLoadMethod]` 는 씬에 `AudioServiceHost` 가 없어도 클래스가 프로젝트에 있으면 Play 마다 불린다. 그래서 소리를 뺀 테스트 씬도 깨끗한 로케이터로 시작한다. 이 메서드는 제네릭이 아닌 클래스에 둔다.',

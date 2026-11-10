@@ -15,7 +15,7 @@ namespace PatternGallery.FactoryDroneSpawner
         Drone drone;
         bool subscribed;
 
-        /// <summary>Instantiate 직후 어댑터가 부른다. 이 뷰가 보일 코어 드론을 정한다</summary>
+        /// <summary>Instantiate 직후 연결 컴포넌트가 부른다. 이 뷰가 보일 코어 드론을 정한다</summary>
         public void Bind(Drone target)
         {
             Unsubscribe();

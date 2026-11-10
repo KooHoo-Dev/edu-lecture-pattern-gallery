@@ -9,14 +9,13 @@ bool 덩어리 대신 지금 상태 객체가 입력과 시간을 처리한다
 - `Core/PlayerStates.cs`
 - `Unity/PlayerController.cs`
 
-모두 프로젝트의 `Assets/Patterns/state-player-actions/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/state-player-actions/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다.
-2. 캐릭터 오브젝트에 `PlayerController` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(Space 점프, X 공격, D 이동 켜기/끄기, C 피격 시연)를 넣는다. D 는 누를 때마다 걷기와 멈춤이 바뀌고, 시작 자리 기준 왼쪽 2.5m, 오른쪽 10.5m 에서 돌아선다.
-3. Animator 가 있으면 `Animator` 칸에 넣고, 상태 이름과 같은 Animator 상태(Idle, Run, Jump, Attack, HitStun)를 만든다. Idle 을 기본 상태(Set as Layer Default State)로 둔다. 시작 상태는 바뀐 적이 없어 CrossFade 되지 않기 때문이다. 공격 판정 오브젝트가 있으면 `Attack Hitbox` 칸에 넣는다.
-4. 적의 공격 판정에서 `PlayerController.TakeHit()` 을 부른다. 그 전까지는 C 키로 피격을 흉내 낸다.
-5. Play 하고 공격(X) 중에 점프(Space)를 눌러 본다. Console 에 상태가 바뀔 때마다 `[Player] Idle → Attack` 처럼 남는다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/state-player-actions/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+2. 캐릭터 오브젝트에 `PlayerController` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(Space 점프, X 공격, D 이동 켜기/끄기, C 피격 시연)를 넣는다. D 는 누를 때마다 걷기와 멈춤이 바뀌고, 시작 자리 기준 왼쪽 2.5m, 오른쪽 10.5m 에서 돌아선다. 웹 갤러리 무대의 ↑/↓ 는 갤러리 단축키를 피한 것이라 Unity 와 다르다.
+3. `Main Camera` 를 Position (4, 1, -10) 에 두고 Projection 을 `Orthographic`, Size 를 4.5 로 한다 (2D 템플릿은 처음부터 Orthographic 이다). 캐릭터를 (0, 0, 0) 에 두면 걷는 범위 x -2.5~10.5 와 점프가 모두 보인다.
+4. Animator 가 있으면 `Animator` 칸에 넣고, 상태 이름과 같은 Animator 상태(Idle, Run, Jump, Attack, HitStun)를 만든다. Idle 을 기본 상태(Set as Layer Default State)로 둔다. 시작 상태는 바뀐 적이 없어 CrossFade 되지 않기 때문이다. 공격 판정 오브젝트가 있으면 `Attack Hitbox` 칸에 넣는다.
+5. 적의 공격 판정에서 `PlayerController.TakeHit()` 을 부른다. 그 전까지는 C 키로 피격을 흉내 낸다.
+6. Play 하고 공격(X) 중에 점프(Space)를 눌러 본다. Console 에 상태가 바뀔 때마다 `[Player] Idle → Attack` 처럼 남는다.
 
 ## 확인
 공격(X) 중에 점프(Space)를 눌러도 Console 에 `Attack → Jump` 가 나오지 않고, 공격 중에 피격(C)하면 `Attack → HitStun` 이 나오며 공격 판정 오브젝트가 바로 꺼진다.
@@ -39,7 +38,6 @@ bool 덩어리 대신 지금 상태 객체가 입력과 시간을 처리한다
 ## 주의할 점
 - 이 표본은 원리를 보이려고 `transform.position` 을 직접 옮긴다. `CharacterController` 나 `Rigidbody` 로 움직이는 게임에서는 코어가 정한 속도를 그 컴포넌트에 넘기고, 땅에 닿았는지는 그쪽 결과를 코어에 알려 준다.
 - 코어의 시간은 `Tick(Time.deltaTime)` 으로 받는다. `Time.timeScale` 이 0(일시정지)이면 시간으로 넘어가는 전이(착지, 공격 끝)는 멈추지만 입력 콜백은 그대로 불려 `Idle → Jump` 처럼 바뀐다. 일시정지 중에는 입력 액션을 `Disable` 하거나 메뉴용 액션 맵으로 바꾼다.
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 두 번 처리된다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다 (기본값 Value 는 다시 켤 때 눌려 있던 키를 바로 처리한다).
 - 입력 콜백(`performed`)은 `Update` 밖에서 불린다. 이 표본은 입력을 받는 즉시 상태를 바꾸므로 괜찮지만, 물리와 맞춰야 하는 입력은 값만 기억했다가 `Update` 나 `FixedUpdate` 에서 처리한다.
 
 ## 흔한 실수

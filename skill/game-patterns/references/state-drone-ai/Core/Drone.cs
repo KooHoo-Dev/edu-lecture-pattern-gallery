@@ -26,7 +26,7 @@ namespace PatternGallery.StateDroneAi
         /// <summary>지금 이동 속도. AttackState 가 Enter 에서 0 으로 멈추고 Exit 에서 Settings.MoveSpeed 로 되돌린다</summary>
         public float Speed;
         public int Hp;
-        /// <summary>쫓는 대상(하린)의 x. 어댑터가 Tick 마다 넘긴다</summary>
+        /// <summary>쫓는 대상(하린)의 x. 연결 컴포넌트가 Tick 마다 넘긴다</summary>
         public float TargetX;
         /// <summary>충전한 시간과 충전 중인지. 드론마다 다른 값이라 상태 객체가 아니라 드론이 든다</summary>
         public float ChargeTimer;

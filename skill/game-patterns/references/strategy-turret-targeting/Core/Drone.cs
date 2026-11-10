@@ -119,7 +119,7 @@ namespace PatternGallery.StrategyTurretTargeting
                 if (d.IsAlive && Math.Abs(d.X - x) <= range) into.Add(d);
         }
 
-        /// <summary>처음부터 다시 (Unity 어댑터의 반복 재생용)</summary>
+        /// <summary>처음부터 다시 (연결 컴포넌트의 반복 재생용)</summary>
         public void Restart()
         {
             active.Clear();

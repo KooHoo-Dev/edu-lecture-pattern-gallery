@@ -13,13 +13,11 @@
 - `Unity/HitSoundOnDamage.cs`
 - `Unity/PlayerHealth.cs`
 
-모두 프로젝트의 `Assets/Patterns/observer-health-events/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/observer-health-events/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다.
-2. 플레이어 오브젝트에 `PlayerHealth` 를 붙인다. 붙이는 순간 `Reset` 이 시연 키(K 피해, H 회복)를 넣는다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/observer-health-events/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+2. 플레이어 오브젝트에 `PlayerHealth` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(K 피해 시연, H 회복 시연)를 넣는다.
 3. `GameObject > UI (Canvas) > Image` 로 체력 바를 만든다. Source Image 에 스프라이트(기본 UISprite 도 된다)를 넣어야 Image Type 칸이 보인다. Image Type 을 Filled, Fill Method 를 Horizontal, Fill Origin 을 Left 로 둔다. 그 Image 에 `HealthBarUI` 를 붙이고 `Target` 에 플레이어, `Fill` 에 그 Image 를 넣는다.
-4. 항상 켜진 오브젝트(Canvas 등)에 `HitSoundOnDamage` 를 붙인다. 같이 붙는 AudioSource 에 피격음 클립을 넣고 Play On Awake 를 끈다. `Target` 에 플레이어를 넣는다.
+4. 항상 켜진 오브젝트(Canvas 등)에 `HitSoundOnDamage` 를 붙인다. 같이 붙는 AudioSource 의 첫 칸 `Audio Generator` 에 피격음 클립을 넣고 `Play On Awake` 를 끈다. `Target` 에 플레이어를 넣는다.
 5. 같은 오브젝트에 `AchievementOnDamage` 와 `GameOverOnDeath` 를 붙이고 `Target` 에 플레이어를 넣는다. 업적 알림 창과 게임 오버 패널은 만들어서 꺼 두고, 각각 `Toast`, `Panel` 칸에 넣는다. 꺼진 창 자신에 붙이면 `OnEnable` 이 돌지 않아 구독하지 않는다.
 6. Play 하고 K 로 피해를 주다가 Hierarchy 에서 체력 바 오브젝트를 Delete 로 지워 본다. 소리, 업적, 게임 오버는 그대로 동작해야 한다.
 

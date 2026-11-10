@@ -10,8 +10,6 @@
 - `Unity/DroneHangar.cs`
 - `Unity/DroneView.cs`
 
-모두 프로젝트의 `Assets/Patterns/prototype-drone-clone/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
 1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/prototype-drone-clone/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
 2. 드론 모양을 만든다. 2D 프로젝트면 `GameObject > 2D Object > Sprites > Square`, Universal 3D 프로젝트면 `GameObject > 3D Object > Cube` 다 (Sprites 메뉴는 2D Sprite 패키지가 있어야 보인다). 이름을 `Drone` 으로 바꾸고 `DroneView` 를 붙인다.
@@ -42,7 +40,7 @@ C 세 번 뒤 M 을 누르면 #3 아래에만 모듈 상자가 하나 늘고, D 
 - `Instantiate` 는 Unity 가 직렬화하는 필드(`[SerializeField]`, public)를 복제하고, 직렬화된 `List` 는 새 목록으로 만든다. 직렬화되지 않는 필드(순수 C# 객체를 담은 private 필드 등)는 복제되지 않고 필드 초기값으로 시작한다. 그래서 이 표본은 코어 드론을 `ScoutDrone.Clone()` 으로 따로 복제하고 `Instantiate` 한 뷰와 짝짓는다.
 - `Max Clones`, `Damage Amount`, `Upgrade Speed`, `Module Name` 은 Play 중에 바꿔도 `OnValidate` 가 코어에 넣는다 (`Module Name` 은 다음 장착부터). 견본의 이름, HP, 속도, 모듈은 Play 를 시작할 때 한 번만 읽는다. 견본을 한 번 설정해 두는 것이 이 패턴의 출발점이다.
 - 컴포넌트가 꺼진 동안에는 `Hangar` 의 이벤트를 듣지 않는다. 그동안 다른 스크립트가 `Hangar` 로 복제하거나 피해를 주면, 다시 켤 때 `OnEnable` 이 `Clones` 를 돌며 빠진 뷰(없거나 파괴된 것)를 만들고 모두 코어 값으로 다시 그린다.
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 두 대가 복제된다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.
+- 왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.
 
 ## 흔한 실수
 - **드론 한 대에 모듈을 달았더니 모든 드론과 견본에 붙었다**: `MemberwiseClone()` 은 얕은 복사다. int, float, struct 같은 값 형식은 변수(스택의 지역 변수나 객체 안의 칸)에 값이 직접 들어 있어 복사하면 값이 둘이 된다. List, 배열, 클래스 같은 참조 형식은 객체가 힙에 하나 있고 변수에는 그 주소만 들어 있어, 복사하면 같은 객체를 가리키는 주소가 둘이 된다. `Clone()` 에서 `MemberwiseClone()` 뒤에 `copy.Modules = new List<string>(Modules);` 처럼 참조 필드를 새로 만든다. 목록 안 원소도 클래스라면 원소까지 복제할지 따로 정한다. 필드를 더하면 `MemberwiseClone` 이 조용히 공유하므로 `Clone` 을 다시 본다.

@@ -1,4 +1,4 @@
-// 포탑 어댑터: Input System 입력으로 조준 전략 객체를 갈아 끼우고, 코어 포탑의 대상을 레이저(LineRenderer)에 옮긴다.
+// 포탑 연결 컴포넌트: Input System 입력으로 조준 전략 객체를 갈아 끼우고, 코어 포탑의 대상을 레이저(LineRenderer)에 옮긴다.
 // 게임 규칙은 여기 없다. 조준 방식을 더하려면 Core/ 에 ITargetingStrategy 구현 클래스를 하나 더한다.
 // 드론 웨이브는 씬의 DroneWaveController 하나를 칸으로 받아 쓴다. 포탑을 더 놓으면 같은 웨이브를 넣는다.
 using UnityEngine;
@@ -158,7 +158,7 @@ namespace PatternGallery.StrategyTurretTargeting
 
         void OnDroneDestroyed(Drone d)
         {
-            // 코어 웨이브는 이미 목록에서 뺐다. 화면의 드론 오브젝트는 웨이브 어댑터가 지운다
+            // 코어 웨이브는 이미 목록에서 뺐다. 화면의 드론 오브젝트는 웨이브 연결 컴포넌트가 지운다
             droneWave.RemoveView(d);
             Log($"{d.Name} 파괴");
         }

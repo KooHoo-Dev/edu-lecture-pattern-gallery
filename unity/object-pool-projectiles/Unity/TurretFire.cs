@@ -1,4 +1,4 @@
-// 포탑 어댑터: Input System 입력을 코어 Turret 에 넘기고, 풀이 탄을 처음 만들 때만 프리팹을 Instantiate 해 코어 탄과 짝짓는다.
+// 포탑 연결 컴포넌트: Input System 입력을 코어 Turret 에 넘기고, 풀이 탄을 처음 만들 때만 프리팹을 Instantiate 해 코어 탄과 짝짓는다.
 // 빌리면 SetActive(true), 돌려받으면 SetActive(false). 위치만 Update 에서 코어 값으로 옮긴다 (발사 때 저장한 시작점 기준). 풀 규칙은 여기 없다 (Core/ 의 ProjectilePool, Turret).
 // 왼쪽 위 상태 글은 확인용 IMGUI(OnGUI) 다. 실제 게임의 화면 글은 UGUI·TextMeshPro 로 만든다.
 using System.Collections.Generic;

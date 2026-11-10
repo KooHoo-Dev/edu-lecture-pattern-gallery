@@ -9,13 +9,11 @@
 - `Core/PowerStats.cs`
 - `Unity/PowerBuffs.cs`
 
-모두 프로젝트의 `Assets/Patterns/decorator-stat-buffs/` 아래에 같은 하위 폴더로 복사한다.
-
 ## 넣는 순서
-1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/decorator-stat-buffs/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
+1. `Core/` 와 `Unity/` 폴더를 `Assets/Patterns/decorator-stat-buffs/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.
 2. `GameObject > UI (Canvas) > Image` 로 출력 막대를 만든다 (Canvas 와 EventSystem 이 함께 생긴다). 이름을 `PowerFill` 로 바꾸고 Rect Transform 의 Width 를 600, Height 를 30 으로 한다. Source Image 에 스프라이트(예: 기본 제공 `UISprite`)를 넣어야 Image Type 칸이 보인다. Image Type 을 `Filled`, Fill Method 를 `Horizontal`, Fill Origin 을 `Left` 로 둔다.
 3. 같은 방법으로 작은 Image 둘(`CellTimer`, `OverloadTimer`, Width 200, Height 12, 같은 스프라이트, Filled · Horizontal · Left)을 만들고, `GameObject > UI (Canvas) > Legacy > Text` 로 Text 둘(`PowerText`, `ChainText`)을 만든다. 두 Text 는 Font Size 를 24, Alignment 를 가운데로 하고 Height 를 40 으로, `PowerText` 는 Width 400, `ChainText` 는 Width 800 으로 한다. Canvas 는 Screen Space - Overlay 라 카메라 위치와 상관없이 Game 뷰에 보인다.
-4. 새 UI 는 모두 Canvas 가운데에 겹쳐 생기므로 Rect Transform 의 Pos X·Y 를 나눈다: `PowerText` (0, 120), `PowerFill` (0, 70), `ChainText` (0, 20), `CellTimer` (−110, −30), `OverloadTimer` (110, −30). 막대 위에 숫자, 아래에 사슬 글과 타이머 둘이 나란히 놓인다.
+4. 새 UI 는 모두 Canvas 가운데에 겹쳐 생기므로 Rect Transform 의 Pos X·Y 를 나눈다: `PowerText` (0, 120), `PowerFill` (0, 70), `ChainText` (0, 20), `CellTimer` (-110, -30), `OverloadTimer` (110, -30). 막대 위에 숫자, 아래에 사슬 글과 타이머 둘이 나란히 놓인다.
 5. 항상 켜져 있는 `Canvas` 에 `PowerBuffs` 를 붙인다. 붙이는 순간 `Reset` 이 기본 키(1 냉각 셀, 2 과부하, 3 정화)를 넣는다. `Power Fill`, `Power Text`, `Chain Text`, `Cell Timer Fill`, `Overload Timer Fill` 칸에 만든 것을 끌어 넣는다. 조절 값 칸 중 `Base Power` 는 웹 갤러리에 없는 칸이다 (웹은 10 고정). 웹 갤러리 무대의 C/O/X 는 갤러리 단축키를 피한 것이라 Unity 와 다르다.
 6. Play 하고 1, 2, 1 을 차례로 누른 뒤 기다린다. `ChainText` 가 `과부하 ×2 [냉각 셀 +5 [기본 10]]` 처럼 바뀌고, Console 에 `[PowerBuffs] 출력 15 → 30`, `[PowerBuffs] 과부하 끝 → 목록에서 뺌` 같은 줄이 남는다.
 
@@ -40,7 +38,6 @@
 - 버프 시간은 `Update` 의 `Tick(Time.deltaTime)` 으로 센다. `Time.timeScale` 이 0(일시정지)이면 버프도 멈춘다. 일시정지 중에도 흘러야 하는 버프라면 `Time.unscaledDeltaTime` 을 넘긴다.
 - 사슬은 목록이 바뀔 때만 다시 만든다 (버프를 받거나, 끝나거나, 정화하거나, Inspector 값이 바뀔 때). 매 프레임 `Rebuild` 하면 층 객체가 프레임마다 생겨 GC 가 늘어난다. 출력은 `PowerChanged` 를 받아 UI 에 옮기고 `Update` 에서 다시 읽지 않는다.
 - 층 순서(더하기 안쪽, 곱하기 바깥)는 `BuffSet.Rebuild` 한 곳에 있다. "배율 뒤에 더하는 고정 보너스" 같은 규칙이 생기면 그 층을 곱하기 층 바깥에 감싸는 단계를 `Rebuild` 에 하나 더한다. 버프마다 순서를 따로 정하지 않는다.
-- `InputAction` 은 `OnEnable` 에서 콜백을 붙이고 `Enable`, `OnDisable` 에서 떼고 `Disable` 한다. 떼지 않으면 다시 켤 때 콜백이 두 번 붙어 한 번 누를 때 버프 갱신이 두 번 일어난다. 코드에서 만드는 액션은 `InputActionType.Button` 으로 만든다.
 - UGUI Filled Image 는 Source Image 에 스프라이트가 있어야 Image Type 칸이 보이고 `fillAmount` 가 화면에 나타난다. 막대가 가득 차는 출력은 조절 값 범위의 최대값 (10 + 15) × 3 = 75 로 고정했다 (웹 무대와 같다). 조절 값으로 계산하면 값을 바꿔도 막대 길이가 같아 보인다. `Base Power` 를 크게 올리면 이 기준도 함께 고친다.
 - `BuffApplied`, `BuffExpired` 같은 알림은 사슬을 다시 만든 뒤에 온다. 핸들러에서 `Buffs.Value` 를 읽으면 새 출력이다. Inspector 값을 바꿔 사슬만 다시 만들어지면(출력이 같으면 `PowerChanged` 는 오지 않는다) `ChainRebuilt` 핸들러가 글과 막대를 함께 맞춘다.
 

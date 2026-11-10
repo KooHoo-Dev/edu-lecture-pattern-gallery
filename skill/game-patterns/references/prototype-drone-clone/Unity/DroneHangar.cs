@@ -1,4 +1,4 @@
-// 격납고 어댑터: Input System 입력을 코어 Hangar 에 넘기고, 복제가 생기면 드론 프리팹을 Instantiate 해 코어 드론과 짝짓는다.
+// 격납고 연결 컴포넌트: Input System 입력을 코어 Hangar 에 넘기고, 복제가 생기면 드론 프리팹을 Instantiate 해 코어 드론과 짝짓는다.
 // 모듈·HP·속도 변화는 Hangar 의 이벤트 핸들러에서 바로 화면에 옮긴다. 복제 규칙은 여기 없다 (Core/ 의 ScoutDrone.Clone, Hangar).
 using System.Collections.Generic;
 using UnityEngine;

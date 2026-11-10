@@ -1,4 +1,4 @@
-// 플레이어 어댑터: Input System 입력을 코어(Player)에 넘기고, 코어의 상태를 위치, 공격 판정, Animator 에 옮긴다.
+// 플레이어 연결 컴포넌트: Input System 입력을 코어(Player)에 넘기고, 코어의 상태를 위치, 공격 판정, Animator 에 옮긴다.
 // 게임 규칙은 여기 없다. 규칙을 바꾸려면 Core/ 의 상태 클래스를 고친다.
 using UnityEngine;
 using UnityEngine.InputSystem;
