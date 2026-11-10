@@ -48,4 +48,21 @@ export default [
       CONSISTENCY,
     ],
   },
+  {
+    id: 'spatial-grid-detection',
+    fix: true,
+    budgetUsd: 8,
+    profiles: PROFILES,
+    items: [
+      '**"36칸" 이 틀렸다** (`meta.ts` 29 cellSize hint, 56 preset `tiny-cells` look, 192 mistakes[2]): 칸 1m·반경 2.5m 에서 `Touches` 가 모서리 칸을 걸러 실제 32칸이다 (프리셋 화면 머리글도 32). 글의 숫자를 화면·코드와 맞춘다.',
+      '**droneSpeed hint 가 틀렸다** (`meta.ts` 51): 0.75 면 2.2초에 D2 가 반경 안인데 칸은 아직 처음 칸이라 탐지 누락 대신 경계 누락이 뜬다. "0.75 면 D2 가 아직 처음 칸에 있어 탐지 누락 대신 경계 누락이, 0.5 면 반경 밖이라 ✖ 가 없다" 처럼 실제와 맞게.',
+      '**물리 쿼리 글** (pitfalls[0] 214, goals[3] 15): `Physics2D.OverlapCircle(point, radius)` 기본 오버로드는 하나만 돌려준다 → 전부는 `OverlapCircleAll` 이나 `ContactFilter2D` + `List<Collider2D>` 오버로드. "물리 엔진이 안에서 공간 분할로 후보를 추리기 때문" 은 단정이다 → "물리 엔진이 자체 가속 구조로 후보를 추린다고 알려져 있어 보통 충분하다". goals[3] "충분하다는 것을 안다" → "대개 충분하다".',
+      '**머리글 판이 드론을 가린다** (`sim.ts` `header`, box y 7.15~8.85, 드론 다음에 그림): 판을 드론보다 먼저 그리고, 불투명도를 0.5 안팎으로 낮추고 폭을 글 길이에 맞춘다 (자동 데모 0.2초 D2, `bug-2`·끝 화면 D3, 18대 시나리오 D11·D3·D14).',
+      '**핵심 ✖ 정지 화면이 잘 안 읽힌다** (`bug-1`): `✖ 탐지 누락` 글이 포탑 상자와 겹친다 → ✖ 글을 링 위(y+0.55)로, 새 ✖ 드론은 이름표를 `✖ D2 탐지 누락` 하나로 합친다. 왼쪽으로 가는 드론이 자기 ✖ 글 위로 걷는 것도 비킨다. 18대 시나리오 정리: 찾음·놓침이 아니고 반경+1칸 밖인 드론은 이름표를 숨기거나 작게·흐리게, 주황 점선은 ✖ 드론과 등록 칸이나 실제 칸이 포탑 칸인 드론에만 (나머지는 작은 주황 점), 등록 칸 사각형은 칸마다 한 번.',
+      '**머티리얼 사본 누수** (`Unity/DroneView.cs` 54 `body.material.color`): 드론마다 사본이 생기고 Destroy 때 남는다. `MaterialPropertyBlock` 으로 `_BaseColor`·`_Color` 를 넣거나 (abstract-factory-zone-themes 관례) `OnDestroy` 에서 사본을 Destroy.',
+      '**글을 이 코드에 맞추기**: mistakes[4] `(int)` — 이 표본은 드론이 0 이상이라 놓치는 일이 없다 → "Unity 월드는 보통 원점이 가운데라 절반이 음수 좌표" 를 실제 예로. mistakes[0] "같은 메서드를 거치게 한다" — Core 에 순간 이동 메서드가 없고 다음 `Tick` 이 칸을 바로잡는다 → `Field.Teleport(d, x, y)` 를 더하거나 글을 "자리를 바꾼 곳에서 바로 `grid.Move`" 로. mistakes[3] `MissingReferenceException` — 이 표본 격자는 코어 `Drone` 이라 예외 없이 사라진 드론이 `찾음` 에 남는다 → "격자에 Transform·MonoBehaviour 를 넣었다면" 조건. pitfalls[4] — `DroneView.LateUpdate` 가 덮어써 "어긋난다" 가 아니라 "무시된다", Rigidbody 를 붙이면 물리와 싸운다. related[0] "루프가 끝난 뒤 함께 뺀다" — 이 Core 는 즉시 빼고 `Removed` 플래그와 사본 목록으로 Tick 을 지킨다 → 코드와 맞게.',
+      '**선택**: `Field.Add`/`SpatialGrid.Add` 중복 가드 (`if (drones.Contains(d)) return;`). Gizmos 에 `Gizmos.matrix = transform.localToWorldMatrix`. `Turret.Tick` 의 float 타이머는 가이드의 정수 단계 규칙으로 (기록을 다시 만든다). offNote 는 587자라 더 늘리지 않는다.',
+      CONSISTENCY,
+    ],
+  },
 ]
