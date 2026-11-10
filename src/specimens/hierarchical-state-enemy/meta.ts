@@ -192,5 +192,6 @@ export const meta: PatternMeta = {
   related: [
     { id: 'state-drone-ai', why: '앞 편. 그 표본의 평평한 상태 클래스 구조가 이 표본의 나쁜 예다. 상태가 넷일 때는 충분했지만, 수색을 더하고 공통 규칙이 생기자 상태마다 복사하게 됐다' },
     { id: 'state-player-actions', why: '같은 상태 패턴의 첫 편. 입력을 지금 상태가 거르는 방식(`HandleInput` 이 null 이면 무시)을 여기서는 "처리하지 않으면 부모에게" 로 넓힌다' },
+    { id: 'chain-input-handlers', why: '처리하지 않은 입력을 부모 상태에 넘기는 것은 책임 연쇄와 같은 생각이다' },
   ],
 }

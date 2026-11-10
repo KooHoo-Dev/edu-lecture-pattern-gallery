@@ -164,5 +164,6 @@ export const meta: PatternMeta = {
     { id: 'state-player-actions', why: '피해 이벤트를 받아 경직 상태로 넘기는 구독자를 하나 더하면 두 패턴이 이어진다' },
     { id: 'event-queue-sound', why: '다음 편. 알리는 순간 구독자가 바로 일하는 대신 요청을 모았다가 나중에 처리한다' },
     { url: 'https://koohoo-dev.github.io/edu-lecture-UIGallery/#/s/health-bar-trail', title: 'UI 갤러리: 체력 바 잔상', why: '체력 바 구독자를 더 보기 좋게 만드는 연출' },
+    { id: 'chain-input-handlers', why: '관찰자는 모두에게 알리고, 책임 연쇄는 처리한 하나가 소비하면 멈춘다' },
   ],
 }

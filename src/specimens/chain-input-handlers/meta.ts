@@ -166,5 +166,6 @@ export const meta: PatternMeta = {
   related: [
     { id: 'command-undo-replay', why: '입력을 객체로 만든다는 점이 같다. 클릭 하나를 `Click` 값으로 만들어 사슬에 넘기는 것도 입력을 값으로 다루는 일이다' },
     { id: 'observer-health-events', why: '관찰자는 소식을 모든 구독자에게 알리고, 책임 연쇄는 처리한 하나에서 멈춘다. 효과 끄기의 각자 구독이 바로 관찰자 모양이다' },
+    { id: 'hierarchical-state-enemy', why: '계층 상태 기계도 자식이 처리하지 않은 입력을 부모에게 넘긴다' },
   ],
 }

@@ -155,5 +155,6 @@ export const meta: PatternMeta = {
     { id: 'state-player-actions', why: '구조는 같다. 다음을 객체가 스스로 정하면 상태, 바깥이 골라 끼우면 전략이다' },
     { id: 'observer-health-events', why: '드론 파괴나 기지 도달을 이벤트로 알리면 점수, 소리, UI 가 각자 구독한다' },
     { id: 'command-undo-replay', why: '조준 방식 바꾸기를 명령 객체로 만들면 기록하고 리플레이할 수 있다' },
+    { id: 'spatial-grid-detection', why: '대상을 고르기 전에 후보를 찾는 일이다. 드론이 많으면 격자로 근처만 본다' },
   ],
 }

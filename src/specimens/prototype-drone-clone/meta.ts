@@ -167,5 +167,6 @@ export const meta: PatternMeta = {
     { id: 'command-undo-replay', why: '이동 명령이 이전 위치를 int 값으로 복사해 두기 때문에, 드론이 그 뒤에 움직여도 되돌릴 위치가 바뀌지 않는다. 값 복사가 안전한 이유가 이 표본과 같다' },
     { id: 'observer-health-events', why: '체력 변화를 readonly struct 값으로 넘겨, 구독자가 받은 값을 고쳐도 체력 자체는 바뀌지 않는다' },
     { id: 'flyweight-drone-types', why: '같은 질문의 반대쪽이다. 프로토타입은 복제본끼리 섞이지 않게 참조 필드를 새로 만들고, 플라이웨이트는 종류 데이터를 일부러 함께 쓴다' },
+    { id: 'memento-checkpoint', why: '메멘토도 상태를 값으로 떠 둔다. 목록을 참조째 담으면 이 표본과 같은 공유가 생긴다' },
   ],
 }

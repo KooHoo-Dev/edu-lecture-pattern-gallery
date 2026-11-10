@@ -236,5 +236,7 @@ export const meta: PatternMeta = {
   related: [
     { id: 'object-pool-projectiles', why: '빠진 드론을 Destroy 하는 대신 풀에 돌려줄 수 있다. 돌려주는 시점도 루프가 끝난 뒤(Despawned)여야 같은 프레임에 다시 빌려 가지 않는다' },
     { id: 'event-queue-sound', why: '같은 생각의 다른 쓰임이다. 도는 중에 생긴 요청을 바로 처리하지 않고 모아 두었다가 정해진 때에 한꺼번에 처리한다' },
+    { id: 'game-loop-fixed-step', why: '이 업데이트를 부르는 바깥 루프다. 화면 프레임과 상관없이 같은 간격으로 부른다' },
+    { id: 'spatial-grid-detection', why: '드론이 많아지면 목록 전체 대신 격자로 근처만 찾는다. 움직일 때 칸 등록을 옮기는 일이 업데이트 안에 들어간다' },
   ],
 }

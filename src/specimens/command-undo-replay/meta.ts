@@ -180,5 +180,6 @@ export const meta: PatternMeta = {
   related: [
     { id: 'state-player-actions', why: '입력을 명령 객체로 바꾸면 상태 기계에 넣기 전에 기록하고 다시 재생할 수 있다' },
     { url: 'https://koohoo-dev.github.io/edu-lecture-UIGallery/#/s/input-rebinding', title: 'UI 갤러리: 입력 재설정', why: '키와 동작을 떼어 놓으면 어떤 키를 눌러도 같은 명령을 만들 수 있다' },
+    { id: 'memento-checkpoint', why: '명령 하나씩 되돌리는 대신 저장한 시점 하나로 되살린다. 이전 상태를 값으로 떠 둔다는 생각은 같다' },
   ],
 }
