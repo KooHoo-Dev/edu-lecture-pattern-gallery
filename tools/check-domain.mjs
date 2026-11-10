@@ -60,6 +60,8 @@ export default async function checkDomain({ project, ids, err, warn }) {
     const reg = readFileSync(join(root, 'src', 'registry.ts'), 'utf8')
     const planned = new RegExp("id: '" + id + "', title: '([^']+)'").exec(reg)?.[1]
     if (planned && meta.title !== planned) err(`${id}: 제목 '${meta.title}' 이 src/registry.ts PLANNED 의 '${planned}' 와 다르다`)
+    // offNote 는 효과 끄기 화면 옆에 붙는 짧은 글이다. 길면 시나리오 note 로 옮긴다 (일관성 정리 기준 300~450자)
+    if ((meta.offNote ?? '').length > 600) warn(`${id}: offNote 가 ${meta.offNote.length}자다. 600자 안으로 (시각·숫자는 시나리오 note 로)`)
     const src = sourceHash(root, id)
     let compared = 0
     // 나쁜 예의 버그(! 줄)는 모두 첫 시나리오(자동 데모)에도 나와야 한다 (가이드 8절)
