@@ -38,12 +38,17 @@ namespace PatternGallery.ChainInputHandlers.Naive
         public Area drone;
         public bool selected;
 
+        /// <summary>드론을 누를 때마다 (이미 선택돼 있어도). 선택 표시나 정비 대상 창이 듣는다</summary>
+        public event Action Selected;
+
         public void Listen(NaiveClickInput input) => input.Clicked += OnClicked;
 
         void OnClicked(float x, float y)
         {
             // [!] 버튼이나 열린 정비 창이 위에 있는지 묻지 않는다 (클릭 관통)
-            if (drone.Contains(x, y)) selected = true;
+            if (!drone.Contains(x, y)) return;
+            selected = true;
+            Selected?.Invoke();
         }
     }
 

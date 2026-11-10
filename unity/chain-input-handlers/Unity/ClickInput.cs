@@ -1,7 +1,9 @@
-// 클릭 입력 연결 컴포넌트: Input System 의 포인터 클릭을 받아 화면 좌표를 월드 좌표로 바꾸고, 코어 Click 으로 만들어 사슬(ClickChain)의 맨 앞에 넣는다.
+// 클릭 입력 연결 컴포넌트: Input System 의 포인터 클릭 위치를 기억해 두었다가 Update 에서 월드 좌표로 바꾸고, 코어 Click 으로 만들어 사슬(ClickChain)의 맨 앞에 넣는다.
 // 처리자 넷과 사슬은 코어 MaintenanceScreen 이 조립한다. 이 컴포넌트는 입력, 하린·드론 오브젝트 옮기기, 확인용 화면 글만 맡는다.
 // 정비 버튼과 정비 창은 확인용 IMGUI(OnGUI 의 GUI.Box) 상자로 그린다. 상자는 클릭을 받지 않고, 클릭은 모두 사슬이 판정한다.
 // 실제 게임의 UI 는 UGUI 로 만든다 (그때 UI 처리자의 판정은 meta 글의 pitfalls 를 본다).
+// 사슬을 콜백이 아니라 Update 에서 돌리는 까닭: UI(EventSystem)는 입력 처리 뒤에 갱신된다. 액션 콜백 안에서
+// EventSystem.current.IsPointerOverGameObject() 를 부르면 경고가 나고 지난 프레임의 UI 상태를 본다.
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,7 +12,7 @@ namespace PatternGallery.ChainInputHandlers
     public class ClickInput : MonoBehaviour
     {
         [Header("조절 값 (웹 갤러리와 같은 이름. Play 중에 바꿔도 반영된다)")]
-        [Tooltip("정비 버튼의 폭 (m). 버튼은 오른쪽 끝이 x 15.4 에 붙어 왼쪽으로 넓어진다. 4 이상이면 드론 가운데(x 11.5)까지 덮어, 드론 가운데를 누른 클릭을 위에 그려진 버튼이 먼저 받는다")]
+        [Tooltip("정비 버튼의 폭 (m). 버튼은 오른쪽 끝이 x 15.4 에 붙어 왼쪽으로 넓어진다. 4 안팎(3.9)부터 드론 가운데(x 11.5)를 덮어, 드론 가운데를 누른 클릭을 위에 그려진 버튼이 먼저 받는다")]
         [Range(1.5f, 6f)]
         [SerializeField] float buttonWidth = 2.5f;
         [Tooltip("하린이 땅 이동 명령을 받아 걷는 빠르기 (m/s)")]
@@ -35,7 +37,12 @@ namespace PatternGallery.ChainInputHandlers
 
         MaintenanceScreen maintenance;
         int clicks;
+        bool clickPending;
+        Vector2 pendingScreen;
+        // 확인용 글은 이벤트를 받을 때 만들어 두고 OnGUI 는 그리기만 한다 (하린 x 는 매 프레임 바뀌므로 Update 에서)
         string lastResult = "클릭을 기다린다";
+        string status = "";
+        float shownHarinX = float.NaN;
 
         /// <summary>처음 읽을 때 만든다. 다른 오브젝트의 OnEnable 이 이 오브젝트의 Awake 보다 먼저 불려도 null 이 아니게</summary>
         public MaintenanceScreen Maintenance => maintenance ??= new MaintenanceScreen(buttonWidth, walkSpeed);
@@ -65,6 +72,7 @@ namespace PatternGallery.ChainInputHandlers
                 drone.position = new Vector3(d.CenterX, d.CenterY, drone.position.z);
             }
             ShowDrone(); // 꺼져 있던 동안 바뀐 선택을 다시 맞춘다
+            clickPending = false;
         }
 
         void OnDisable()
@@ -91,22 +99,35 @@ namespace PatternGallery.ChainInputHandlers
 
         void OnClick(InputAction.CallbackContext ctx)
         {
-            if (viewCamera == null || !(ctx.control.device is Pointer pointer)) return;
-            Vector2 screen = pointer.position.ReadValue();
-            // 카메라에서 z = 0 평면까지의 거리. Orthographic 이면 x, y 에 영향이 없다
-            float depth = Mathf.Abs(viewCamera.transform.position.z);
-            Vector3 world = viewCamera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, depth));
-            Maintenance.Chain.Send(new Click(++clicks, world.x, world.y)); // [1] 클릭을 사슬의 맨 앞에 넣는다
+            // 콜백에서는 누른 위치만 기억한다. 사슬은 Update 에서 돌린다 (UI 상태가 이번 프레임 것이 되게. 파일 머리 주석)
+            if (!(ctx.control.device is Pointer pointer)) return;
+            pendingScreen = pointer.position.ReadValue();
+            clickPending = true; // 한 프레임에 두 번 눌리면 마지막 위치 하나만 보낸다
         }
 
         void Update()
         {
+            if (clickPending)
+            {
+                clickPending = false;
+                SendClick(pendingScreen);
+            }
             Maintenance.Harin.Tick(Time.deltaTime);
             // 매 프레임 바뀌는 위치만 여기서 옮긴다
+            if (Maintenance.Harin.X != shownHarinX) ShowStatus();
             if (harin == null) return;
             Vector3 p = harin.position;
             p.x = Maintenance.Harin.X;
             harin.position = p;
+        }
+
+        void SendClick(Vector2 screen)
+        {
+            if (viewCamera == null) return;
+            // 카메라에서 z = 0 평면까지의 거리. Orthographic 이면 x, y 에 영향이 없다
+            float depth = Mathf.Abs(viewCamera.transform.position.z);
+            Vector3 world = viewCamera.ScreenToWorldPoint(new Vector3(screen.x, screen.y, depth));
+            Maintenance.Chain.Send(new Click(++clicks, world.x, world.y)); // [1] 클릭을 사슬의 맨 앞에 넣는다
         }
 
         void OnPassed(IClickHandler h, Click c) => Log($"#{c.Number} {h.GetType().Name} → 넘김");
@@ -123,13 +144,30 @@ namespace PatternGallery.ChainInputHandlers
             Debug.LogWarning($"[Click] {lastResult}", this); // [4] 조용히 버리지 않는다
         }
 
-        void OnPopupOpened() => Log("정비 창 열림");
-        void OnPopupClosed() => Log("정비 창 닫힘");
+        void OnPopupOpened()
+        {
+            Log("정비 창 열림");
+            ShowStatus();
+        }
+
+        void OnPopupClosed()
+        {
+            Log("정비 창 닫힘");
+            ShowStatus();
+        }
+
         void OnMoveOrdered(float from, float to) => Log($"하린 이동 명령 {from:0.00} → {to:0.00}");
 
         void ShowDrone()
         {
             if (droneSelectedMark != null) droneSelectedMark.SetActive(Maintenance.Drone.IsSelected);
+            ShowStatus();
+        }
+
+        void ShowStatus()
+        {
+            shownHarinX = Maintenance.Harin.X;
+            status = $"정비 창 {(Maintenance.Popup.IsOpen ? "열림" : "닫힘")} · 드론 {(Maintenance.Drone.IsSelected ? "선택됨" : "선택 안 됨")} · 하린 x {shownHarinX:0.00}";
         }
 
         void Log(string message)
@@ -148,7 +186,7 @@ namespace PatternGallery.ChainInputHandlers
         void OnGUI()
         {
             if (!showOverlay || viewCamera == null) return;
-            // 사슬 순서와 같게 그린다: 뒤에 그린 것이 위에 보인다 (버튼 위에 정비 창)
+            // 그리는 순서는 사슬의 역순이다: 뒤에 그린 것이 위에 보이고, 사슬은 위에 보이는 것부터 받는다 (버튼 다음에 정비 창)
             GUI.Box(ToGui(Maintenance.Button.Area), "UI 정비");
             if (Maintenance.Popup.IsOpen)
             {
@@ -156,7 +194,7 @@ namespace PatternGallery.ChainInputHandlers
                 GUI.Box(ToGui(Maintenance.Popup.CloseButton), "X");
             }
             GUI.Label(new Rect(12f, 12f, 640f, 24f), lastResult);
-            GUI.Label(new Rect(12f, 34f, 640f, 24f), $"정비 창 {(Maintenance.Popup.IsOpen ? "열림" : "닫힘")} · 드론 {(Maintenance.Drone.IsSelected ? "선택됨" : "선택 안 됨")} · 하린 x {Maintenance.Harin.X:0.00}");
+            GUI.Label(new Rect(12f, 34f, 640f, 24f), status);
         }
     }
 }
