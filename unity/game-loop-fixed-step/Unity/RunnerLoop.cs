@@ -1,6 +1,6 @@
 // 하린 연결 컴포넌트: 엔진이 부르는 Update 에서 Time.deltaTime 을 코어 FixedStepper 에 넣고, 쌓인 시간만큼 Runner 를 고정 간격으로 돌린다.
 // Unity 의 FixedUpdate 를 쓰지 않고 같은 일을 코어로 직접 한다 (웹 무대와 같은 코드). 화면 위치는 마지막 두 고정 단계 사이를 보간한다.
-// 왼쪽 위 상태 글은 확인용 IMGUI(OnGUI) 다. 실제 게임의 화면 글은 UGUI·TextMeshPro 로 만든다.
+// 왼쪽 위 상태 글은 확인용 IMGUI(OnGUI) 다. 실제 게임의 화면 글은 UGUI·TextMeshPro 로 만든다. 최고 높이·돌진 글은 이벤트를 받을 때, 횟수 글은 매 프레임 바뀌어 Update 에서 만든다.
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -9,8 +9,8 @@ namespace PatternGallery.GameLoopFixedStep
     public class RunnerLoop : MonoBehaviour
     {
         [Header("조절 값 (웹 갤러리와 같은 이름. Play 중에 바꿔도 반영된다)")]
-        [Tooltip("규칙 한 단계의 길이 (초). 뜻은 Unity 의 Time.fixedDeltaTime(Project Settings > Time 의 Fixed Timestep, 기본 0.02)과 같지만, 이 컴포넌트는 FixedUpdate 를 쓰지 않아 서로 영향을 주지 않는다")]
-        [Min(0.005f)]
+        [Tooltip("규칙 한 단계의 길이 (초). 뜻은 Unity 의 Time.fixedDeltaTime(Project Settings > Time 의 Fixed Timestep, 기본 0.02)과 같지만, 이 컴포넌트는 FixedUpdate 를 쓰지 않아 서로 영향을 주지 않는다. 한 단계 돌진(15 × 이 값)이 벽 두께 + 몸 폭(0.8m)보다 짧아야 하므로 0.05 까지만 둔다 (0.054 를 넘으면 코어도 벽을 건너뛴다)")]
+        [Range(0.005f, 0.05f)]
         [SerializeField] float fixedStep = 0.02f;
         [Tooltip("한 화면 프레임에 도는 고정 단계 상한. 넘친 시간은 버린다. fixedStep × 이 값이 보통 프레임 길이보다 짧으면 렉이 없어도 시간을 버려 게임이 느려진다")]
         [Min(1)]
@@ -23,7 +23,7 @@ namespace PatternGallery.GameLoopFixedStep
         [SerializeField] float jumpSpeed = 8f;
 
         [Header("기기 흉내")]
-        [Tooltip("Application.targetFrameRate 에 넣는다. 30·60·144 로 바꿔 Play 하며 최고 높이를 견준다. VSync 설정에 따라 다를 수 있다")]
+        [Tooltip("Application.targetFrameRate 에 넣는다. 30·60·144 로 바꿔 Play 하며 최고 높이를 견준다. 데스크톱에서는 QualitySettings.vSyncCount 가 0 이 아니면 무시되므로 OnEnable 에서 VSync 를 끈다. Editor 에서는 Game 뷰에만 듣는다")]
         [SerializeField] int targetFrameRate = 60;
 
         [Header("화면")]
@@ -48,7 +48,8 @@ namespace PatternGallery.GameLoopFixedStep
         int frames;
         float lastPeak = -1f;
         float lastDash = -1f;
-        string statusText = "";
+        string countText = "";
+        string resultText = "최고 높이 - · 돌진 -";
 
         /// <summary>처음 읽을 때 만든다. 다른 오브젝트의 OnEnable 이 이 오브젝트의 Awake 보다 먼저 불려도 null 이 아니게</summary>
         public FixedStepper Stepper => stepper ??= new FixedStepper(fixedStep, maxStepsPerFrame);
@@ -81,6 +82,9 @@ namespace PatternGallery.GameLoopFixedStep
             dashAction.Enable();
             lagAction.Enable();
             restartAction.Enable();
+            // 데스크톱에서는 vSyncCount 가 0 이 아니면 targetFrameRate 가 무시되고 모니터 주사율을 따른다 (6000.3 문서).
+            // 기기 흉내를 위해 VSync 를 끈다. 프로젝트 전체 설정(Quality 의 VSync Count)을 바꾸는 것이라 시연용이다
+            QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = targetFrameRate;
             PlaceWall();
         }
@@ -146,8 +150,14 @@ namespace PatternGallery.GameLoopFixedStep
                 float y = Mathf.Lerp(Runner.PrevY, Runner.Y, a);
                 runnerView.position = transform.position + new Vector3(x, y + runnerView.lossyScale.y * 0.5f, 0f);
             }
-            statusText = $"목표 {targetFrameRate}fps · 화면 프레임 {frames}회 · 고정 단계 {Stepper.TotalSteps}회 · 버린 시간 {Stepper.TotalDropped:0.00}초\n"
-                + $"최고 높이 {(lastPeak < 0f ? "-" : lastPeak.ToString("0.00") + "m")} · 돌진 {(lastDash < 0f ? "-" : lastDash.ToString("0.00") + "m")}";
+            // 횟수 글은 매 프레임 바뀌어 여기서 고친다
+            countText = $"목표 {targetFrameRate}fps · 화면 프레임 {frames}회 · 고정 단계 {Stepper.TotalSteps}회 · 버린 시간 {Stepper.TotalDropped:0.00}초";
+        }
+
+        /// <summary>최고 높이·돌진 글은 그 이벤트를 받을 때만 만든다</summary>
+        void UpdateResultText()
+        {
+            resultText = $"최고 높이 {(lastPeak < 0f ? "-" : lastPeak.ToString("0.00") + "m")} · 돌진 {(lastDash < 0f ? "-" : lastDash.ToString("0.00") + "m")}";
         }
 
         void PlaceWall()
@@ -165,6 +175,7 @@ namespace PatternGallery.GameLoopFixedStep
         void OnPeakReached(float peak)
         {
             lastPeak = peak;
+            UpdateResultText();
             Log($"최고 {peak:0.00}m");
         }
 
@@ -173,6 +184,7 @@ namespace PatternGallery.GameLoopFixedStep
         void OnDashEnded(float distance)
         {
             lastDash = distance;
+            UpdateResultText();
             Log($"돌진 끝 · {distance:0.00}m");
         }
 
@@ -186,7 +198,8 @@ namespace PatternGallery.GameLoopFixedStep
         void OnGUI()
         {
             if (!showStatusOnScreen) return;
-            GUI.Label(new Rect(12f, 12f, 760f, 44f), statusText);
+            GUI.Label(new Rect(12f, 12f, 760f, 22f), countText);
+            GUI.Label(new Rect(12f, 34f, 760f, 22f), resultText);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace PatternGallery.GameLoopFixedStep.Naive
         public float jumpSpeed = 8f;
         public float gravity = 40f;
         public float dashSpeed = 15f;
-        public float dashTime = 0.19f;
+        public float dashTime = 0.2f;
         public float wallX = 12f;
         public float wallThickness = 0.2f;
         public float halfWidth = 0.3f;
@@ -38,7 +38,7 @@ namespace PatternGallery.GameLoopFixedStep.Naive
             if (dashTimer > 0f)
             {
                 x += dashSpeed * dt; // [!] 렉으로 길어진 dt 를 한 번에 곱해 벽 두께보다 멀리 건너뛴다
-                dashTimer -= dt;
+                dashTimer -= dt; // [!] 돌진 시간을 프레임 길이로 빼며 세어 '> 0' 비교로 끊는다: 돌진이 몇 프레임 가는지가 dt 와 float 오차에 달렸다
                 if (x + halfWidth > wallX && x - halfWidth < wallX + wallThickness)
                 {
                     x = wallX - halfWidth;
