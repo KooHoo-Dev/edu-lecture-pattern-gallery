@@ -1,4 +1,4 @@
-# src 7beba123e7d4
+# src cf813b7d1a72
 # chain-input-handlers modal-popup naive=1
 0.30 in tapButton
 0.30 ev 클릭 #1 정비 버튼 (14.15, 3.10)
@@ -33,9 +33,13 @@
 3.50 st harin=10.50 target=10.50 popup=0 selected=1 eharin=5.50 clicks=5
 3.80 in tapDrone
 3.80 ev 클릭 #6 드론 (11.50, 2.70)
+3.80 ev 드론 선택: 정비 드론 선택
 3.80 ev 땅 이동: 하린 이동 명령 10.50 → 11.50
 3.80 ev !두 번 처리: 드론 위 클릭 #6 에 드론 선택과 땅 이동이 함께 반응 → 하린 목표 11.50
 4.00 st harin=11.10 target=11.50 popup=0 selected=1 eharin=5.50 clicks=6
 4.12 ev 하린 도착 11.50
 4.50 st harin=11.50 target=11.50 popup=0 selected=1 eharin=5.50 clicks=6
-end st harin=11.50 target=11.50 popup=0 selected=1 eharin=5.50 clicks=6
+4.50 in tapSky
+4.50 ev 클릭 #7 빈 하늘 (7.60, 7.40)
+5.00 st harin=11.50 target=11.50 popup=0 selected=1 eharin=5.50 clicks=7
+end st harin=11.50 target=11.50 popup=0 selected=1 eharin=5.50 clicks=7

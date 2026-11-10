@@ -1,6 +1,7 @@
 // 하네스 어댑터: 책임 연쇄 코어(MaintenanceScreen 의 ClickChain)와 나쁜 예(클릭을 각자 구독하는 세 시스템)를 시나리오 입력으로 돌린다.
-// 입력 넷은 정해진 자리에 떨어지는 클릭이다. 패턴은 사슬과 처리자의 이벤트를 불린 순서대로 적는다.
-// 나쁜 예는 이벤트가 없으므로 클릭마다 상태를 비교해 적는다. 옆에 같은 클릭을 받는 코어(그림자)를 두고,
+// 입력 다섯은 정해진 자리에 떨어지는 클릭이다. 패턴은 사슬과 처리자의 이벤트를 불린 순서대로 적는다.
+// 나쁜 예는 클릭마다 상태를 비교해 적는다 (드론은 Selected 가 불린 횟수로 본다. 이미 선택된 드론을 또 눌러도 반응이 잡히게).
+// 옆에 같은 클릭을 받는 코어(그림자)를 두고,
 // 그 사슬에서 소비한 처리자를 '있어야 할 결과' 로 삼아 버그를 찾는다 (나쁜 예 코드에는 검사 코드를 넣지 않는다).
 // 웹 sim(src/specimens/chain-input-handlers/sim.ts)과 같은 글을 만든다.
 using System.Collections.Generic;
@@ -15,12 +16,16 @@ namespace PatternGallery.ChainInputHandlers
         /// <summary>'빈 땅 탭' 이 떨어지는 자리</summary>
         const float GroundTapX = 2.5f;
         const float GroundTapY = 2f;
+        /// <summary>'빈 하늘 탭' 이 떨어지는 자리 (땅 영역 y 7 위. 어느 처리자의 영역도 아니다)</summary>
+        const float SkyTapX = 7.6f;
+        const float SkyTapY = 7.4f;
 
         readonly List<string> events = new List<string>();
         readonly MaintenanceScreen screen; // 패턴. 나쁜 예 모드에서는 그림자
         readonly Dictionary<IClickHandler, string> names = new Dictionary<IClickHandler, string>();
         readonly bool isNaive;
         int clicks;
+        int droneHits;
         IClickHandler consumer;
 
         readonly NaiveClickInput input;
@@ -48,6 +53,7 @@ namespace PatternGallery.ChainInputHandlers
                 ui.Listen(input);
                 drone.Listen(input);
                 ground.Listen(input);
+                drone.Selected += () => droneHits++;
                 return; // 그림자 코어의 사건은 적지 않는다
             }
             screen.Chain.Passed += (h, c) => events.Add($"#{c.Number} {names[h]} → 넘김");
@@ -74,6 +80,7 @@ namespace PatternGallery.ChainInputHandlers
                 case "tapButton": spot = "정비 버튼"; x = button.CenterX; y = button.CenterY; break;
                 case "tapDrone": spot = "드론"; x = screen.Drone.Area.CenterX; y = screen.Drone.Area.CenterY; break;
                 case "tapGround": spot = "빈 땅"; x = GroundTapX; y = GroundTapY; break;
+                case "tapSky": spot = "빈 하늘"; x = SkyTapX; y = SkyTapY; break;
                 case "togglePopup":
                     // 열려 있으면 창의 ✕, 닫혀 있으면 정비 버튼을 누른다
                     if (PopupOpen) { spot = "팝업 ✕"; x = screen.Popup.CloseButton.CenterX; y = screen.Popup.CloseButton.CenterY; }
@@ -91,14 +98,14 @@ namespace PatternGallery.ChainInputHandlers
         void NaiveClick(float x, float y)
         {
             bool open0 = ui.popupOpen;
-            bool selected0 = drone.selected;
+            int hits0 = droneHits;
             bool walking0 = ground.walking;
             float target0 = ground.targetX;
             float from = ground.harinX;
             input.Click(x, y);
 
             if (ui.popupOpen != open0) events.Add(ui.popupOpen ? "UI: 정비 창 열림" : "UI: 정비 창 닫힘 (✕)");
-            bool droneReacted = drone.selected && !selected0;
+            bool droneReacted = droneHits != hits0;
             if (droneReacted) events.Add("드론 선택: 정비 드론 선택");
             bool groundReacted = ground.walking != walking0 || ground.targetX != target0;
             if (groundReacted) events.Add($"땅 이동: 하린 이동 명령 {Fmt.F(from)} → {Fmt.F(ground.targetX)}");

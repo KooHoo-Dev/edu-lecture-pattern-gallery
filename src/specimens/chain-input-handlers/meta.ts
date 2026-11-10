@@ -2,8 +2,8 @@ import type { PatternMeta } from '../../stage/types.ts'
 
 export const meta: PatternMeta = {
   id: 'chain-input-handlers',
-  title: '책임 연쇄: 클릭 처리 사슬',
-  titleEn: 'Chain of Responsibility: Click Handler Chain',
+  title: '책임 연쇄 패턴: 클릭 처리 사슬',
+  titleEn: 'Chain of Responsibility Pattern: Click Handler Chain',
   pattern: '책임 연쇄 패턴',
   group: 'B',
   order: 4,
@@ -17,21 +17,22 @@ export const meta: PatternMeta = {
   tags: ['입력 처리', '클릭 관통', '모달 팝업', '처리 순서'],
   difficulty: 2,
   params: [
-    { key: 'buttonWidth', label: '정비 버튼 폭', type: 'range', min: 1.5, max: 6, step: 0.5, default: 2.5, unit: 'm', hint: '버튼은 오른쪽 끝(x 15.4)에 붙어 왼쪽으로 넓어진다. 4 이상이면 드론 가운데를 덮어, 드론 탭을 위에 그려진 버튼이 먼저 받는다' },
+    { key: 'buttonWidth', label: '정비 버튼 폭', type: 'range', min: 1.5, max: 6, step: 0.5, default: 2.5, unit: 'm', hint: '버튼은 오른쪽 끝(x 15.4)에 붙어 왼쪽으로 넓어진다. 4 안팎(3.9)부터 드론 가운데(x 11.5)를 덮어, 드론 탭을 위에 그려진 버튼이 먼저 받는다' },
     { key: 'walkSpeed', label: '하린 걷는 빠르기', type: 'range', min: 1, max: 6, step: 0.5, default: 3, unit: 'm/s', hint: '땅 이동 명령을 받은 하린이 걷는 빠르기. 효과 끄기에서 잘못 받은 이동 명령으로 얼마나 멀리 걸어가는지가 달라진다' },
   ],
   presets: [
     { id: 'standard', name: '기본', look: '정비 버튼과 드론이 떨어져 있다', values: {} },
     { id: 'wide-button', name: '넓은 정비 버튼', look: '버튼이 드론 가운데를 덮어 드론 탭을 버튼이 받는다', values: { buttonWidth: 5 } },
-    { id: 'quick-walk', name: '빠른 탐사대장', look: '효과 끄기에서 관통한 이동 명령으로 버튼 밑까지 금방 간다', values: { walkSpeed: 6 } },
+    { id: 'quick-walk', name: '빠른 탐사대장', look: '땅 탭에 하린이 금방 도착한다. 효과 끄기에서는 관통한 이동 명령으로 버튼 밑까지 금방 간다', values: { walkSpeed: 6 } },
   ],
   events: [
     { id: 'tapButton', label: '정비 버튼 탭' },
     { id: 'tapDrone', label: '드론 탭' },
     { id: 'tapGround', label: '빈 땅 탭' },
     { id: 'togglePopup', label: '정비 창 열기/닫기 (버튼 또는 ✕ 탭)' },
+    { id: 'tapSky', label: '빈 하늘 탭 (땅 위 띠, 아무 영역도 아님)' },
   ],
-  keys: { KeyQ: 'tapButton', KeyW: 'tapDrone', KeyE: 'tapGround', KeyR: 'togglePopup' },
+  keys: { KeyQ: 'tapButton', KeyW: 'tapDrone', KeyE: 'tapGround', KeyR: 'togglePopup', KeyT: 'tapSky' },
   scenarios: [
     {
       id: 'button-over-ground',
@@ -49,9 +50,9 @@ export const meta: PatternMeta = {
     },
     {
       id: 'modal-popup',
-      label: '정비 창이 열린 채 여러 곳을 누른다',
-      duration: 4.8,
-      note: '0.30 에 창이 열린 뒤 1.00 땅, 1.70 드론, 2.40 버튼 탭을 모두 정비 창이 맨 앞에서 먹는다. 3.10 에 ✕ 로 닫으면 3.80 의 드론 탭은 다시 드론이 받는다',
+      label: '정비 창이 열린 채 여러 곳을 누르고, 닫은 뒤 하늘을 누른다',
+      duration: 5.4,
+      note: '0.30 에 창이 열린 뒤 1.00 땅, 1.70 드론, 2.40 버튼 탭을 모두 정비 창이 맨 앞에서 먹는다. 3.10 에 ✕ 로 닫으면 3.80 의 드론 탭은 다시 드론이 받는다. 4.50 의 빈 하늘 탭은 땅(y 7 아래)보다 위라 아무 처리자도 받지 않아 사슬 끝에서 버려진다 (단계 4). 효과 끄기의 3.80 은 이미 선택된 드론을 다시 누른 것인데, 드론 선택과 땅 이동이 함께 반응한다 (✖ 두 번 처리)',
       inputs: [
         [0.3, 'tapButton'],
         [1.0, 'tapGround'],
@@ -59,6 +60,7 @@ export const meta: PatternMeta = {
         [2.4, 'tapButton'],
         [3.1, 'togglePopup'],
         [3.8, 'tapDrone'],
+        [4.5, 'tapSky'],
       ],
     },
     {
@@ -93,9 +95,9 @@ export const meta: PatternMeta = {
       { id: 'i-button', from: 'button', to: 'iface', kind: 'implements' },
       { id: 'i-drone', from: 'drone', to: 'iface', kind: 'implements' },
       { id: 'i-ground', from: 'ground', to: 'iface', kind: 'implements' },
-      { id: 'popup-button', from: 'popup', to: 'button', label: '다음', kind: 'call' },
-      { id: 'button-drone', from: 'button', to: 'drone', label: '다음', kind: 'call' },
-      { id: 'drone-ground', from: 'drone', to: 'ground', label: '다음', kind: 'call' },
+      { id: 'popup-button', from: 'popup', to: 'button', label: '다음 (사슬이 넘김)', kind: 'call' },
+      { id: 'button-drone', from: 'button', to: 'drone', label: '다음 (사슬이 넘김)', kind: 'call' },
+      { id: 'drone-ground', from: 'drone', to: 'ground', label: '다음 (사슬이 넘김)', kind: 'call' },
       { id: 'ground-walker', from: 'ground', to: 'walker', label: 'MoveTo', kind: 'call' },
     ],
   },
@@ -113,12 +115,12 @@ export const meta: PatternMeta = {
     ],
   },
   steps: [
-    { n: 1, label: '클릭이 사슬의 앞에 들어온다', body: '`ClickInput` 이 포인터 클릭의 화면 좌표를 월드 좌표로 바꿔 `Click` 으로 만들고 `ClickChain.Send` 에 넣는다. 사슬은 이번 클릭을 돌 순서를 먼저 복사해 둔다. 처리자가 도중에 사슬을 바꿔도 이번 클릭은 그 순서로 돈다.', target: 'input,input-chain,chain' },
+    { n: 1, label: '클릭이 사슬의 앞에 들어온다', body: '`ClickInput` 이 액션 콜백에서는 누른 화면 좌표만 기억하고, `Update` 에서 월드 좌표로 바꿔 `Click` 으로 만들어 `ClickChain.Send` 에 넣는다. 사슬은 이번 클릭을 돌 순서를 먼저 복사해 둔다. 처리자가 도중에 사슬을 바꿔도 이번 클릭은 그 순서로 돈다.', target: 'input,input-chain,chain' },
     { n: 2, label: '자기 영역이면 처리하고 소비한다', body: '처리자는 자기 영역의 클릭인지만 보고, 맞으면 일을 하고 `true` 를 돌려준다. 사슬은 `true` 를 받으면 거기서 멈춘다. 그래서 정비 버튼을 누르면 버튼 밑의 땅까지 가지 않는다. 정비 창은 열려 있는 동안 어디를 눌러도 `true` 라 뒤의 처리자가 아무것도 받지 못한다 (모달).', target: 'chain-iface,iface,popup,button,drone,ground' },
-    { n: 3, label: '아니면 다음 처리자로 넘긴다', body: '`false` 면 사슬이 다음 처리자에게 넘긴다. 처리자는 다음이 누구인지 모른다. 순서는 `MaintenanceScreen` 이 붙인 순서(정비 창 → 버튼 → 드론 → 땅)이고, 화면에서 위에 그려진 것부터다. 오른쪽 위 사슬 줄의 ✓ 가 넘긴 칸, ● 가 소비한 칸이다.', target: 'popup-button,button-drone,drone-ground' },
-    { n: 4, label: '끝까지 아무도 안 받으면 버린다', body: '맨 끝의 땅도 받지 않으면 `Unhandled` 로 알리고 버린다. 조용히 버리지 않아야 "왜 반응이 없지" 를 찾을 수 있다. 이 화면의 입력은 모두 땅(y 7 아래)에 떨어져 버려지는 클릭이 없다. Unity 에서 창이 닫힌 채 화면 맨 위 띠를 누르면 Console 에 경고가 난다.', target: 'chain' },
+    { n: 3, label: '아니면 다음 처리자로 넘긴다', body: '`false` 면 사슬이 다음 처리자에게 넘긴다. 처리자는 다음이 누구인지 모른다. Refactoring Guru 예제는 처리자마다 `SetNext` 로 다음 처리자를 들고 직접 넘기지만, 이 표본은 목록(`ClickChain`)이 넘기는 변형이라 순서를 목록 한 곳에서 바꾼다. 순서는 `MaintenanceScreen` 이 붙인 순서(정비 창 → 버튼 → 드론 → 땅)이고, 화면에서 위에 그려진 것부터다. 오른쪽 위 사슬 줄의 ✓ 가 넘긴 칸, ● 가 소비한 칸이다.', target: 'popup-button,button-drone,drone-ground' },
+    { n: 4, label: '끝까지 아무도 안 받으면 버린다', body: '맨 끝의 땅도 받지 않으면 `Unhandled` 로 알리고 버린다. 조용히 버리지 않아야 "왜 반응이 없지" 를 찾을 수 있다. 땅(y 7 아래)보다 위의 띠는 어느 처리자의 영역도 아니라, 창이 닫힌 채 빈 하늘을 누르면 사슬 줄의 넷이 모두 ✓ 로 넘기고 버려진다 (시나리오 "정비 창이 열린 채 …" 의 4.50). Unity 에서는 Console 에 경고가 난다.', target: 'chain' },
   ],
-  offNote: '정비 UI, 드론 선택, 땅 이동이 클릭 이벤트 하나를 **각자 구독**하고 각자 판정하는 흔한 코드다. 셋은 서로를 모른다. 정비 버튼을 누르면 버튼 밑도 땅 영역이라 하린이 버튼 아래로 걸어간다 (✖ 클릭 관통). 드론을 누르면 드론 선택과 땅 이동이 함께 반응한다 (✖ 두 번 처리). 정비 창이 열린 줄은 UI 만 알아서, 창 밖의 땅, 드론, ✕ 를 누른 클릭에도 하린이 걷고 드론이 선택된다 (같은 원인이라 같은 클릭 관통이다). 흐린 하린은 사슬이었다면 서 있을 자리다. Unity 에서도 같다: UGUI 버튼을 눌러도, Input System 으로 클릭을 듣고 땅을 Raycast 로 판정하는 스크립트는 그 클릭을 그대로 받는다.',
+  offNote: '정비 UI, 드론 선택, 땅 이동이 클릭 이벤트 하나를 **각자 구독**하고 각자 판정하는 흔한 코드다. 셋은 서로를 모른다. 정비 버튼을 누르면 버튼 밑도 땅 영역이라 하린이 버튼 아래로 걸어간다 (✖ 클릭 관통). 드론을 누르면 드론 선택과 땅 이동이 함께 반응한다 (✖ 두 번 처리). 정비 창이 열린 줄은 UI 만 알아서, 창 밖의 땅이나 드론, 창의 ✕ 를 누른 클릭에도 하린이 걷고 드론이 선택된다 (같은 원인이라 같은 클릭 관통이다). 흐린 하린은 사슬이었다면 서 있을 자리다. Unity 에서도 같다: UGUI 버튼을 눌러도, Input System 으로 클릭을 듣고 땅을 Raycast 로 판정하는 스크립트는 그 클릭을 그대로 받는다.',
   mistakes: [
     { title: 'UI 버튼을 눌렀는데 캐릭터가 그 자리로 걸어간다', body: '버튼, 유닛 선택, 땅 이동이 클릭을 각자 듣고 각자 판정한다. 버튼 밑도 땅이라 땅 이동은 자기 클릭으로 본다. 클릭을 하나의 사슬로 받고, 처리한 처리자가 `true` 를 돌려 뒤로 넘기지 않게 한다. UGUI 를 쓰면 UI 처리자를 사슬 앞에 두고 `EventSystem.current.IsPointerOverGameObject()` 로 판정하는 방법이 흔하다 (Unity 주의 사항을 본다).' },
     { title: '사슬을 썼는데도 드론을 누르면 하린이 걸어간다', body: '처리자가 일을 하고도 `true` 를 돌려주지 않았다 (`return false` 를 그대로 두었거나, 처리하는 갈래에서 `return true` 를 빠뜨렸다). 사슬은 `false` 를 "내 것이 아님" 으로 읽고 다음으로 넘긴다. 일을 했으면 `true` 다.' },
@@ -128,19 +130,19 @@ export const meta: PatternMeta = {
   ],
   unity: {
     setup: [
-      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/chain-input-handlers/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다.',
+      '`Core/` 와 `Unity/` 폴더를 `Assets/Patterns/chain-input-handlers/` 에 둔다. `Naive/` 는 비교용 나쁜 예라 넣지 않는다. `Edit > Project Settings > Player` 의 Other Settings > Configuration 에 있는 Active Input Handling 이 `Input System Package (New)` 나 `Both` 여야 한다.',
       '`Main Camera` 를 Position (8, 4.5, -10), Rotation (0, 0, 0) 에 두고 Projection 을 `Orthographic`, Size 를 4.5 로 한다 (2D 템플릿은 처음부터 Orthographic 이다). Game 뷰 비율을 16:9 로 두면 x 0~16, y 0~9 가 화면에 꽉 차서 코어 좌표와 월드 좌표가 같아진다.',
       '땅: 2D 프로젝트면 `GameObject > 2D Object > Sprites > Square`, Universal 3D 프로젝트면 `GameObject > 3D Object > Cube` 를 만들고 Position (8, 0.5, 0), Scale (16, 1, 1) 로 둔다 (Sprites 메뉴는 2D Sprite 패키지가 있어야 보인다). 그림일 뿐이다. 땅 이동을 받는 영역(y 0~7)은 코어가 정한다.',
       '하린: 2D 면 `Sprites > Capsule`, 3D 면 `3D Object > Capsule` 을 만들어 Position (5.5, 1.7, 0), Scale (0.7, 0.7, 0.7) 로 둔다. 드론: 2D 면 `Sprites > Circle`, 3D 면 `3D Object > Sphere` 를 만든다 (Play 하면 컴포넌트가 (11.5, 2.7) 로 옮긴다). 드론의 자식으로 같은 메뉴의 모양을 하나 더 만들어 Position (0, 1, 0), Scale (0.3, 0.3, 0.3) 으로 두고 Inspector 맨 위 체크를 꺼 둔다. 이것이 선택 표시다.',
-      '빈 오브젝트(`GameObject > Create Empty`)를 만들어 `ClickInput` 을 붙인다. 붙이는 순간 `Reset` 이 클릭 액션(`<Pointer>/press`, 마우스·펜·터치)을 넣고 `View Camera` 칸에 Main Camera 를 넣는다. `Harin` 칸에 하린, `Drone` 칸에 드론, `Drone Selected Mark` 칸에 꺼 둔 선택 표시를 끌어 넣는다.',
+      '빈 오브젝트(`GameObject > Create Empty`)를 만들어 `ClickInput` 을 붙인다. 붙이는 순간 `Reset` 이 기본 키(마우스 왼쪽 버튼·터치·펜, `<Pointer>/press`)를 넣고 `View Camera` 칸에 Main Camera 를 넣는다. `Harin` 칸에 하린, `Drone` 칸에 드론, `Drone Selected Mark` 칸에 꺼 둔 선택 표시를 끌어 넣는다. 웹 갤러리 무대의 Q/W/E/R/T 는 정해진 자리를 누르는 시연이고 Unity 에서는 직접 클릭한다.',
       'Play 하고 Game 뷰 오른쪽의 `UI 정비` 상자(확인용 IMGUI 로 그린 버튼)를 누른다. 정비 창이 열리고 하린은 걷지 않는다. 창 밖의 땅을 눌러도 하린은 서 있고, 창 오른쪽 위 `X` 상자를 눌러야 닫힌다. 창이 닫힌 채 드론을 누르면 선택 표시가 켜지고, 빈 땅을 누르면 하린이 그 x 로 걷는다.',
     ],
     verify: '정비 버튼, 열린 정비 창, 드론을 누를 때 하린이 걷지 않고 Console 에는 넘김 줄 뒤에 소비한 처리자 하나만 찍힌다. 창이 닫힌 채 화면 맨 위 띠(y 7 위)를 누르면 "아무도 받지 않아 버림" 경고가 난다.',
     pitfalls: [
-      '정비 버튼과 정비 창은 확인용 IMGUI(`OnGUI` 의 `GUI.Box`) 상자다. 상자는 클릭을 받지 않고, 판정은 모두 사슬이 코어 영역으로 한다. 실제 게임의 UI 는 UGUI·TextMeshPro 로 만든다.',
-      'UGUI 로 만들면 `EventSystem` 이 UI 클릭을 먼저 받아 버튼의 `onClick` 을 부르지만, Input System 액션으로 클릭을 듣는 다른 스크립트는 그 사실을 모른다. 그래서 UI 처리자의 `Handle` 을 `EventSystem.current.IsPointerOverGameObject()` 로 판정해(포인터가 UI 위면 `true`) 사슬 앞에 두는 방법이 흔하다. 다만 Input System 액션 콜백 안에서 부르면 기대와 다를 수 있다. Input System 문서의 UI support 를 확인한다.',
+      '왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다. 하린 x 는 매 프레임 바뀌어 `Update` 에서 고친다. 정비 버튼과 정비 창도 확인용 IMGUI(`GUI.Box`) 상자다. 상자는 클릭을 받지 않고 판정은 사슬이 코어 영역으로 한다.',
+      'UGUI 로 만들어도 Input System 액션으로 클릭을 듣는 스크립트는 포인터가 UI 위였는지 모른다. 그래서 UI 처리자의 `Handle` 을 `EventSystem.current.IsPointerOverGameObject()` 로 판정해(포인터가 UI 위면 `true`) 사슬 앞에 두는 방법이 흔하다. 다만 Input System 문서(UI support)대로 UI 는 입력 처리 뒤에 갱신되어, 액션 콜백 안에서 이 함수를 부르면 경고가 나고 지난 프레임의 UI 상태를 본다. 콜백에서는 위치만 기억하고 `Update` 에서 `Send` 한다 (이 표본의 `ClickInput` 이 그렇게 한다).',
       '드론과 땅은 dotnet 대조를 위해 Raycast 대신 코어의 `Area.Contains` 로 판정한다. 실제 게임에서는 `DroneSelectHandler`·`GroundMoveHandler` 의 `Handle` 안을 `Physics.Raycast` 나 `Physics2D.OverlapPoint` 로 바꾼다. 사슬과 다른 처리자는 그대로다.',
-      'Play 중 Inspector 에서 `Button Width` 를 바꾸면 `OnValidate` 가 코어의 버튼 영역을 바꾼다. 다음 클릭부터 새 영역으로 판정하고, 상자도 코어 영역을 읽어 바로 다시 그린다. 4 이상이면 버튼이 드론 가운데를 덮어 드론 가운데를 누른 클릭을 버튼이 받는다.',
+      'Play 중 Inspector 에서 `Button Width` 를 바꾸면 `OnValidate` 가 코어의 버튼 영역을 바꾼다. 다음 클릭부터 새 영역으로 판정하고, 상자도 코어 영역을 읽어 바로 다시 그린다. 4 안팎(3.9)부터 버튼이 드론 가운데를 덮어 드론 가운데를 누른 클릭을 버튼이 받는다.',
       '처리자가 처리하는 도중에 사슬을 바꿔도(처리자 붙이기, 빼기) 이번 클릭은 `Send` 를 시작할 때의 순서로 돈다. 붙인 처리자는 다음 클릭부터 받고, 도중에 뺀 처리자는 이번 클릭도 받지 않는다.',
     ],
   },

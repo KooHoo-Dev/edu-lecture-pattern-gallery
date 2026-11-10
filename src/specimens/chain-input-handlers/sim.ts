@@ -263,11 +263,14 @@ class NaiveMaintenanceUi {
 class NaiveDroneSelect {
   drone!: Area
   selected = false
+  Selected = new Event<[]>()
   Listen(input: NaiveClickInput) {
     input.Clicked.add(this.OnClicked)
   }
   private OnClicked = (x: number, y: number) => {
-    if (this.drone.Contains(x, y)) this.selected = true
+    if (!this.drone.Contains(x, y)) return
+    this.selected = true
+    this.Selected.invoke()
   }
 }
 
@@ -304,6 +307,8 @@ const F2 = (v: number) => v.toFixed(2)
 const B = (b: boolean) => (b ? 1 : 0)
 const GroundTapX = f(2.5)
 const GroundTapY = f(2)
+const SkyTapX = f(7.6)
+const SkyTapY = f(7.4)
 
 const GREEN = '#7ee081'
 const RED = '#ff5d6c'
@@ -342,6 +347,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     [screen.Ground, '땅'],
   ])
   let clicks = 0
+  let droneHits = 0
   let consumer: IClickHandler | null = null
   let clock = 0
   let last: LastClick | null = null
@@ -373,6 +379,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     ui.Listen(input)
     drone.Listen(input)
     ground.Listen(input)
+    drone.Selected.add(() => droneHits++)
   } else {
     screen.Chain.Passed.add((h, c) => events.push(`#${c.Number} ${names.get(h)} → 넘김`))
     screen.Chain.Handled.add((h, c) => events.push(`#${c.Number} ${names.get(h)} ● 소비`))
@@ -391,10 +398,9 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
 
   const naiveClick = (x: number, y: number) => {
     const u = ui!
-    const d = drone!
     const g = ground!
     const open0 = u.popupOpen
-    const selected0 = d.selected
+    const hits0 = droneHits
     const walking0 = g.walking
     const target0 = g.targetX
     const from = g.harinX
@@ -402,7 +408,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
 
     const uiReacted = u.popupOpen !== open0
     if (uiReacted) events.push(u.popupOpen ? 'UI: 정비 창 열림' : 'UI: 정비 창 닫힘 (✕)')
-    const droneReacted = d.selected && !selected0
+    const droneReacted = droneHits !== hits0
     if (droneReacted) events.push('드론 선택: 정비 드론 선택')
     const groundReacted = g.walking !== walking0 || g.targetX !== target0
     if (groundReacted) events.push(`땅 이동: 하린 이동 명령 ${F2(from)} → ${F2(g.targetX)}`)
@@ -435,6 +441,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
     if (name === 'tapButton') [spot, x, y] = ['정비 버튼', button.CenterX, button.CenterY]
     else if (name === 'tapDrone') [spot, x, y] = ['드론', screen.Drone.Area.CenterX, screen.Drone.Area.CenterY]
     else if (name === 'tapGround') [spot, x, y] = ['빈 땅', GroundTapX, GroundTapY]
+    else if (name === 'tapSky') [spot, x, y] = ['빈 하늘', SkyTapX, SkyTapY]
     else if (name === 'togglePopup') {
       if (popupOpen()) [spot, x, y] = ['팝업 ✕', screen.Popup.CloseButton.CenterX, screen.Popup.CloseButton.CenterY]
       else [spot, x, y] = ['정비 버튼', button.CenterX, button.CenterY]
@@ -484,7 +491,10 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       // 이름표는 드론 아래에 둔다 (위는 정비 창 아래 가장자리와 닿는다)
       world.push({ kind: 'actor', x: dr.CenterX, y: dr.Bottom, role: 'neutral' })
       const ghost = isNaive && Math.abs(hx - screen.Harin.X) > 0.01
-      if (ghost) world.push({ kind: 'actor', x: screen.Harin.X, y: 1, role: 'ally', label: '있어야 할 자리', alpha: 0.3 })
+      // 흐린 하린이 하린과 가까우면 두 이름표가 겹치므로, 흐린 쪽 이름표를 한 줄 위(y 3.25)에 따로 둔다
+      const ghostNear = ghost && Math.abs(hx - screen.Harin.X) < 1.6
+      if (ghost) world.push({ kind: 'actor', x: screen.Harin.X, y: 1, role: 'ally', label: ghostNear ? undefined : '있어야 할 자리', alpha: 0.3 })
+      if (ghostNear) world.push({ kind: 'text', x: screen.Harin.X, y: 3.25, text: '있어야 할 자리', color: DIM, size: 14 })
       world.push({
         kind: 'actor',
         x: hx,
@@ -494,9 +504,11 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         pose: walking ? 'run' : 'idle',
         facing: htarget < hx ? -1 : 1,
       })
-      // 드론 이름표는 하린 다음에 그려, 하린이 드론 밑에 와도 읽히게 한다
-      if (badSelect !== null) world.push({ kind: 'text', x: dr.CenterX, y: 1.5, text: `✖ 선택 (#${badSelect} 관통)`, color: RED, size: 16 })
-      else world.push({ kind: 'text', x: dr.CenterX, y: 1.5, text: selected ? '정비 드론 · 선택됨' : '정비 드론', color: selected ? GREEN : SOFT, size: 15 })
+      // 드론 이름표는 드론 밑(y 1.5)에 둔다. 하린이 드론 밑에 오면 몸과 겹치지 않게 하린의 반대쪽 옆으로 비킨다
+      const nearDrone = Math.abs(hx - dr.CenterX) < 1.5
+      const tagX = nearDrone ? (hx >= dr.CenterX ? hx - 1.6 : hx + 1.6) : dr.CenterX
+      if (badSelect !== null) world.push({ kind: 'text', x: tagX, y: 1.5, text: `✖ 선택 (#${badSelect} 관통)`, color: RED, size: 16 })
+      else world.push({ kind: 'text', x: tagX, y: 1.5, text: selected ? '정비 드론 · 선택됨' : '정비 드론', color: selected ? GREEN : SOFT, size: 15 })
       if (walking) world.push({ kind: 'arrow', x1: hx, y1: 0.72, x2: htarget, y2: 0.72, color: isNaive && badWalk ? RED : SOFT, dashed: true })
       if (isNaive && badWalk) {
         const by = badWalk.kind === '클릭 관통' ? '클릭 관통으로' : `${badWalk.kind}로`

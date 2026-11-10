@@ -1,4 +1,4 @@
-# src 7beba123e7d4
+# src cf813b7d1a72
 # chain-input-handlers modal-popup naive=0
 0.30 in tapButton
 0.30 ev 클릭 #1 정비 버튼 (14.15, 3.10)
@@ -36,4 +36,12 @@
 3.80 ev #6 드론 ● 소비
 4.00 st harin=5.50 target=5.50 popup=0 selected=1 clicks=6
 4.50 st harin=5.50 target=5.50 popup=0 selected=1 clicks=6
-end st harin=5.50 target=5.50 popup=0 selected=1 clicks=6
+4.50 in tapSky
+4.50 ev 클릭 #7 빈 하늘 (7.60, 7.40)
+4.50 ev #7 팝업 → 넘김
+4.50 ev #7 버튼 → 넘김
+4.50 ev #7 드론 → 넘김
+4.50 ev #7 땅 → 넘김
+4.50 ev #7 아무도 받지 않음 → 버림
+5.00 st harin=5.50 target=5.50 popup=0 selected=1 clicks=7
+end st harin=5.50 target=5.50 popup=0 selected=1 clicks=7
