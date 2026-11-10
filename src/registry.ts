@@ -57,4 +57,8 @@ export const PLANNED: PlannedSpecimen[] = [
   { id: 'service-locator-audio', title: '서비스 로케이터: 소리 서비스와 널 객체', group: 'B', order: 3, oneLiner: '게임 코드는 소리 서비스를 찾아 쓰기만 하고, 서비스가 없으면 아무것도 하지 않는 널 객체가 대신한다' },
   { id: 'flyweight-drone-types', title: '플라이웨이트: 드론 종류 데이터 공유', group: 'D', order: 2, oneLiner: '종류마다 같은 값은 한 객체를 모든 드론이 함께 쓰고, 드론마다 다른 값은 드론이 든다' },
   { id: 'dirty-flag-loadout', title: '더티 플래그: 장비 무게 다시 계산', group: 'D', order: 3, oneLiner: '비싼 합계는 바뀌었을 때만 다시 계산하고, 값을 바꾸는 모든 길이 다시 계산 표시를 켜게 한 곳에 모은다' },
+  { id: 'game-loop-fixed-step', title: '게임 루프: 고정 시간 간격', group: 'A', order: 6, oneLiner: '화면 프레임이 몇이든 게임 규칙은 같은 시간 간격으로 돌려, 30fps 와 144fps 에서 점프 높이가 같게 한다' },
+  { id: 'chain-input-handlers', title: '책임 연쇄: 클릭 처리 사슬', group: 'B', order: 4, oneLiner: '클릭을 처리자 사슬에 앞에서부터 넘기고, 처리한 처리자가 소비하면 뒤로 넘기지 않는다' },
+  { id: 'memento-checkpoint', title: '메멘토: 체크포인트 저장과 되살리기', group: 'C', order: 2, oneLiner: '저장할 때 상태를 값으로 떠서 메멘토에 담고, 되살릴 때 그 값으로 덮는다' },
+  { id: 'spatial-grid-detection', title: '공간 분할: 격자로 근처 적 찾기', group: 'D', order: 4, oneLiner: '땅을 칸으로 나눠 드론을 칸에 등록하고, 근처 칸만 보아 탐지 범위 안의 적을 찾는다' },
 ]

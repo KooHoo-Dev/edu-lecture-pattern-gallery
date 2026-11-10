@@ -1,6 +1,10 @@
 import { bullets, codeSection, numbered, promptDoc, richToMarkdown, valueTable, type AiConfig, type CodeFile, type ParamDef, type ParamValues } from '@koohoo/gallery-kit'
 import type { PatternSpecimen } from './stage/types'
 
+/** Skill 설명의 패턴 목록: 표본마다가 아니라 패턴마다 한 번 (설명 한도 1536자. 표본 20개에서 1315자였다) */
+const patternList = (all: { meta: { pattern: string; titleEn: string } }[]) =>
+  [...new Map(all.map(s => [s.meta.pattern, `${s.meta.pattern}(${s.meta.titleEn.split(':')[0].trim()})`])).values()].join(', ')
+
 /* AI 지시 세트와 Skill. 프롬프트는 특정 AI 도구에 묶지 않는 평범한 Markdown 이다. */
 
 const ENVIRONMENT = ['- Unity 6.3 LTS (6000.3), C# 9', '- 입력: 새 Input System 패키지 (구 Input Manager 는 쓰지 않음)'].join('\n')
@@ -125,7 +129,7 @@ export const ai: AiConfig<PatternSpecimen> = {
   skill: {
     name: 'game-patterns',
     description: all =>
-      `Unity 에 게임 프로그래밍 패턴(상태, 관찰자, 명령 등)을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 연결 컴포넌트)과 넣는 순서가 들어 있다. 포함된 표본: ${all.map(s => `${s.meta.title}(${s.meta.titleEn})`).join(', ')}. 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다.`,
+      `Unity 에 게임 프로그래밍 패턴(상태, 관찰자, 명령 등)을 넣거나 변형하거나 고칠 때 쓴다. Unity 6.3 LTS, C# 9, 새 Input System 기준의 검증된 샘플(순수 C# 코어 + MonoBehaviour 연결 컴포넌트)과 넣는 순서가 들어 있다. 다루는 패턴: ${patternList(all)}. 비슷한 구조를 새로 만들 때도 기준 코드로 삼는다.`,
     compatibility: 'Unity 6.3 LTS (6000.3), C# 9, Input System',
     title: 'Pattern Gallery',
     intro: '사용자가 Unity 에서 상태 관리, 이벤트 알림, 되돌리기 같은 구조를 요청하면 아래 목록에서 가장 가까운 표본을 고르고, 그 표본의 `references/<id>/guide.md` 만 읽는다. 다른 표본의 자료는 읽지 않는다.',
