@@ -334,7 +334,6 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
   let savedItems: string[] | null = null
   /** 나쁜 예: 마지막 되살리기가 인벤토리를 돌려놓지 못했다 (다음 저장까지 남긴다) */
   let bugActive = false
-  let bugExtra = 0
 
   if (isNaive) {
     naive = new NaiveCheckpoint(intOf('maxHp'), StartCell)
@@ -488,7 +487,6 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
           const extra = p.items.length - savedItems!.length
           events.push(`!인벤토리 안 돌아옴: 저장 뒤 주운 ${Fragment} ${extra}개가 그대로 (저장할 때 ${savedItems!.length}개, 되살린 뒤 ${p.items.length}개) · 크레딧은 저장한 값 ${p.credits} 이 돌아옴`)
           bugActive = true
-          bugExtra = extra
           at.bug = clock
           note = `크레딧은 돌아왔는데 조각 ${extra}개가 그대로`
         }
@@ -546,7 +544,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
       // 체크포인트 깃발: 저장한 칸에 선다
       if (saved) {
         // 깃발 천은 기둥 왼쪽에 둔다 (하린의 이름표와 겹치지 않게)
-        const fx = CX(saved.cell) - 0.5
+        const fx = CX(saved.cell) - 0.62
         world.push(
           { kind: 'box', x: fx, y: 1, w: 0.07, h: 1.45, fill: '#c9d3e6' },
           { kind: 'box', x: fx - 0.5, y: 2.05, w: 0.5, h: 0.36, fill: C.flag },
@@ -605,14 +603,16 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
           saveChip = shared ? '인벤토리는 같은 목록' : ''
           saveChipColor = C.warn
         }
+        // 되살린 뒤 또 주우면 빨간 칸이 늘어난다. 글의 수도 그때그때 센다
+        const extra = p.items.length - expect
         if (bugActive) {
-          nowChip = `✖ 저장 뒤 주운 ${bugExtra}개가 그대로`
+          nowChip = `✖ 저장 뒤 주운 ${extra}개가 그대로`
           nowChipColor = C.bug
         } else if (recent(at.restore, 1.2)) {
           nowChip = 'HP·칸·크레딧만 덮음'
           nowChipColor = C.dim
-        } else if (shared && p.items.length > expect) {
-          nowChip = `저장 뒤 주운 것 ${p.items.length - expect}개`
+        } else if (shared && extra > 0) {
+          nowChip = `저장 뒤 주운 것 ${extra}개`
           nowChipColor = C.warn
         }
         world.push(...stateBox(NOW_X, '지금 상태 (player)', now, nowChip, nowChipColor, bugActive ? C.bug : C.line))
@@ -625,7 +625,7 @@ export const createSim: SimFactory = (values: ParamValues, isNaive: boolean): Pa
         if (s) world.push({ kind: 'arrow', x1: saveCx, y1: BOX_Y, x2: cx + 0.5, y2: LIST_TOP + 0.03, color: shared ? C.warn : C.line })
         world.push(...listBox(cx, fills, listColor))
         if (bugActive) {
-          line2 = `✖ 인벤토리 안 돌아옴: 조각 ${bugExtra}개가 그대로 · 크레딧은 돌아옴`
+          line2 = `✖ 인벤토리 안 돌아옴: 저장 뒤 주운 조각 ${extra}개가 그대로 · 크레딧은 돌아옴`
           line2Color = C.bug
         } else if (s) {
           line2 = `저장본: 칸 ${s.cell} · 인벤토리는 지금 목록을 그대로 가리킴`

@@ -126,7 +126,7 @@ export const meta: PatternMeta = {
     { n: 3, label: '되살릴 때 원래 객체가 메멘토의 값으로 자기를 덮는다', body: 'R(되살리기)은 `Checkpoint.Respawn()` 이 `explorer.Restore(memento)` 를 부른다. `Explorer` 가 HP, 칸, 크레딧을 덮고, 인벤토리는 목록을 바꿔 끼우지 않고 `Clear` 뒤 메멘토의 복사본으로 다시 채운다. 모든 값을 덮은 뒤 `Restored` 를 알려 화면이 새 값을 그린다. 하린이 깃발 칸으로 돌아오고 `지금 상태` 상자의 숫자가 `저장본` 과 같아진다.', target: 'in-cp,cp,cp-ex,ex,ex-me,me,ex-el,el' },
     { n: 4, label: '저장 뒤 바뀐 것은 메멘토에 닿지 않는다', body: '저장 뒤에 주운 조각은 `Explorer` 의 목록에만 들어간다 (무대의 초록 칸). 메멘토의 인벤토리는 저장할 때 따로 복사한 목록이라 그대로다. 되살린 뒤에도 메멘토는 바뀌지 않아, 다시 줍고 쓰러져도 같은 저장본으로 몇 번이든 되살린다 (두 번째 시나리오).', target: 'in-ex,ex,ex-el,el,ml' },
   ],
-  offNote: '저장할 때 HP·칸·크레딧은 int 값으로 담지만 인벤토리는 `saved.items = player.items;` 로 목록을 참조째 담는 흔한 코드다. 저장본과 지금 상태가 목록 하나를 함께 가리켜, 저장 뒤 주운 회로 조각이 저장본에도 들어간다. 무대에서 두 상자의 화살표가 가운데 목록 상자 하나로 모인다 (주황). 되살리면 HP·칸·크레딧은 저장한 값으로 돌아오지만 인벤토리는 그대로다 (인벤토리 안 돌아옴). 저장 뒤 주운 칸은 빨간 ✖ 로 남는다. 누르는 순서와 상관없이, 저장한 뒤 주운 것이 있으면 되살릴 때 남고, 줍지 않았으면 증상이 없다. Unity 에서 이렇게 짜도 같다: 되살린 뒤 위치와 HP 는 돌아오는데 인벤토리 UI 의 조각 수가 줄지 않는다.',
+  offNote: '저장할 때 HP·칸·크레딧은 int 값으로 담지만 인벤토리는 `saved.items = player.items;` 로 목록을 참조째 담는 흔한 코드다. 저장본과 지금 상태가 목록 하나를 함께 가리켜, 저장 뒤 주운 회로 조각이 저장본에도 들어간다. 무대에서 두 상자의 화살표가 가운데 목록 상자 하나로 모인다 (주황). 되살리면 HP·칸·크레딧은 저장한 값으로 돌아오지만 인벤토리는 그대로다 (인벤토리 안 돌아옴). 저장 뒤 주운 칸은 빨간 칸으로 남고 ✖ 가 붙는다. 누르는 순서와 상관없이, 저장한 뒤 주운 것이 있으면 되살릴 때 남고, 줍지 않았으면 증상이 없다. Unity 에서 이렇게 짜도 같다: 되살린 뒤 위치와 HP 는 돌아오는데 인벤토리 UI 의 조각 수가 줄지 않는다.',
   mistakes: [
     { title: '체크포인트에서 되살렸는데 인벤토리는 쓰러지기 직전 그대로다', body: '저장할 때 `saved.items = player.items;` 로 목록을 참조째 담았다. int 는 값이 복사되지만 `List` 는 주소만 복사되어, 저장본과 지금 상태가 같은 목록 하나를 쓴다. 저장 뒤 주운 것은 저장본에도 들어가고, 되살리며 `player.items = saved.items;` 를 해도 같은 목록이다. 메멘토를 만들 때 `new List<string>(items)` 처럼 새 목록에 복사하고, 되살릴 때는 `items.Clear(); items.AddRange(memento.Items);` 로 내용을 덮는다. 목록 안 원소가 클래스(강화 수치를 가진 아이템)라면 원소도 값으로 떠야 한다.' },
     { title: '저장본의 값이 저장한 적 없는 값으로 바뀌어 있다', body: '저장본이 public 필드(`saved.credits`)라 UI 나 다른 스크립트가 미리보기를 고치다 저장본 자체를 바꿨다. 메멘토는 만든 뒤 바뀌지 않아야 한다. 속성을 `get` 만 두고 생성자에서만 채우고, 목록은 `IReadOnlyList` 로 감싼 복사본을 내준다 (이 표본의 `ExplorerMemento`). 관리자(`Checkpoint`)는 메멘토를 들고만 있고 속을 읽거나 고치지 않는다.' },
@@ -146,7 +146,8 @@ export const meta: PatternMeta = {
     verify: 'W, Q 뒤 T 와 W 를 두 번씩 누르면 왼쪽 위 지금 인벤토리는 3개, 저장본은 1개다. E 두 번에 하린이 옆으로 눕고, R 을 누르면 깃발 칸에 선 채 HP 100, 크레딧 20, 인벤토리 1개로 돌아온다.',
     pitfalls: [
       '`Fragment Value` 와 `Hurt Damage` 는 키를 누를 때마다 필드에서 읽어 Play 중에 바꾸면 다음 입력부터 쓴다. `Max Hp` 와 `Start Cell` 은 코어를 처음 만들 때 한 번만 읽어, 바꾸려면 Play 를 다시 시작한다.',
-      '메멘토를 파일로 남기려면 `JsonUtility.ToJson` 을 쓸 수 있다. 다만 `JsonUtility.ToJson` 문서에 따르면 Unity 직렬화기를 써서 `[Serializable]` 클래스의 지원되는 형식의 필드만 담고 private 필드는 넘어간다. 이 표본의 `ExplorerMemento` 는 `get` 만 있는 속성(컴파일러가 만든 private 필드)과 `IReadOnlyList` 라 그대로 넣으면 값이 담기지 않는다. 파일용 `[Serializable]` 클래스에 public 필드(`int hp`, `List<string> items`)로 옮겨 담는다. 이 표본에는 파일 저장 코드가 없다.',
+      '메멘토를 파일로 남기려면 `JsonUtility.ToJson` 을 쓸 수 있다. 무엇이 담기는지는 매뉴얼의 Serialization rules 를 따른다: public 이거나 `[SerializeField]` 인 필드가 담기고, readonly 필드와 `get` 만 있는 자동 속성(의 숨은 필드)은 담기지 않는다. 그래서 이 표본의 `ExplorerMemento`(`get` 만 있는 속성과 `IReadOnlyList`)를 그대로 넣으면 값이 담기지 않는다. `[Serializable]` 클래스에 `[SerializeField] int hp;` 와 `public int Hp => hp;` 처럼 두면 바깥에는 읽기 전용이면서 `JsonUtility` 가 담는다 (목록은 `[SerializeField] List<string> items;`). public 필드로 열 필요는 없다. `FromJson` 은 private 필드도 채우므로, 고칠 수 없다는 약속은 코드 관례로 지킨다. 이 표본에는 파일 저장 코드가 없다.',
+      'C# 에서 메멘토의 속을 관리자에게도 완전히 숨기려면 메멘토를 `Explorer` 안의 중첩 클래스로 두고 바깥에는 빈 표지 인터페이스(`IExplorerMemento`)로만 건넨다. 이 표본은 화면이 저장본을 읽어 보여 주려고 읽기 전용 속성으로 열어 두었다.',
       '`ExplorerMemento` 의 생성자는 `internal` 이지만, Assets 아래 스크립트는 어셈블리 정의(asmdef)가 없으면 한 어셈블리(Assembly-CSharp)로 컴파일되어 다른 폴더에서도 부를 수 있다. 막으려면 `Core/` 에 asmdef 를 둔다. 속성이 `get` 만 있어 고칠 수 없다는 것은 asmdef 없이도 지켜진다.',
       '컴포넌트가 꺼진 동안에는 `Explorer` 와 `Checkpoint` 의 이벤트를 듣지 않는다. 그동안 다른 스크립트가 저장하거나 되살렸다면, 다시 켤 때 `OnEnable` 이 하린의 위치·자세, 깃발, 왼쪽 위 글을 지금 코어 값으로 다시 맞춘다.',
       '왼쪽 위 글은 확인용 IMGUI(`OnGUI` 의 `GUI.Label`)다. UI 를 만드는 단계를 줄이려고 썼고, 실제 게임은 UGUI·TextMeshPro 로 만든다. 글은 이벤트를 받을 때 만들어 두고 `OnGUI` 는 그리기만 한다.',
@@ -155,7 +156,7 @@ export const meta: PatternMeta = {
   prompt: {
     goal: '체크포인트에서 저장할 때 플레이어가 자기 상태(HP, 위치, 인벤토리, 크레딧)를 값으로 떠 읽기 전용 메멘토를 만들고, 관리자는 그것을 들고만 있다가, 쓰러지면 플레이어가 그 값으로 자기를 덮어 되살리게 한다. 인벤토리 같은 목록은 저장할 때 새 목록에 복사한다.',
     adaptIdeas: [
-      '체크포인트를 파일로도 남겨 게임을 껐다 켜도 이어 하고 싶다 (메멘토 값을 `[Serializable]` 클래스의 public 필드로 옮겨 `JsonUtility.ToJson`).',
+      '체크포인트를 파일로도 남겨 게임을 껐다 켜도 이어 하고 싶다 (메멘토 값을 `[Serializable]` 클래스의 public 필드로 옮기거나, `[SerializeField]` private 필드에 `get` 만 있는 속성을 붙여 읽기 전용으로 둔 채 `JsonUtility.ToJson`).',
       '저장 칸을 세 개 두고 플레이어가 고른 칸에서 되살리고 싶다.',
       '퍼즐 방에 들어갈 때 상자와 스위치의 상태를 떠 두었다가 "방 다시 시작" 으로 되돌리고 싶다.',
       '강화 수치가 있는 아이템(클래스)을 인벤토리에 두면서도 저장본이 지금 아이템과 섞이지 않게 하고 싶다.',
@@ -168,7 +169,7 @@ export const meta: PatternMeta = {
     { label: 'Unity 스크립팅 API: JsonUtility', url: 'https://docs.unity3d.com/6000.3/Documentation/ScriptReference/JsonUtility.html' },
   ],
   related: [
-    { id: 'prototype-drone-clone', why: '같은 함정이다. 얕은 복사가 목록의 주소만 복사해 복제본끼리 섞이듯, 저장본이 목록을 참조째 담으면 저장본과 지금 상태가 섞인다. 둘 다 바뀌어야 할 참조 필드만 새로 만든다' },
+    { id: 'prototype-drone-clone', why: '같은 함정이다. 얕은 복사가 목록의 주소만 복사해 복제본끼리 섞이듯, 저장본이 목록을 참조째 담으면 저장본과 지금 상태가 섞인다. 둘 다 따로 가져야 할 참조 필드(목록)는 새로 만든다' },
     { id: 'command-undo-replay', why: '명령은 되돌리려고 이전 위치를 값으로 저장해 한 걸음씩 되돌린다. 메멘토는 상태 전체를 한 번에 값으로 떠 두었다가 통째로 덮는다' },
   ],
 }

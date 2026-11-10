@@ -10,7 +10,8 @@ namespace PatternGallery.MementoCheckpoint
         [Header("조절 값 (웹 갤러리와 같은 이름)")]
         [Tooltip("'회로 조각 줍기' 한 번에 더하는 크레딧. 누를 때마다 읽어 Play 중에 바꾸면 다음 줍기부터 쓴다")]
         [SerializeField] int fragmentValue = 20;
-        [Tooltip("'피해' 한 번에 깎는 HP. 누를 때마다 읽어 Play 중에 바꾸면 다음 피해부터 쓴다")]
+        [Tooltip("'피해' 한 번에 깎는 HP. 누를 때마다 읽어 Play 중에 바꾸면 다음 피해부터 쓴다. 0 이하는 코어가 받지 않아 1 이상으로 막는다")]
+        [Min(1)]
         [SerializeField] int hurtDamage = 50;
         [Tooltip("하린의 최대 HP 이자 시작 HP. 코어를 처음 만들 때 한 번만 읽는다")]
         [SerializeField] int maxHp = 100;
@@ -158,8 +159,11 @@ namespace PatternGallery.MementoCheckpoint
 
         void OnInputIgnored(string input)
         {
-            if (!Explorer.IsDown) Log("끝 칸이라 더 가지 않음");
-            else Log($"쓰러져 있어 받지 않음 ({(input == "walk" ? "이동" : input == "pickup" ? "줍기" : "피해")})");
+            // 받지 않은 까닭: 쓰러져 있다 → 모든 입력. 아니면 이동은 끝 칸, 피해는 0 이하의 피해량
+            if (Explorer.IsDown) Log($"쓰러져 있어 받지 않음 ({(input == "walk" ? "이동" : input == "pickup" ? "줍기" : "피해")})");
+            else if (input == "walk") Log("끝 칸이라 더 가지 않음");
+            else if (input == "hurt") Log($"피해량 {hurtDamage} 이 0 이하라 받지 않음");
+            else Log($"받지 않음 ({input})");
         }
 
         void OnSaveRefused() => Log("쓰러져 있어 저장하지 않음");
