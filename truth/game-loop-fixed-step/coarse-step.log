@@ -1,0 +1,48 @@
+# src 9d5dc5d98eed
+# game-loop-fixed-step coarse-step naive=0
+0.30 in jump
+0.32 ev 30fps 점프
+0.32 ev 60fps 점프
+0.32 ev 144fps 점프
+0.50 st f30.x=6.00 f30.y=1.04 f30.frames=15 f30.steps=12 f30.dropped=0.00 f60.x=6.00 f60.y=1.04 f60.frames=30 f60.steps=12 f60.dropped=0.00 f144.x=6.00 f144.y=1.04 f144.frames=72 f144.steps=12 f144.dropped=0.00
+0.55 ev 최고 높이 30fps 1.06 · 60fps 1.06 · 144fps 1.06 (같다)
+0.75 ev 30fps 착지 · 점프 뒤 11단계 (0.44초)
+0.75 ev 60fps 착지 · 점프 뒤 11단계 (0.44초)
+0.75 ev 144fps 착지 · 점프 뒤 11단계 (0.44초)
+1.00 st f30.x=6.00 f30.y=0.00 f30.frames=30 f30.steps=25 f30.dropped=0.00 f60.x=6.00 f60.y=0.00 f60.frames=60 f60.steps=25 f60.dropped=0.00 f144.x=6.00 f144.y=0.00 f144.frames=144 f144.steps=24 f144.dropped=0.00
+1.30 in dash
+1.32 ev 30fps 돌진
+1.32 ev 60fps 돌진
+1.32 ev 144fps 돌진
+1.47 ev 60fps 돌진 끝 · 3.00m
+1.48 ev 30fps 돌진 끝 · 3.00m
+1.48 ev 144fps 돌진 끝 · 3.00m
+1.50 st f30.x=9.00 f30.y=0.00 f30.frames=45 f30.steps=37 f30.dropped=0.00 f60.x=9.00 f60.y=0.00 f60.frames=90 f60.steps=37 f60.dropped=0.00 f144.x=9.00 f144.y=0.00 f144.frames=216 f144.steps=37 f144.dropped=0.00
+2.00 st f30.x=9.00 f30.y=0.00 f30.frames=60 f30.steps=50 f30.dropped=0.00 f60.x=9.00 f60.y=0.00 f60.frames=120 f60.steps=50 f60.dropped=0.00 f144.x=9.00 f144.y=0.00 f144.frames=288 f144.steps=49 f144.dropped=0.00
+2.20 in dash
+2.20 ev 144fps 돌진
+2.23 ev 60fps 돌진
+2.25 ev 30fps 돌진
+2.30 in lag
+2.43 ev 30fps 렉 프레임 0.15초 → Advance 에 그대로 쌓음
+2.43 ev 30fps 벽에 막힘 · x 11.70
+2.43 ev 30fps 돌진 끝 · 2.70m
+2.43 ev 60fps 렉 프레임 0.15초 → Advance 에 그대로 쌓음
+2.43 ev 60fps 벽에 막힘 · x 11.70
+2.43 ev 60fps 돌진 끝 · 2.70m
+2.43 ev 144fps 렉 프레임 0.15초 → Advance 에 그대로 쌓음
+2.43 ev 144fps 벽에 막힘 · x 11.70
+2.43 ev 144fps 돌진 끝 · 2.70m
+2.50 st f30.x=11.70 f30.y=0.00 f30.frames=71 f30.steps=62 f30.dropped=0.00 f60.x=11.70 f60.y=0.00 f60.frames=142 f60.steps=62 f60.dropped=0.00 f144.x=11.70 f144.y=0.00 f144.frames=339 f144.steps=62 f144.dropped=0.00
+3.00 st f30.x=11.70 f30.y=0.00 f30.frames=86 f30.steps=74 f30.dropped=0.00 f60.x=11.70 f60.y=0.00 f60.frames=172 f60.steps=75 f60.dropped=0.00 f144.x=11.70 f144.y=0.00 f144.frames=411 f144.steps=74 f144.dropped=0.00
+3.00 in jump
+3.00 ev 30fps 점프
+3.00 ev 144fps 점프
+3.03 ev 60fps 점프
+3.27 ev 최고 높이 30fps 1.06 · 60fps 1.06 · 144fps 1.06 (같다)
+3.43 ev 30fps 착지 · 점프 뒤 11단계 (0.44초)
+3.43 ev 144fps 착지 · 점프 뒤 11단계 (0.44초)
+3.47 ev 60fps 착지 · 점프 뒤 11단계 (0.44초)
+3.50 st f30.x=11.70 f30.y=0.00 f30.frames=101 f30.steps=87 f30.dropped=0.00 f60.x=11.70 f60.y=0.00 f60.frames=202 f60.steps=87 f60.dropped=0.00 f144.x=11.70 f144.y=0.00 f144.frames=483 f144.steps=87 f144.dropped=0.00
+4.00 st f30.x=11.70 f30.y=0.00 f30.frames=116 f30.steps=99 f30.dropped=0.00 f60.x=11.70 f60.y=0.00 f60.frames=232 f60.steps=100 f60.dropped=0.00 f144.x=11.70 f144.y=0.00 f144.frames=555 f144.steps=99 f144.dropped=0.00
+end st f30.x=11.70 f30.y=0.00 f30.frames=116 f30.steps=99 f30.dropped=0.00 f60.x=11.70 f60.y=0.00 f60.frames=232 f60.steps=100 f60.dropped=0.00 f144.x=11.70 f144.y=0.00 f144.frames=555 f144.steps=99 f144.dropped=0.00

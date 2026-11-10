@@ -1,0 +1,52 @@
+# src 9d5dc5d98eed
+# game-loop-fixed-step jump-dash-lag naive=1
+0.30 in jump
+0.30 ev 60fps 점프
+0.30 ev 144fps 점프
+0.32 ev 30fps 점프
+0.50 st f30.x=6.00 f30.y=0.67 f30.frames=15 f60.x=6.00 f60.y=0.73 f60.frames=30 f144.x=6.00 f144.y=0.77 f144.frames=72
+0.50 ev !프레임마다 다른 점프: 최고 높이 30fps 0.67 · 60fps 0.73 · 144fps 0.77
+0.65 ev 30fps 착지 · 점프 뒤 0.33초
+0.68 ev 60fps 착지 · 점프 뒤 0.38초
+0.68 ev 144fps 착지 · 점프 뒤 0.39초
+1.00 st f30.x=6.00 f30.y=0.00 f30.frames=30 f60.x=6.00 f60.y=0.00 f60.frames=60 f144.x=6.00 f144.y=0.00 f144.frames=144
+1.30 in dash
+1.30 ev 60fps 돌진
+1.30 ev 144fps 돌진
+1.32 ev 30fps 돌진
+1.48 ev 30fps 돌진 끝 · 3.00m
+1.48 ev 60fps 돌진 끝 · 3.00m
+1.48 ev 144fps 돌진 끝 · 2.92m
+1.50 st f30.x=9.00 f30.y=0.00 f30.frames=45 f60.x=9.00 f60.y=0.00 f60.frames=90 f144.x=8.92 f144.y=0.00 f144.frames=216
+2.00 st f30.x=9.00 f30.y=0.00 f30.frames=60 f60.x=9.00 f60.y=0.00 f60.frames=120 f144.x=8.92 f144.y=0.00 f144.frames=288
+2.40 in dash
+2.40 ev 60fps 돌진
+2.40 ev 144fps 돌진
+2.42 ev 30fps 돌진
+2.50 st f30.x=10.50 f30.y=0.00 f30.frames=75 f60.x=10.50 f60.y=0.00 f60.frames=150 f144.x=10.48 f144.y=0.00 f144.frames=360
+2.50 in lag
+2.78 ev 30fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+2.78 ev !렉에 벽 통과: 30fps dt 0.30초 한 프레임에 x 10.50 → 15.00
+2.78 ev 30fps 돌진 끝 · 6.00m
+2.78 ev 60fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+2.78 ev !렉에 벽 통과: 60fps dt 0.30초 한 프레임에 x 10.50 → 15.00
+2.78 ev 60fps 돌진 끝 · 6.00m
+2.78 ev 144fps 렉 프레임 0.30초 → Update(dt) 한 번에 적분
+2.78 ev !렉에 벽 통과: 144fps dt 0.30초 한 프레임에 x 10.48 → 14.98
+2.78 ev 144fps 돌진 끝 · 6.06m
+3.00 st f30.x=15.00 f30.y=0.00 f30.frames=82 f60.x=15.00 f60.y=0.00 f60.frames=163 f144.x=14.98 f144.y=0.00 f144.frames=389
+3.50 st f30.x=15.00 f30.y=0.00 f30.frames=97 f60.x=15.00 f60.y=0.00 f60.frames=193 f144.x=14.98 f144.y=0.00 f144.frames=461
+3.60 in jump
+3.60 ev 60fps 점프
+3.60 ev 144fps 점프
+3.62 ev 30fps 점프
+3.80 ev !프레임마다 다른 점프: 최고 높이 30fps 0.67 · 60fps 0.73 · 144fps 0.77
+3.95 ev 30fps 착지 · 점프 뒤 0.33초
+3.98 ev 60fps 착지 · 점프 뒤 0.38초
+3.98 ev 144fps 착지 · 점프 뒤 0.39초
+4.00 st f30.x=15.00 f30.y=0.00 f30.frames=112 f60.x=15.00 f60.y=0.00 f60.frames=223 f144.x=14.98 f144.y=0.00 f144.frames=533
+4.50 st f30.x=15.00 f30.y=0.00 f30.frames=127 f60.x=15.00 f60.y=0.00 f60.frames=253 f144.x=14.98 f144.y=0.00 f144.frames=605
+5.00 st f30.x=15.00 f30.y=0.00 f30.frames=142 f60.x=15.00 f60.y=0.00 f60.frames=283 f144.x=14.98 f144.y=0.00 f144.frames=677
+5.50 st f30.x=15.00 f30.y=0.00 f30.frames=157 f60.x=15.00 f60.y=0.00 f60.frames=313 f144.x=14.98 f144.y=0.00 f144.frames=749
+6.00 st f30.x=15.00 f30.y=0.00 f30.frames=172 f60.x=15.00 f60.y=0.00 f60.frames=343 f144.x=14.98 f144.y=0.00 f144.frames=821
+end st f30.x=15.00 f30.y=0.00 f30.frames=172 f60.x=15.00 f60.y=0.00 f60.frames=343 f144.x=14.98 f144.y=0.00 f144.frames=821
