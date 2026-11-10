@@ -1,0 +1,31 @@
+# src 3fb0e21c3c8b
+# memento-checkpoint fragile-down naive=1
+0.30 in save
+0.30 ev 저장 · HP 50 칸 1 크레딧 0 인벤토리 0개 (지금 목록을 그대로 가리킴)
+0.50 st hp=50 cell=1 credits=0 items=0 saved=1 shp=50 scell=1 scredits=0 sitems=0 shared=1 expect=0
+0.80 in walk
+0.80 ev 한 칸 이동 → 칸 2
+1.00 st hp=50 cell=2 credits=0 items=0 saved=1 shp=50 scell=1 scredits=0 sitems=0 shared=1 expect=0
+1.30 in pickup
+1.30 ev 회로 조각 주움 (+50) → 인벤토리 1개 크레딧 50 · 저장본 인벤토리도 1개 (같은 목록)
+1.50 st hp=50 cell=2 credits=50 items=1 saved=1 shp=50 scell=1 scredits=0 sitems=1 shared=1 expect=0
+1.80 in pickup
+1.80 ev 회로 조각 주움 (+50) → 인벤토리 2개 크레딧 100 · 저장본 인벤토리도 2개 (같은 목록)
+2.00 st hp=50 cell=2 credits=100 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0
+2.40 in hurt
+2.40 ev 피해 50 → HP 0
+2.40 ev 쓰러짐 (HP 0)
+2.50 st hp=0 cell=2 credits=100 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0
+2.90 in pickup
+2.90 ev 쓰러져 있어 받지 않음 (줍기)
+3.00 st hp=0 cell=2 credits=100 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0
+3.40 in save
+3.40 ev 쓰러져 있어 저장하지 않음
+3.50 st hp=0 cell=2 credits=100 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0
+4.00 st hp=0 cell=2 credits=100 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0
+4.00 in restore
+4.00 ev 되살림 · HP 50 칸 1 크레딧 0 인벤토리 2개
+4.00 ev !인벤토리 안 돌아옴: 저장 뒤 주운 회로 조각 2개가 그대로 (저장할 때 0개, 되살린 뒤 2개) · 크레딧은 저장한 값 0 이 돌아옴
+4.50 st hp=50 cell=1 credits=0 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0
+5.00 st hp=50 cell=1 credits=0 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0
+end st hp=50 cell=1 credits=0 items=2 saved=1 shp=50 scell=1 scredits=0 sitems=2 shared=1 expect=0

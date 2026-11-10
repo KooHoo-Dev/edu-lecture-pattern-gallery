@@ -1,0 +1,34 @@
+# src 3fb0e21c3c8b
+# memento-checkpoint save-pickup-fall-restore naive=0
+0.40 in pickup
+0.40 ev 회로 조각 주움 (+20) → 인벤토리 1개 크레딧 20
+0.50 st hp=100 cell=1 credits=20 items=1 saved=0
+0.90 in save
+0.90 ev 저장 · HP 100 칸 1 크레딧 20 인벤토리 1개 (새 목록에 복사)
+1.00 st hp=100 cell=1 credits=20 items=1 saved=1 shp=100 scell=1 scredits=20 sitems=1
+1.40 in walk
+1.40 ev 한 칸 이동 → 칸 2
+1.50 st hp=100 cell=2 credits=20 items=1 saved=1 shp=100 scell=1 scredits=20 sitems=1
+1.90 in pickup
+1.90 ev 회로 조각 주움 (+20) → 인벤토리 2개 크레딧 40
+2.00 st hp=100 cell=2 credits=40 items=2 saved=1 shp=100 scell=1 scredits=20 sitems=1
+2.40 in walk
+2.40 ev 한 칸 이동 → 칸 3
+2.50 st hp=100 cell=3 credits=40 items=2 saved=1 shp=100 scell=1 scredits=20 sitems=1
+2.90 in pickup
+2.90 ev 회로 조각 주움 (+20) → 인벤토리 3개 크레딧 60
+3.00 st hp=100 cell=3 credits=60 items=3 saved=1 shp=100 scell=1 scredits=20 sitems=1
+3.50 st hp=100 cell=3 credits=60 items=3 saved=1 shp=100 scell=1 scredits=20 sitems=1
+3.50 in hurt
+3.50 ev 피해 50 → HP 50
+4.00 st hp=50 cell=3 credits=60 items=3 saved=1 shp=100 scell=1 scredits=20 sitems=1
+4.10 in hurt
+4.10 ev 피해 50 → HP 0
+4.10 ev 쓰러짐 (HP 0)
+4.50 st hp=0 cell=3 credits=60 items=3 saved=1 shp=100 scell=1 scredits=20 sitems=1
+4.80 in restore
+4.80 ev 되살림 · HP 100 칸 1 크레딧 20 인벤토리 1개
+5.00 st hp=100 cell=1 credits=20 items=1 saved=1 shp=100 scell=1 scredits=20 sitems=1
+5.50 st hp=100 cell=1 credits=20 items=1 saved=1 shp=100 scell=1 scredits=20 sitems=1
+6.00 st hp=100 cell=1 credits=20 items=1 saved=1 shp=100 scell=1 scredits=20 sitems=1
+end st hp=100 cell=1 credits=20 items=1 saved=1 shp=100 scell=1 scredits=20 sitems=1
